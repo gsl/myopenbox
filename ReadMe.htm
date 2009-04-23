@@ -1,0 +1,576 @@
+<html>
+<head>
+	<title>MyOpenbox :: Example Site ReadMe</title>
+	<style>
+	/* equalizer styles */
+	*{
+	 	margin:0;
+	 	padding:0;
+	}
+	
+	/* anchor styles */
+	a:link{
+		color:Blue;
+		text-decoration:none;
+	}
+	a:visited{
+		color:Blue;
+		text-decoration:none;
+	}
+	a:active{
+		color:Blue;
+		text-decoration:none;
+	}
+	a:hover{
+		border-bottom:1px solid Orange;
+		color:Orange;
+		text-decoration:none;
+	}
+	a.JumpToTop:link, a.JumpToTop:visited, a.JumpToTop:active, a.JumpToTop:hover{
+		color:Orange;
+		margin-right:5px;
+		text-decoration:none;
+	}
+	a.JumpToTop:hover{
+		border-bottom:1px solid Orange;
+	}
+	
+	/* default font styles */
+	body, .Copy, .Footer, .Header1, .Header2, .Header3, .JumpTo, .JumpToTop, .Section{
+		color:Black;
+		font-family:Verdana, Arial, "Times New Roman";
+		font-size:11px;
+		font-weight:normal;
+	}
+	
+	/* text styles */
+	.Header1{
+		background-color:Maroon;
+		color:White;
+		font-family:Tahoma, Verdana, Arial;
+		font-size:16px;
+		font-weight:bold;
+		margin-bottom:10px;
+		padding:10px;
+	}
+	.Header2{
+		border-bottom:3px double Orange;
+		color:Orange;
+		font-size:14px;
+		font-weight:bold;
+		margin-bottom:5px;
+	}
+	.Header3{
+		color:#333333;
+		font-weight:bold;
+	}
+	.Footer{
+		color:Gray;
+		margin:20px;
+		text-align:center;
+	}
+	
+	/* list styles */
+	ol, ul, li{
+		margin:10px;
+		padding:0px;
+	}
+	ul{list-style-type:disc;}
+	
+	/* form styles */
+	select.JumpTo{
+		background-color:#F2F2F2;
+	}
+	
+	/* special styles */
+	.Code, .Comment, .File{
+		color:Black;
+		font-family:"Courier New", Courier, mono;
+		font-size:11px;
+	}
+	.Code{
+		color:Maroon;
+	}
+	.Comment{
+		color:Gray;
+	}
+	li.Comment{
+		font-family:Verdana, Arial, "Times New Roman";
+	}
+	.File{
+		font-family:Tahoma, Verdana, Arial;
+		font-style:italic;
+	}
+	div.Section{
+		margin:10px;
+	}
+	pre.Code{
+		background-color:#F2F2F2;
+		margin:10px;
+		padding:5px;
+	}
+	.Spacer{
+		font-size:5px;
+	}
+	</style>
+</head>
+
+<body>
+
+<div class="Header1">
+	<div style="float:right;">
+	<select name="JumpTo" class="JumpTo" onChange="if(this.selectedIndex > 0){window.location='#' + this.options[this.selectedIndex].value}">
+		<option value="">--- Table of Contents ---</option>
+		<option value="Introduction">Introduction</option>
+		<option value="Installation">Installation</option>
+		<option value="VersionHistory">Version History</option>
+		<option value="KnownIssues">Known Issues</option>
+		<option value="TipsForExample">Tips for Working with the Example Site</option>
+		<option value="Blackboard">Blackboard</option>
+		<option value="AdditionalInformation">Additional Information</option>
+		<option value="Soapbox">Soapbox</option>
+	</select>
+	</div>
+	<div>MyOpenbox :: Example Site ReadMe [v0.034]</div>
+</div>
+
+<div class="Section">
+	<div class="JumpToTop" style="float:right;"><a href="#" class="JumpToTop">top</a></div>
+	<div class="Header2">Introduction<a name="Introduction">&nbsp;</a></div>
+	MyOpenbox (MOBX) is an open-source, at least in spirit, replacement framework for Fusebox 4 for ColdFusion MX.  The framework itself very closely resembles FB4’s XML based language, but the ideas and motivations are more deeply rooted in the openness and reusability of FB3 than in FB4’s heavily enforced suggestion of the MVC (Model View Controller) design pattern.<br /><br />
+		
+	Key Features/Improvements (IMO):<br />
+ 	<ul>
+		<li>
+		<span class="Header3">Content Generation with Content tag:</span><br />
+		Adds a new <span class="Code">&lt;content /&gt;</span> tag that saves display output. The <span class="Code">content</span> tag saves generated content into the variable defined in the Parameter <span class="Code">DefaultContentVariable</span> by default. This can be overridden by supplying the <span class="Code">variable</span> attribute.  The main difference between the <span class="Code">&lt;content /&gt;</span> tag's behavior and FB4's <span class="Code">contentvariable</span> attribute is that the <span class="Code">content</span> tag can inherit itself. So if a <span class="Code">content</span> tag includes another <span class="Code">content</span> tag, and a specific <span class="Code">variable</span> attribute is not defined for the interior tag, or the provided variable is the same as the outer <span class="Code">content</span> tag, the output of the inner <span class="Code">content</span> tag will be appended to the output of the first content tag. For example:<br />
+<pre class="Code" wrap="">
+<span class="Comment">&lt;!--- the generated output from FuseAction "SomeFuseAction" would be saved into a content variable ---&gt;</span>
+&lt;content.do action="SomeFuseAction" /&gt;
+</pre>
+And if the FuseAction <span class="Code">SomeFuseAction</span> contained another <span class="Code">content</span> tag:
+<pre class="Code" wrap="">
+&lt;fuseaction name="SomeFuseAction"&gt;
+	<span class="Comment">&lt;!--- the generated output from this content call would be appended to the previous content variable ---&gt;</span>
+	&lt;content.include template="dsp.somefile" /&gt;
+&lt;/fuseaction&gt;
+</pre>
+		It would automatically be "inherited" by the previous content tag with the same value for <span class="Code">variable</span>, or lack thereof.  You also have the option, with additional attributes, to force the inner content call to set a new variable instead of appending to the previous content.<br /><br />
+		The Parameter <span class="Code">DefaultContentVariable</span> is set to YourOpenbox.GeneratedContent by default. And while the <span class="Code">content</span> tag does manage your display variables, it does not automatically purge the generated content at the end of the request. You are still responsible for deciding where to output what content.<br /><br />
+		I also added <span class="Code">ThisContentVariable</span> to the YourOpenbox structure. This allows you to set up generic layout, or any other type, files and not have to call a predefined variable name.
+		</li>
+		 
+		<li>
+		<span class="Header3">Settings in config file(s):</span><br />
+		I never understood why settings were not included in FB4, I can't imagine any useful Fusebox app that wouldn't need at least a couple values set. Update: Fusebox 4.1 has global settings. I have not checked out how they are handled, so I'm not sure how it compares.
+		</li>
+		 
+		<li>
+		<span class="Header3">FuseAction Variables (FAVs):</span><br />
+		You can now define FuseAction-specific variables that only exist during the FuseAction request.  This results in a mix between customtag <span class="Code">attributes</span>, function <span class="Code">arguments</span>, and function <span class="Code">var</span> variables.  You can set <span class="Code">FAVs</span> within a FuseAction or when calling a FuseAction with a Do command:
+		
+<pre class="Code" wrap="">
+&lt;fuseaction name="SomeFuseAction"&gt;
+	&lt;fav name="Uno"&gt;One&lt;/fav&gt;
+	&lt;include template="dsp.somefile" /&gt;
+&lt;/fuseaction&gt;
+</pre>
+
+Or...
+
+<pre class="Code" wrap="">
+&lt;do action="SomeFuseAction"&gt;
+	&lt;fav name="Uno"&gt;Three&lt;/fav&gt;
+&lt;/do&gt;
+
+&lt;fuseaction name="SomeFuseAction"&gt;
+	&lt;fav name="Uno" type="string" overwrite="False"&gt;One&lt;/fav&gt;
+	&lt;include template="dsp.somefile" /&gt;
+&lt;/fuseaction&gt;
+</pre>
+
+		You can reference the FAV from anywhere within the FuseAction by appending "FAVs." to the beginning of the <span class="Code">name</span> value. 
+		If <span class="Code">#FAVs.Uno#</span> was output within the <span class="File">dsp.somefile</span>, the results would be "One" and "Three" respectively. The FAVs are managed internally on each parsed file and are transferred into storage and reloaded as necessary during processing.  All standard Set command attributes are available to the <span class="Code">fav</span> tag, so you can treat FAVs as parameters with type checking (like the example above) if desired.<br /><br />
+		XFAs are handled in the same fashion. XFA values will only exist during the local FuseAction request, and will not trickle down into other called FuseActions.
+		</li>
+		 
+		<li>
+		<span class="Header3">Circuit Variables (CRVs) and Circuit level Settings:</span><br />
+		You can also define Circuit-specific variables and Settings that are only available to the individual request from within each Circuit.  This allows you provide Circuit read-only properties (Settings) or local variables that available across separate FuseActions within the same Circuit.
+		</li>
+		 
+		<li>
+		<span class="Header3">Phase declarations from any configuration file and custom Phases:</span><br />
+		The core Phases (<span class="Code">Init, PreProcess, PreGlobalFuseAction, PreFuseAction, PostFuseAction, PostGlobalFuseAction, PostProcess, and OnError</span>) can be defined in either the application configuration file (<span class="File">cfg.myopenbox.cfm</span>), or in any of the Circuit configuration files (<span class="File">cfg.circuit.cfm</span>.)  You may also define custom Phases and execute the phases by using the new <span class="Code">call</span> verb:
+		
+<pre class="Code" wrap="">
+<span class="Comment">&lt;!--- cfg.circuit ---&gt;</span>
+&lt;fuseaction name="SomeFuseAction"&gt;
+	&lt;include template="dsp.somefile" /&gt;
+&lt;/fuseaction&gt;
+
+&lt;phases&gt;
+	&lt;phase name="PreFuseAction"&gt;
+		&lt;write&gt;I am the PreFuseAction phase in #YourOpenbox.ThisCircuit.Name#&lt;/write&gt;
+	&lt;/phase&gt;
+	&lt;phase name="SomePhase"&gt;
+		&lt;write&gt;I am the SomePhase phase in #YourOpenbox.ThisCircuit.Name#&lt;/write&gt;
+	&lt;/phase&gt;
+&lt;phases&gt;
+</pre>
+	
+	And then, in another Circuit, you could execute the custom Phase inline with <span class="Code">call</span> verb:
+
+<pre class="Code" wrap="">
+<span class="Comment">&lt;!--- cfg.circuit ---&gt;</span>
+&lt;fuseaction name="SomeOtherFuseAction"&gt;
+	&lt;call phase="SomePhase" /&gt;
+&lt;/fuseaction&gt;
+
+&lt;phases&gt;
+	&lt;phase name="PreFuseAction"&gt;
+		&lt;write&gt;I am the PreFuseAction phase in #YourOpenbox.ThisCircuit.Name#&lt;/write&gt;
+	&lt;/phase&gt;
+&lt;phases&gt;
+</pre>
+		The <span class="Code">call</span> verb behaves very much like a <span class="Code">do</span> verb, except you can define a custom Phase from just about anywhere in the application. You might need to learn to be a better debugger when using the event-like feature of custom Phases, but it should help the organization and functionality of your application in a big way.
+		</li>
+		 
+		<li>
+		<span class="Header3">New verbs:</span> <span class="Code">attribute, call, callsuper, case, content, crv, dump, fav, write, if/elseif/else, targetcall/supercall/primarycall/secondarycall, lock, phase, switch</span><br />
+		A few functional verbs and a few utilities.  I've also added/changed some of the stock verb attributes (but there's no need to go into that right here, please check out the Core Reference below when completed.)
+		</li>
+		 
+		<li>
+		<span class="Header3">Nested commands:</span><br />
+		This just give you more decision possibilities in your FuseAction definitions.
+		</li>
+		 
+		<li>
+		<span class="Header3">Self-describing Circuits:</span><br />
+		Instead of extracting the definitions from the root configuration file's Circuit elements, MOBX parses the Circuit configuration files for the Circuit definitions.  This allows you to add truly plug and play Circuits. This is added with minimal impact from what I can tell. You have to parse each individual Circuit already, so you might as well use it to your benefit.
+		</li>
+		 
+		<li>
+		<span class="Header3">Automatic Name generation from Title attribute:</span><br />
+		All objects need a Name, and most object need a friendly Title as well. And most Names are derived from the object's Title and vice-versa. So I have created a function named <span class="Code">FilterString()</span> that can set both Name and Title by only supplying a Title for Circuits, FuseActions, and Phases:
+<pre class="Code" wrap="">
+<span class="Comment">&lt;!--- cfg.circuit ---&gt;</span>
+&lt;circuit title="Some Circuit"&gt;
+	&lt;fuseaction title="Some Other FuseAction"&gt;
+		&lt;call phase="CustomPhase" /&gt;
+	&lt;/fuseaction&gt;
+	
+	&lt;phases&gt;
+		&lt;phase name="A Custom Phase"&gt;
+			&lt;write&gt;I am a user-created Phase&lt;/write&gt;
+		&lt;/phase&gt;
+	&lt;phases&gt;
+&lt;/circuit&gt;
+</pre>
+		The function <span class="Code">FilterString()</span> will determine the target's  Name by removing all whole-word instances of "a", "the", or "or" from the Title if no Name is supplied. Title is not a mandatory attribute or value for the elements above, but it can be very useful if it's available. (This would mean the Circuit above would have a Name of SomeCircuit, the FuseAction would have a Name of SomeOtherFuseAction, and the Phase would have a Name of CustomPhase.<br /><br />
+		
+		Note: The function can be turned off with a <span class="Code">Parameter</span> setting and is also exposed from the application.MyOpenbox object.
+		</li>
+		 
+		<li>
+		<span class="Header3">Ability to define Attributes, CRVs, FAVs and XFAs from Do calls:</span><br />
+		This has been immensely helpful for us, as it allows you to pass in values for Attributes, FAVs and XFAs from a do command. For example:<br />
+<pre class="Code" wrap="">
+&lt;do action="SomeOtherFuseAction"&gt;
+	&lt;xfa name="Dos" value="Tres" /&gt;
+&lt;/do&gt;
+</pre>
+		Note: This works for <span class="Code">content.do</span> calls as well.
+		</li>
+		
+		<li>
+		<span class="Header3">Init Phase:</span><br />
+		I've added a Phase named Init that only runs when the MyOpenbox object is created or refreshed. This provides a neat place to put "run-once" code that you don't have to manage directly.
+		</li>
+		
+		<li>
+		<span class="Header3">MyOpenbox Log Information:</span><br />
+		If the Parameter <span class="Code">EnableLogs</span> is set to <span class="Code">True</span>, the application-based core CFC keeps detailed information such as total number of Circuits and FuseActions; uptime for the MyOpenbox object and application variables; and parsing processing times for the core and individual Circuit configuration files.  You can view the complete details by dumping the <span class="Code">application.MyOpenbox.Logs</span> key:
+		<pre class="Code" wrap="">&lt;cfdump var="#application.MyOpenbox.Logs#" label="MyOpenbox Logs"&gt;</pre>
+		</li>
+	</ul>
+	
+	I've basically re-thought every aspect of FB4 as I developed this, and while I tried to stay as compatible as I could with Fusebox4, there are some subtle changes I have made throughout the framework. So until I finish the official MOBX document, you'll only be able to see the inner workings of the code by running it.  (I've also included some good functions to help make it clearer what's going on.)<br /><br />
+	
+	So, why is it called MyOpenbox? Mainly, because I'm not allowed to use the Fusebox name and I couldn't think of anything more buzz-worthy.  But also because it really aids with the variable handling within the app.  I've always represented the application in the first-person perspective, and the user in the second-person perspective.  So my comments would read something like:
+<pre class="Code" wrap="">
+<span class="Comment">// i send you to the next step in the process</span>
+&lt;cflocation... /&gt;
+</pre>
+	This helps to clarify how the application is servicing the user.  So, as you will see when you dig deeper into MOBX, the internal variables are stored within an application-scoped CFC called <span class="Code">MyOpenbox</span> (first-person), and the public request variables are stored in a structure called <span class="Code">YourOpenbox</span> (second-person). Nifty, eh?<br /><br />
+	
+	*The code included in the core CFC file is all completely new, original code.  No FB4 code was harmed, re-used, or even viewed, during development.
+</div>
+
+<div class="Section">
+	<div class="JumpToTop" style="float:right;"><a href="#" class="JumpToTop">top</a></div>
+	<div class="Header2">Installation<a name="Installation">&nbsp;</a></div>
+	You'll need to have cffile and cfdirectory enabled for the file parsing, but the example app should be fully drag-and-droppable beyond those two tags. Just put the unzipped "familyguy/" folder anywhere on your webroot where ColdFusion MX is running, and access it as normal from the web. (Either <span class="File">http://yourwebpath/familyguy/</span> or <span class="File">http://yourwebpath/familyguy/index.cfm</span>.) You can also rename it and it should still operate correctly.<br /><br />
+	*I've used copy and images from Fox's Family Guy website (<span class="File">http://www.fox.com/familyguy/index.htm</span>) for demonstration purposes only. All images and likeness are copyright their respective owners.
+</div>
+
+<div class="Section">
+	<div class="JumpToTop" style="float:right;"><a href="#" class="JumpToTop">top</a></div>
+	<div class="Header2">Version History<a name="VersionHistory">&nbsp;</a></div>
+	<!-- <em>v0.01 build 099 [2005.00.00] - Feature update/release:</em><br />
+	Blah blah blahblah blah blah blahblah blah.
+	<ul>
+		<li>Muu-wha-ha-ha-ha!</li>
+		<li>Muu-wha-ha-ha-ha!</li>
+		<li>Muu-wha-ha-ha-ha!</li>
+	</ul> -->
+	<em>v0.01 build 036 [2009.03.11] - bug fix:</em><br />
+	FAVs were clashing with cgi.FAVs.
+	<ul>
+		<li>Scoped all system FAV sets and gets.</li>
+	</ul>
+	<em>v0.01 build 035 [2009.03.04] - added Exists method:</em><br />
+	Added a method. Nothing more.
+	<ul>
+		<li>Added an Exists method for checking valid FuseActions.</li>
+	</ul>
+	<em>v0.01 build 034 [2005.06.09] - Bug fix:</em><br />
+	Content bug fix and example site error handling update.
+	<ul>
+		<li>Fixed structure reference error when assigning Variable within Content verbs.</li>
+		<li>Re-instated error handling in core file that prevented proper errors from displaying</li>
+		<li>Updated ReadMe file with new features and information.</li>
+	</ul>
+	<em>v0.01 build 033 [2005.05.11] - Infastructure update:</em><br />
+	Changed core files to run on NewAtlanta's BlueDragon*.
+	<ul>
+		<li>Lots and lots of fun! Thanks to Justin Chaloupka for additional help in figuring out the dragon that is blue.</li>
+		<li>*Tested with demo app only. Please let me know if you find any bugs.</li>
+	</ul>
+	<em>v0.01 build 032 [2005.03.26 - 2005.04.06] - Feature update/Bug fix:</em><br />
+	Fixed bugs and implemented a new Verb.
+	<ul>
+		<li>Fixed Do Verb's subcommands bugs. (Error with XFA subcommands and double parsing of child commands on some do calls.)</li>
+		<li>Added preliminary ToDo Verb.</li>
+	</ul>
+	<em>v0.01 build 031fff [2005.03.22] - Bug fix:</em><br />
+	Fixed variable setting bugs resulting from recent rewrite.
+	<ul>
+		<li>Fixed major bug where XFA did not automatically prepend the correct Circuit.</li>
+		<li>Fixed ability to only supply a Value for Set Verbs. (Useful for function calls.)</li>
+		<li>Fixed Do Verbs to run correct routines for subelements as well.</li>
+	</ul>
+	<em>v0.01 build 031ff [2005.03.14] - Feature/Infastructure/Optimization update:</em><br />
+	Updated core file arrangement and fixed minor bugs.
+	<ul>
+		<li>Added ability/fixed bug to allow dynamic Phase assignments and calls.</li>
+		<li>Fixed Init Phase bug where it throws an error if the Init Phase is not provided (Thanks to Tyler Clendenin.)</li>
+		<li>Added <span class="File">youropenbox.cfm</span> request-time file to the MyOpenbox directory. This file creates the <span class="Code">YourOpenbox</span> and <span class="Code">_YourOpenbox</span> variables and contains request-time functions to eliminate repetitive parsed code.</li>
+		<li>Updated Verb error handling to catch and throw more specific error information for invalid or insufficent Verbs.</li>
+	</ul>
+	<em>v0.01 build 031f [2005.03.12] - Feature/Infastructure update:</em><br />
+	Updated core feature set and fixed minor bugs.
+	<ul>
+		<li>Added foundation for Custom Verbs. You may add custom verbs through cfg.myopenbox, but the implementation might change slightly in the future</li>
+		<li>Added "Deployment" Processing Mode for reading directly from the parsed files. No files will be written in this mode.</li>
+		<li>Added default setup configuration file (<span class="File">config.cfm</span>) to the MyOpenbox directory.</li>
+		<li>Fixed required attribute FileExists() bug.</li>
+		<li>Updated/fixed Include Verb to work outside of Circuits.</li>
+		<li>Added Instantiate and Invoke Verbs. (Note: I believe that FB4 have these verbs as of v4.1, but I have not looked at their syntax, so do not expect the verbs to behave in the same manner.)</li>
+	</ul>
+	<em>v0.01 build 031a [2005.02.09] - v0.01 build 031e [2005.03.06] - Feature/Infastructure update:</em><br />
+	Re-factoring the core files - Part Two.
+	<ul>
+		<li>Moved MyOpenbox files into separate [MyOpenbox] directory for better encapsulation. <span class="File">index.cfm</span> now calls <span class="File">myopenbox.cfm</span> in the MOBX directory which instantiates the MyOpenbox component and executes the request.</li>
+		<li>Major re-working of core CFC file and page request handling.</li>
+		<li>Changed Parsed directory and Parameter attributes to "Cache".</li>
+		<li>Added Settings segment to Circuit configuration files.</li>
+		<li>Added Phases segment to Circuit configuration files.</li>
+		<li>Added Call Verb for executing Phase declarations and custom Phases.</li>
+		<li>Parsing/compiling/caching now creates individual files for FuseActions, Phases and Settings command blocks. This will allow calling FuseActions dynamically and should cut down on ColdFusion processing from trying to make the files handle too much responsibility, but it does mean more file writes per request. (And it seems, longer execution times in development.)</li>
+		<li>A good amount of minor features/small changes to existing features. (See updated Core Reference for documentation)</li>
+	</ul>
+	<em>v0.01 build 031 [2005.02.05] - Feature/Infastructure update:</em><br />
+	Re-factoring the core files - Part One.
+	<ul>
+		<li>Removed Extensions. (I need to decide on a better implemetation for Extensions, XML namespaces are basically a hack.)</li>
+		<li>Removed Bracket evaluation from configuration files and moved Settings into a runtime include.</li>
+		<li>Removed GetRootMapping utility function from core file. It doesn't belong in MOBX.</li>
+		<li>Renamed DefaultFileExtensionAppend() to AppendDefaultFileExtension() to match other extended methods.</li>
+		<li>Moved Settings assignment into it's own file (settings.root.cfm) in the MOBX directory.</li>
+		<li>Removed the ability to evaluate attribute values in configuration files with brackets "{}". Brackets now denote references to MOBX variables (Circuits, Parameters, Phases, Settings, and MyOpenbox). e.g.: You may use <span class="Code">{Settings}</span> or <span class="Code">{Parameters}</span> in <span class="Code">&lt;setting ... /&gt;</span> verbs to reference pre-existing values in their respective structures.</li>
+		<li>Updated parameter EnableLogs so that logs are enabled by default while in Development mode, and turned off while in Production mode.</li>
+	</ul>
+	<em>v0.01 build 030c [2005.1.16] - Feature update:</em><br />
+	A few bug fixes and updated Circuit/Phase functionalities.
+	<ul>
+		<li>Added much needed error messages for invalid XML in the Circuit configuration files.</li>
+		<li>Added FuseActions element to Circuit configuration files.</li>
+		<li>Added Phases element to configuration files.</li>
+		<li>Changed Phase assignments to <span class="Code">&lt;phase name="PhaseName"&gt;...&lt;/phase&gt;</span>. This makes it much easier to define custom Phases and helps to organize Phases from within Circuit configuration files. (You can now set any phase from any configuration file.)</li>
+	</ul>
+	<em>v0.01 build 030b [2005.1.11] - Bug/feature update:</em><br />
+	A few bug fixes and updated Circuit/Phase functionalities.
+	<ul>
+		<li>Fixed Include Path attribute bug.</li>
+		<li>Fixed Extension reference bug for Init() methods.</li>
+		<li>Added Argument tag for Extension Init() initialization.</li>
+		<li>Removed if statements and cflock for non-application or non-session scoped Extension initializations.</li>
+	</ul>
+	<em>v0.01 build 029j [2004.10.25] - Feature release:</em><br />
+	I changed quite a few things between this version and 028c.  I removed some extraneous features and consolidated other abilities into what I fell is a more coherent release.  Listed are a few of the more important changes.
+	<ul>
+		<li>Added full content tag.</li>
+		<li>Removed ParseCircuitsFrom Parameter - The directories are already being parsed, I feel it is totally unnecessary to have the option to parse the Circuit definitions from the application configuration file.</li>
+		<li>Added FAV processing.</li>
+		<li>Changed XFA output structure to XFAs - this was mainly done for prosperity's sake.</li>
+		<li>Changed do commands additional attributes to append to FAVs instead of attributes.</li>
+		<li>Changed "contentvariable" attribute to "variable".</li>
+		<li>Updated XFA variable to behave like standard variables, but are managed like FAVs.</li>
+		<li>Added IsPrimaryCall, IsSecondaryCall, IsTargetCall, and IsSuperCall tags.</li>
+		<li>Added primarycalls, secondarycalls, targetcalls, and supercalls attributes to prefuseaction and postfuseaction tags.</li>
+		<li>Updated Request logs to reset with application MyOpenbox object.</li>
+		<li>Removed FilterMyOpenbox Parameter.</li>
+		<li>Add ThisContentVariable to YourOpenbox.</li>
+		<li>Many more internal changes not necessary to list here.</li>
+	</ul>
+	<em>v0.01 build 028c [2004.09.01]:</em><br />
+	<ul>
+		<li>Nothing (or everything) new to report here, since this is the first public "release".</li>
+	</ul>
+</div>
+
+<div class="Section">
+	<div class="JumpToTop" style="float:right;"><a href="#" class="JumpToTop">top</a></div>
+	<div class="Header2">Known Issues<a name="KnownIssues">&nbsp;</a></div>
+	<ul>
+		<li>The Access property of Circuits and FuseActions are not completely functioning yet. [Priority:<em>High</em> | Anticipated:<em>Very Soon</em>]</li>
+		<li>Quality Error Handling is not completely fleshed out yet. I've tried to cover the most important (and most annoying) errors so far. [Priority:<em>High</em> | Anticipated:<em>Soon</em>]</li>
+		<li>Plugins are not very high on my list, and unless someone else asks for them, I might never add them. I've yet to see any plugins that provide core functionality that couldn't be executed with an internal FuseAction. But then again, I haven't been looking that hard. I am going to be updating the core files soon with custom verbs which should suffice very nicely in their place. [Priority:<em>Low</em> | Anticipated:<em>Unknown</em>]</li>
+	</ul>
+	*A few bugs, known and unknown, and a few missing features are pretty much what I have my to-do list whittled down to.  I feel that the framework is production ready and I have used it on a few small to medium sized sites already.
+</div>
+
+<div class="Section">
+	<div class="JumpToTop" style="float:right;"><a href="#" class="JumpToTop">top</a></div>
+	<div class="Header2">Tips for Working with the Example Site<a name="TipsForExample">&nbsp;</a></div>
+	<ul>
+		<li>
+		One of the more important to remember when you are messing around with the example site is that to refresh the cached FuseAction or memory variable values, you need to do one of three things:<br />
+			<ol>
+				<li>
+				Change the value of the Parameter "ProcessingMode" in the root configuration file <span class="File">cfg.myopenbox.cfm</span> to "Development" or "True" or "1" and it will reparse the root configuration file and all of the Circuit configuration files throughout the site on every request.
+<pre class="Code" wrap="">
+&lt;parameters&gt;
+	&lt;parameter name="ProcessingMode" value="Development" /&gt;
+	&lt;parameter... /&gt;
+&lt;/parameters&gt;
+</pre>
+				</li>
+				<li>Change the root configuration file <span class="File">cfg.myopenbox.cfm</span> file in any way and the application will reparse itself.</li>
+				<li>Include a URL attribute of "ForceReparsePassword" with a value equal to what is set as the value for the Parameter "ForceReparsePassword" in <span class="File">cfg.myopenbox.cfm</span> (cannot be empty).</li>
+			</ol>
+
+		</li>
+		<li>Keep in mind that Title attributes can set the Name of a Circuit, FuseAction or Phase. But you need to call the object with the Name (<span class="Code">&lt;do action="SomeFuseAction" /&gt;</span>), the Title is only there to provide a human readable description. Useful to MyOpenbox, but not totally necessary.</li>
+		<li>
+		The best way to check out some of the variables' structure is to change the value for "Debug.Dump.Display" in the root <span class="File">cfg.myopenbox.cfm</span> file to "True".
+<pre class="Code" wrap="">
+&lt;setting name="Debug.Dump.Display" value="True" /&gt;
+&lt;setting name="Debug.Dump.Vars" value="{Parameters}, {Circuits}, YourOpenbox, attributes" /&gt;
+</pre>
+		This will dump whatever is set in the Settings variable <span class="Code">Debug.Dump.Vars</span> at the bottom of the page in your browser. This values above will dump just about every important variable that is used within the framework, so while it will slow down the page refreshes, it will greatly help display what is going on internally.<br /><br />
+		(For those of you who are wondering where this output is coming from, check out the PostProcess Global FuseAction in the root configuration file <span class="File">cfg.myopenbox.cfm</span> and you will see that it is calling the Fuseaction Management.DumpVars, which you can trace to the Management Circuit's configuration file <span class="File">cfg.circuit.cfm</span> and you'll notice that it is simply outputting a UDF called Dumper.)
+		</li>
+		<li>Browse to the FuseAction "Management.Stat" (<span class="File">http://yourwebpath/familyguy/index.cfm?FuseAction=Management.Stat</span>). This FA displays the formatted values of <span class="Code">application.MyOpenbox.Logs</span>.</li>
+		<li>Make sure you make it a point to remember that I've renamed the XFA structure to a more consistent ColdFusion scope name "XFAs". So, to output a XFA, your would write <span class="Code">#XFAs.SomeName#</span>. Also XFAs are treated like specialized FAVs and only exist for the duration of the current FuseAction. If you need to persist an XFA across FuseActions, pass them from FuseAction to FuseAction with sub-verb calls in the Do verb:
+<pre class="Code" wrap="">
+<span class="Comment">// originating call</span>
+&lt;do action="SomeFuseAction"&gt;
+	&lt;xfa name="SomeXFA"&gt;#XFAs.SomeXFA#&lt;/xfa&gt;
+&lt;/do&gt;
+
+<span class="Comment">// target FuseAction</span>
+&lt;fuseaction title="Some FuseAction"&gt;
+	&lt;xfa name="SomeXFA" overwrite="false"&gt;ExampleValue&lt;/xfa&gt;
+&lt;/do&gt;
+</pre>		
+		</li>
+	</ul>
+</div>
+
+<div class="Section">
+	<div class="JumpToTop" style="float:right;"><a href="#" class="JumpToTop">top</a></div>
+	<div class="Header2">Blackboard<a name="Blackboard">&nbsp;</a></div>
+	This section lists a few of the ideas I have floating around my brain for this project. None of these items are guaranteed to be integrated into MOBX, but if I do list them here, there's a good chance I'm going to try and work them in some how in the near future.
+	<ul>
+		<li>
+		IN PROGRESS: Custom Verbs - SSIA. <span style="text-decoration:line-through;">This will be completed in a matter of hours, I just need to find the available hours.</span> This is now implemented, but should not be considered final by any means.
+		</li>
+		<li>
+		Packages - ability to add folders to a pre-defined location in the MyOpenbox directory, which allows for "typed" or extensible applications. For example: if you build a good amount of online stores, you might have an e-commerce Package that you would install, which could set necessary MyOpenbox Settings and runs some additional commands during the <span class="Code">PreGlobbalFuseAction</span> Phase.
+		</li>
+		<li>
+		Object/XML Namespaces shorthand - I originally had XML namespaces that defined CFCs, Custom Tags and WebServices in MyOpenbox's configuration files for the first year or so. But because of XML standards and the method to include and use the namespaces included some hackery, I've initially replaced the original namespaces with the <span class="Code">Instantiate</span> and <span class="Code">Invoke</span> verbs. I plan on creating a namespace syntax that allows your application to provide namespace pointers for better organization and readibility very soon.
+		</li>
+		<li>
+		DoInstead or ChangeFuseAction verb - I need to figure out an elegant solution, but we've used a variation of this with great success in some of our application. For instance, this verb would allow you to check permissions on target FuseActions and then run a separate FuseAction if necessary.
+		</li>
+		<li>
+		ToDo verb - self evident, don't you think?
+		</li>
+		<li>
+		Built-in Caching - I think it would be useful if you could set a cache attribute for ContentVariables and the like. I already have an optional lock attribute for <span class="Code">if</span> elements. I think a cache option would be beneficial also, but it is a matter of whether or not adding that type of functionality is crossing a line of purpose for the framework.
+		</li>
+		<li class="Comment">
+		FINISHED :: Default Settings and Parameters - would be enabled with specific files in the MyOpenbox directory. This would allow users to customize their MyOpenbox core file set to their own liking. Note: The config.cfm file is not necessarily for customizing, but it does provide a structure for adding additional features such as Packages below.
+		</li>
+		<li class="Comment">
+		FINISHED :: FuseAction Specific Variables - This item has been thrown around the Fusebox lists for a while now and I really, truly, honestly, deeply feel they could be of invaluable use by providing a semi protected/managed segment of variables that are directly binded to each individual instance of each individual FuseAction. I have a rather simple plan for this and once I find the time to mend the FlushContent bug listed above, I'll tackle this one.
+		</li>
+		<li class="Comment">
+		FINISHED :: XFAs could be FuseAction specific also. If I set up the FSVs from above correctly, I could treat XFAs as specialized FSVs and it would generally help the process flow of the applications.
+		</li>
+		<li class="Comment">
+		FINISHED :: TargetCall tag - this would provide a little shorthand for conditional statements inside of Pre- and PostFuseAction phases. It would replace having to type:
+		<pre class="Code" wrap=""><span class="Comment">&lt;if condition="YourOpenbox.IsTargetCall"&gt;...&lt;/if&gt;</span></pre>
+		You may now call targetcall, supercall, primarycall, or secondarycall to handle filtered commands in the prefuseaction, postfuseaction, preglobalfuseaction or postglobalfuseaction tags.
+		</li>
+		<li class="Comment">
+		FINISHED :: Individually compiled FAs - I think there'd be quite a few bonuses to the overall performance and code organization if I separated the parsed/compiled FuseActions into individual files instead of one file per complete FuseAction request. I'm going to test this out in one or more arrangements and see what happens.<br /><br />
+		Update: I'm not sure is this would be more hassle than it's worth, the jury's still out.
+		</li>
+		<li class="Comment">
+		FINISHED :: Add Settings/Properties to Circuit and FuseActions - I've questioned whether or not to provide a more rigid method of setting properties for Circuits and FuseActions, which would probably bubble up to the application Settings. Instead of the current ability to add attributes to Circuits and FuseActions from the <code class="File">cfg.circuit</code> files, I might institute a &lt;property .../&gt; element that can be added to Circuits and FuseActions.  I've given this very little thought, but it might be a good future-proofing idea.
+		</li>
+	</ul>
+</div>
+
+<div class="Section">
+	<div class="JumpToTop" style="float:right;"><a href="#" class="JumpToTop">top</a></div>
+	<div class="Header2">Additional Information<a name="AdditionalInformation">&nbsp;</a></div>
+	Right now, there isn't much available besides this document and the reference document linked below. I'm also working on a Getting Started tutorial. Hopefully in the future, I will be able to reference additional resources that will get you the answers to any questions you may have.
+	<ul>
+		<li><a href="http://www.myopenbox.org/_docs/corereference/">Core Reference</a> - This document, which is the only thing being served from the www.myopenbox.org website at the time of this ReadMe, will some day describe everything there is to know about the innards of MyOpenbox. Although there are examples, it is not meant to be a tutorial, but more of an all encompassing reference. Sadly, it is but a shadow of that goal as of this release. But I will be updating the document on a recurring schedule to try and nudge it in that direction. (It is currently completely out of date. I hope to work on this next.)</li>
+	</ul>
+</div>
+
+<div class="Section">
+	<div class="JumpToTop" style="float:right;"><a href="#" class="JumpToTop">top</a></div>
+	<div class="Header2">Soapbox<a name="Soapbox">&nbsp;</a></div>
+	I just wanted to insert a quick missive here stating that I am in no way saying not to use Fusebox 4, or that Fusebox 4 in not good enough for your projects, etc.  As you most likely already know, John Quarto-vonTivadar, Hal Helms, Steve Nelson, Barney Boisvert, and everyone else involved in the current and prior versions of Fusebox deserve a great deal of respect, and especially in my case, admiration for their hard work.  You can appreciate the quality of their work in every new Fusebox website you stumble upon, and when every new developer finally "gets it" when learning with any version of Fusebox.  The impact of Fusebox on the ColdFusion community is understatedly ginormous.<br /><br />
+	When FB4 came along, it was just about everything I wanted in the next version of Fusebox...but not quite.  It took some very important steps to legitimizing the Fusebox standard but, for me, this came at the cost of reusability and speed of development.  Could I use FB4 and still be incredibly productive? Hell yes.  But I had some ideas that would help out in my day to day development, and so did a lot of other active members in the FB scene. So when Hal asked for suggestions and feature requests earlier last year, I sent him, John Q, and the FB listserv a laundry list of ideas.  Now, whether or not the message was blocked by spam-killers or giant fuzzy robot bunnies or what not, or my ideas just plain stunk and weren't ready for the big league, I do not know. But I never received a response. So I decided to start/continue development on my own version of Fusebox for in-house use. I built it completely from scratch, and was very careful after hearing about, and then reading the licensing for FB4 not to even view the innards of the current core files so that I wouldn't conscientiously or subconsciously reuse any of the Fusebox code. Well, I've been using my version for a little while now and I think it's great. (Of course.) But I don't necessarily feel comfortable floating to the outskirts of the Fusebox realm and loosing compatibility with the current and future versions of FB.<br /><br />
+	What I really want out of this is a little feedback. I did make one more post about my "enhancements" a couple months ago and I did receive some encouraging words from one person. So after I fixed some of the looser items, I've decided to throw it up on cfopen.org and see what it all really is worth. And that's exactly what I'm looking for: a little idea of whether or not the ideas included here are worth anything or not.  A good public (read "free") discussion would really help me decide whether to crawl back into my private hole and continue down my lonely path, or if any of the features here have any hope of some type of inclusion in a future version of FB.<br /><br />
+	But, for the near future, I am going to continue to use and improve MyOpenbox because so far it has been a great time-saver and productivity enhancer. If anyone else wants to use it for their projects, please do. And if you could provide some precious feedback, it'd be greatly appreciated.<br /><br />
+	Thanks for making it this far. Please give the example application a good run-through and let me know what you think either at the address below or on the House of Fusion Fusebox listserv (fusebox@houseoffusion.com).<br /><br />
+	<em>Tyler Silcox</em>
+</div>
+
+<div class="Footer">
+Please send all questions, comments, or suggestions to <a href="mailto:myopenbox@gmail.com">myopenbox@gmail.com</a>.<br /><br class="Spacer" />
+<em>Last updated 3/17/2005</em>
+</div>
+
+</body>
+</html>
