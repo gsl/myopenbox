@@ -9,7 +9,7 @@
 --->
 
 <cfif StructKeyExists(application, "MyOpenbox") 
-	AND application.MyOpenbox.Version.BuildNumber NEQ '036'>
+	AND application.MyOpenbox.Version.BuildNumber NEQ '037'>
 	<cfset StructDelete(application, "MyOpenbox")>
 </cfif>
 
@@ -42,7 +42,7 @@ application.MyOpenbox.RunFuseAction(attributes[application.MyOpenbox.Parameters.
 <!--- i apply application Settings --->
 <cfif StructKeyExists(application.MyOpenbox, "Settings")>
 	<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/settings.cfm">
-	<cfset YourOpenbox["Settings"]=application.MyOpenbox.Settings>
+	<cfset YourOpenbox["Settings"]=Duplicate(application.MyOpenbox.Settings)>
 </cfif>
 
 <!--- i include the YourOpenbox request file --->

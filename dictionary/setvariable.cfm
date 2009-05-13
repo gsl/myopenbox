@@ -48,7 +48,24 @@ if(LocalVars.Attributes.Quote){
 } */
 
 // i create and insert the tag(s)
-if(StructKeyExists(arguments.Command.XMLAttributes, "name")){
+if(StructKeyExists(arguments.Command.XMLAttributes, "collection")){
+	
+	if(StructKeyExists(arguments.Command.XMLAttributes, "name")){
+		if(NOT LocalVars.Attributes.Overwrite){
+			GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfif NOT StructKeyExists(" & replace(LocalVars.VariablePrefix, ".", "") & ", """ & arguments.Command.XMLAttributes.name & """)>" & NewLine));
+			arguments.Level = arguments.Level + 1;
+		}
+		GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfset " & LocalVars.VariablePrefix & "" & arguments.Command.XMLAttributes.name & " = " & arguments.Command.XMLAttributes.collection & ">" & NewLine));
+		if(NOT LocalVars.Attributes.Overwrite){
+			arguments.Level = arguments.Level - 1;
+			GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "/cfif>" & NewLine));
+		}
+	} else {
+		GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfset StructAppend(" & replace(LocalVars.VariablePrefix, ".", "") & ", " & arguments.Command.XMLAttributes.Collection & ", """ & LocalVars.Attributes.Overwrite & """)>" & NewLine));
+	}
+	
+} else if(StructKeyExists(arguments.Command.XMLAttributes, "name")){
+	
 	if(LocalVars.Attributes.Overwrite){
 		// i insert the Overwrite call
 		GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfset " & LocalVars.VariablePrefix & arguments.Command.XMLAttributes.name & "=" & LocalVars.Quote & LocalVars.Attributes.Value & LocalVars.Quote & ">" & NewLine));
@@ -60,8 +77,6 @@ if(StructKeyExists(arguments.Command.XMLAttributes, "name")){
 		GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfparam name=""" & LocalVars.VariablePrefix & arguments.Command.XMLAttributes.name & """ type=""" & LocalVars.Attributes.Type & """ default=""" & LocalVars.Attributes.Value & """>" & NewLine));
 	}
 // i handle structure appending (NEEDS A OVERWRITE ATTRIBUTE...but named something else bc of existing attribute)
-} else if(structKeyExists(arguments.Command.XMLAttributes, "collection")){
-	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfset structAppend(" & left(LocalVars.VariablePrefix, len(LocalVars.VariablePrefix) - 1) & ", " & arguments.Command.XMLAttributes.Collection & ")>" & NewLine));
 } else {
 	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfset " & LocalVars.Quote & LocalVars.Attributes.Value & LocalVars.Quote & ">" & NewLine));
 }

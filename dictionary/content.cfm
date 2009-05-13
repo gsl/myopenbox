@@ -31,6 +31,11 @@ if(arguments.Command.XMLName EQ "content.call"){
 	LocalVars.CallCommands.XMLName="write";
 	LocalVars.CallCommands.XMLText=arguments.Command.XMLText;
 	LocalVars.CallCommands.XMLAttributes=arguments.Command.XMLAttributes;
+} else if(arguments.Command.XMLName EQ "content.dump"){
+	LocalVars.Type.IsWrapper=true;
+	LocalVars.CallCommands.XMLName="dump";
+	LocalVars.CallCommands.XMLText=arguments.Command.XMLText;
+	LocalVars.CallCommands.XMLAttributes=arguments.Command.XMLAttributes;
 }
 
 GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "!--- CONTENT --->" & NewLine));
