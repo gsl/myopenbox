@@ -35,6 +35,7 @@
 		<parameter name="ReservedFuseActionAttributes" value="Commands,Name,Title,TimeStamp" />
 		<parameter name="FilterCircuitAttributes" value="Access,ConfigFileName,DateLastModified,FuseActions,Phases" />
 		<parameter name="FilterFuseActionAttributes" value="Access,Commands,TimeStamp" />
+		<parameter name="AccessList" value="Public,Internal,Private,Special,Any" />
 	</parameters>
 	
 	<verbs>

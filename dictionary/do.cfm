@@ -44,6 +44,7 @@ if(ArrayLen(arguments.Command.XMLChildren)){
 			LocalVars.Attributes.Value=LocalVars.CurrentNode.XMLText;
 		} else {
 			// THROW ERROR - Value not defined
+			// LocalVars.Attributes.Value="";
 		}
 		
 		// i create and insert the tag(s)
@@ -58,11 +59,19 @@ if(ArrayLen(arguments.Command.XMLChildren)){
 			case "crv" :
 				GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfif YourOpenbox.ThisCircuit.Name EQ ListFirst(_YourOpenbox.Temp.DoFuseAction.FQName, ""."")>" & NewLine));
 				if(structKeyExists(LocalVars.CurrentNode.XMLAttributes, "collection")){
+					// if the collection value is set to 'CRVs', this will write out as: structAppend(CRVs, CRVs)
 					GeneratedContent.append(JavaCast("string", Indent(arguments.Level + 1) & "<" & "cfset structAppend(CRVs, " & LocalVars.CurrentNode.XMLAttributes.collection & ")>" & NewLine));
 				} else {
 					GeneratedContent.append(JavaCast("string", Indent(arguments.Level + 1) & "<" & "cfset CRVs." & LocalVars.CurrentNode.XMLAttributes.name & "=""" & LocalVars.Attributes.Value & """>" & NewLine));
 				}
 				GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfelse>" & NewLine));
+				
+				
+				GeneratedContent.append(JavaCast("string", Indent(arguments.Level + 1) & "<" & "cfif NOT structKeyExists(_YourOpenbox.Circuits, ListFirst(_YourOpenbox.Temp.DoFuseAction.FQName, "".""))>" & NewLine));
+					GeneratedContent.append(JavaCast("string", Indent(arguments.Level + 2) & "<" & "cfset _YourOpenbox.Circuits[ListFirst(_YourOpenbox.Temp.DoFuseAction.FQName, ""."")][""CRVs""] = structNew()>" & NewLine));
+				GeneratedContent.append(JavaCast("string", Indent(arguments.Level + 1) & "<" & "/cfif>" & NewLine));
+				
+				
 				if(structKeyExists(LocalVars.CurrentNode.XMLAttributes, "collection")){
 					GeneratedContent.append(JavaCast("string", Indent(arguments.Level + 1) & "<" & "cfset structAppend(_YourOpenbox.Circuits[ListFirst(_YourOpenbox.Temp.DoFuseAction.FQName, ""."")][""CRVs""], " & LocalVars.CurrentNode.XMLAttributes.collection & ")>" & NewLine));
 				} else {

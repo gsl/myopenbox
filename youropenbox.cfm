@@ -48,7 +48,9 @@ _YourOpenbox.ContentStack=ArrayNew(1);
 	}
 	
 	// i process the YourOpenbox, Circuit, and FuseAction variables
-	_YourOpenbox.ActionStack[i]["ThisPhase"]=YourOpenbox.ThisPhase;
+	if(StructKeyExists(YourOpenbox, "ThisPhase")){
+		_YourOpenbox.ActionStack[i]["ThisPhase"]=YourOpenbox.ThisPhase;
+	}
 	if(StructKeyExists(YourOpenbox, "CallerCircuit")){
 		_YourOpenbox.ActionStack[i]["CallerCircuit"]=YourOpenbox.CallerCircuit;
 		StructDelete(YourOpenbox, "CallerCircuit");
@@ -92,7 +94,9 @@ _YourOpenbox.ContentStack=ArrayNew(1);
 	
 	<cfscript>
 	// i reinstate ThisPhase's, ThisCircuit's and ThisFuseAction's values from the ActionStack
-	YourOpenbox.ThisPhase=_YourOpenbox.ActionStack[i]["ThisPhase"];
+	if(StructKeyExists(_YourOpenbox.ActionStack[i], "ThisPhase")){
+		YourOpenbox.ThisPhase=_YourOpenbox.ActionStack[i]["ThisPhase"];
+	}
 	if(StructKeyExists(_YourOpenbox.ActionStack[i], "ThisCircuit")){
 		YourOpenbox.ThisCircuit=_YourOpenbox.ActionStack[i]["ThisCircuit"];
 		CRVs=_YourOpenbox.Circuits[YourOpenbox.ThisCircuit.Name]["CRVs"];

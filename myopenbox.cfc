@@ -18,8 +18,8 @@
     	<cfscript>
 		// i set the Version information
 		this.Version.Number="0";
-		this.Version.BuildNumber="036";
-		this.Version.BuildDate="2009.03.11";
+		this.Version.BuildNumber="037";
+		this.Version.BuildDate="2009.05.13";
 		</cfscript>
 		
 		<cfreturn this>
@@ -54,10 +54,8 @@
 			)>
 			<!--- i lock the parsing of the MyOpenbox --->
 			<cflock name="#Hash(GetCurrentTemplatePath() & "_RunMyOpenbox")#" timeout="10">
-				<cfscript>
-				// i (re)determine if i should parse the MyOpenbox
-				if(
-					NOT StructKeyExists(this, "Parameters") 
+				<!--- i (re)determine if i should parse the MyOpenbox --->
+				<cfif NOT StructKeyExists(this, "Parameters") 
 					OR this.Parameters.ProcessingMode EQ "Development" 
 					OR NOT StructKeyExists(this, "ApplicationConfigurationFile")
 					OR NOT StructKeyExists(this.ApplicationConfigurationFile, "HashKey")
@@ -65,17 +63,21 @@
 					OR (
 						StructKeyExists(url, "ForceReparsePassword") 
 						AND url.ForceReparsePassword EQ this.Parameters.ForceReparsePassword
-					)
-				){
+					)>
+					<cflock name="#Hash(GetCurrentTemplatePath() & "_RunMyOpenbox_inner")#" timeout="10">
+					
+					<cfscript>
 					// i create a TimeStamp
 					this.TimeStamp=Now();
-					request.OpenboxReparseInitiated = true;
+					// request.OpenboxReparseInitiated = true;
 					// i parse the XML MyOpenbox configuration file(s)
 					ParseApplicationConfigurationFiles(XMLParse(RawXML));
 					// i create a Hash reference in this for checks against the MyOpenbox configuration file
 					this.ApplicationConfigurationFile.HashKey=HashKey;
-				}
-				</cfscript>
+					</cfscript>
+					
+					</cflock>
+				</cfif>
 			</cflock>
 		</cfif>
 		
@@ -545,7 +547,7 @@
 		<cfscript>
 		// i set this Circuit's attributes
 		Circuit["Access"]="Public";
-		if(StructKeyExists(arguments.CircuitNode.XMLAttributes, "Access") AND ListFindNoCase("Public,Private", arguments.CircuitNode.XMLAttributes["Access"])){
+		if(StructKeyExists(arguments.CircuitNode.XMLAttributes, "Access") AND ListFindNoCase(this.Parameters.AccessList, arguments.CircuitNode.XMLAttributes["Access"])){
 			Circuit.Access=arguments.CircuitNode.XMLAttributes["Access"];
 		}
 		// i set Name and Title
@@ -665,7 +667,7 @@
 		}
 		
 		// i set this element's Access to inherit this Circuit's Access if not defined or is an illegal value
-		if(NOT StructKeyExists(FuseAction[FuseActionName], "Access") OR NOT ListFindNoCase("Public,Internal,Private", FuseAction[FuseActionName]["Access"])){
+		if(NOT StructKeyExists(FuseAction[FuseActionName], "Access") OR NOT ListFindNoCase(this.Parameters.AccessList, FuseAction[FuseActionName]["Access"])){
 			FuseAction[FuseActionName]["Access"]=arguments.Circuit.Access;
 		}
 		
@@ -717,7 +719,7 @@
 				Phases[PhaseName]["Commands"]=CurrentNode["XMLChildren"];
 			} else {
 				// if the target Phase does not exist yet
-				if(NOT StructKeyExists(this.Phases, PhaseName)){
+				if(NOT StructKeyExists(this.Phases, PhaseName) OR NOT IsArray(this.Phases[PhaseName])){
 					// ...i create the empty array
 					this.Phases[PhaseName]=ArrayNew(1);
 				}
@@ -1187,11 +1189,18 @@
 			GeneratedContent.append(JavaCast("string", "YourOpenbox.ThisFuseAction.UUId=Insert(""-"", CreateUUID(), 23);" & NewLine));
 			GeneratedContent.append(JavaCast("string", "YourOpenbox.IsSuperCall=False;" & NewLine));
 			GeneratedContent.append(JavaCast("string", "// i set the Circuit and FuseAction variables" & NewLine));
-			GeneratedContent.append(JavaCast("string", "if(StructKeyExists(_YourOpenbox.Circuits, """ & arguments.Circuit.Name & """) AND StructKeyExists(_YourOpenbox.Circuits." & arguments.Circuit.Name & ", ""CRVs"")){" & NewLine));
-				GeneratedContent.append(JavaCast("string", Indent() & "variables.CRVs=_YourOpenbox.Circuits." & arguments.Circuit.Name & ".CRVs;" & NewLine));
-			GeneratedContent.append(JavaCast("string", "} else {" & NewLine));
-				GeneratedContent.append(JavaCast("string", Indent() & "variables.CRVs=StructNew();" & NewLine));
+			
+			// added/changed on 12/1/08 - all Circuits will now get Keys in _YourOpenbox.Circuits
+			GeneratedContent.append(JavaCast("string", "if(NOT StructKeyExists(_YourOpenbox.Circuits, """ & arguments.Circuit.Name & """) OR NOT StructKeyExists(_YourOpenbox.Circuits." & arguments.Circuit.Name & ", ""CRVs"")){" & NewLine));
+				GeneratedContent.append(JavaCast("string", Indent() & "_YourOpenbox.Circuits[""" & arguments.Circuit.Name & """][""CRVs""]=StructNew();" & NewLine));
 			GeneratedContent.append(JavaCast("string", "}" & NewLine));
+			GeneratedContent.append(JavaCast("string", "variables.CRVs=_YourOpenbox.Circuits." & arguments.Circuit.Name & ".CRVs;" & NewLine));
+			
+			// GeneratedContent.append(JavaCast("string", "if(StructKeyExists(_YourOpenbox.Circuits, """ & arguments.Circuit.Name & """) AND StructKeyExists(_YourOpenbox.Circuits." & arguments.Circuit.Name & ", ""CRVs"")){" & NewLine));
+			// 	GeneratedContent.append(JavaCast("string", Indent() & "variables.CRVs=_YourOpenbox.Circuits." & arguments.Circuit.Name & ".CRVs;" & NewLine));
+			// GeneratedContent.append(JavaCast("string", "} else {" & NewLine));
+			// 	GeneratedContent.append(JavaCast("string", Indent() & "variables.CRVs=StructNew();" & NewLine));
+			// GeneratedContent.append(JavaCast("string", "}" & NewLine));
 			GeneratedContent.append(JavaCast("string", "// i set empty local FuseAction variable structures" & NewLine));
 			GeneratedContent.append(JavaCast("string", "variables.FAVs=StructNew();" & NewLine));
 			GeneratedContent.append(JavaCast("string", "variables.XFAs=StructNew();" & NewLine));
