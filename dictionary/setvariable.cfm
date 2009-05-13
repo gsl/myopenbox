@@ -24,15 +24,19 @@ if(StructKeyExists(arguments.Command.XMLAttributes, "quote")){
 switch(arguments.Command.XMLName){
 	case "attribute" :
 		LocalVars.VariablePrefix="attributes.";
+		LocalVars.VariableScope="attributes";
 		break;
 	case "crv" :
 		LocalVars.VariablePrefix="variables.CRVs.";
+		LocalVars.VariableScope="variables.CRVs";
 		break;
 	case "fav" :
 		LocalVars.VariablePrefix="variables.FAVs.";
+		LocalVars.VariableScope="variables.FAVs";
 		break;
 	case "set" :
 		LocalVars.VariablePrefix="";
+		LocalVars.VariableScope="";
 		break;
 }
 
@@ -52,7 +56,7 @@ if(StructKeyExists(arguments.Command.XMLAttributes, "collection")){
 	
 	if(StructKeyExists(arguments.Command.XMLAttributes, "name")){
 		if(NOT LocalVars.Attributes.Overwrite){
-			GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfif NOT StructKeyExists(" & replace(LocalVars.VariablePrefix, ".", "") & ", """ & arguments.Command.XMLAttributes.name & """)>" & NewLine));
+			GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfif NOT StructKeyExists(" & LocalVars.VariableScope & ", """ & arguments.Command.XMLAttributes.name & """)>" & NewLine));
 			arguments.Level = arguments.Level + 1;
 		}
 		GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfset " & LocalVars.VariablePrefix & "" & arguments.Command.XMLAttributes.name & " = " & arguments.Command.XMLAttributes.collection & ">" & NewLine));
@@ -61,7 +65,7 @@ if(StructKeyExists(arguments.Command.XMLAttributes, "collection")){
 			GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "/cfif>" & NewLine));
 		}
 	} else {
-		GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfset StructAppend(" & replace(LocalVars.VariablePrefix, ".", "") & ", " & arguments.Command.XMLAttributes.Collection & ", """ & LocalVars.Attributes.Overwrite & """)>" & NewLine));
+		GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfset StructAppend(" & LocalVars.VariableScope & ", " & arguments.Command.XMLAttributes.Collection & ", """ & LocalVars.Attributes.Overwrite & """)>" & NewLine));
 	}
 	
 } else if(StructKeyExists(arguments.Command.XMLAttributes, "name")){
