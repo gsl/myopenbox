@@ -50,15 +50,20 @@
 	if(StructKeyExists(arguments.Command.XMLAttributes, "startrow")){
 		LocalVars.Attributes.StartRow=arguments.Command.XMLAttributes.startrow;
 	} else {
-		LocalVars.Attributes.StartRow=1;
+		LocalVars.Attributes.StartRow="";
 	}
 	if(StructKeyExists(arguments.Command.XMLAttributes, "endrow")){
 		LocalVars.Attributes.EndRow=arguments.Command.XMLAttributes.endrow;
 	} else {
-		LocalVars.Attributes.EndRow="##" & arguments.Command.XMLAttributes.query & ".RecordCount##";
+		LocalVars.Attributes.EndRow="";
 	}
 	// i insert the cfloop tag with the Query, StartRow, and EndRow attributes
-	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfloop query=""" & arguments.Command.XMLAttributes.query & """ startrow=""" & LocalVars.Attributes.StartRow & """ endrow=""" & LocalVars.Attributes.EndRow & """>" & NewLine));
+	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfloop query=""" & arguments.Command.XMLAttributes.query & """"));
+	if(Len(LocalVars.Attributes.StartRow) GT 0)
+		GeneratedContent.append(JavaCast("string"," startrow=""" & LocalVars.Attributes.StartRow & """"));
+	if(Len(LocalVars.Attributes.EndRow) GT 0)
+		GeneratedContent.append(JavaCast("string"," endrow=""" & LocalVars.Attributes.EndRow & """"));
+	GeneratedContent.append(JavaCast("string", ">" & NewLine));
 	</cfscript>
 
 <cfelse>
