@@ -14,6 +14,11 @@ if(StructKeyExists(arguments.Command.XMLAttributes, "overwrite")){
 } else {
 	LocalVars.Attributes.Overwrite=True;
 }
+if(StructKeyExists(arguments.Command.XMLAttributes, "checkdefault")){
+	LocalVars.Attributes.CheckDefault=arguments.Command.XMLAttributes.checkdefault;
+} else {
+	LocalVars.Attributes.CheckDefault="";
+}
 if(StructKeyExists(arguments.Command.XMLAttributes, "quote")){
 	LocalVars.Attributes.Quote=arguments.Command.XMLAttributes.quote;
 } else {
@@ -49,19 +54,39 @@ if(LocalVars.Attributes.Quote){
 
 // i create and insert the tag(s)
 if(StructKeyExists(arguments.Command.XMLAttributes, "name")){
-	if(LocalVars.Attributes.Overwrite){
-		// i insert the Overwrite call
-		GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfset " & LocalVars.VariablePrefix & arguments.Command.XMLAttributes.name & "=" & LocalVars.Quote & LocalVars.Attributes.Value & LocalVars.Quote & ">" & NewLine));
-		if(LocalVars.Attributes.Type NEQ "any"){
-			GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfparam name=""" & LocalVars.VariablePrefix & arguments.Command.XMLAttributes.name & """ type=""" & LocalVars.Attributes.Type & """ default=""##" & LocalVars.VariablePrefix & arguments.Command.XMLAttributes.name & "##"">" & NewLine));
-		}
+	if(structKeyExists(arguments.Command.XMLAttributes, "collection")){
+		GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfset structAppend(" & LocalVars.VariablePrefix & arguments.Command.XMLAttributes.name & ", " & arguments.Command.XMLAttributes.Collection & ", " & LocalVars.Attributes.Overwrite & ")>" & NewLine));
 	} else {
-		// i insert the param validator/setter
-		GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfparam name=""" & LocalVars.VariablePrefix & arguments.Command.XMLAttributes.name & """ type=""" & LocalVars.Attributes.Type & """ default=""" & LocalVars.Attributes.Value & """>" & NewLine));
+		if(LocalVars.Attributes.Overwrite){
+			// i insert the Overwrite call
+			if(Len(LocalVars.Attributes.CheckDefault) GT 0) {
+				GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfif IsDefined(""" & LocalVars.Attributes.CheckDefault & """)>" & NewLine));
+				GeneratedContent.append(JavaCast("string", Indent(arguments.Level+1) & "<" & "cfset " & LocalVars.VariablePrefix & arguments.Command.XMLAttributes.name & "=" & LocalVars.Attributes.CheckDefault & ">" & NewLine));
+				GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfelse>" & NewLine));
+				GeneratedContent.append(JavaCast("string", Indent(arguments.Level+1) & "<" & "cfset " & LocalVars.VariablePrefix & arguments.Command.XMLAttributes.name & "=" & LocalVars.Quote & LocalVars.Attributes.Value & LocalVars.Quote & ">" & NewLine));
+				GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "/cfif>" & NewLine));
+			} else {
+				GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfset " & LocalVars.VariablePrefix & arguments.Command.XMLAttributes.name & "=" & LocalVars.Quote & LocalVars.Attributes.Value & LocalVars.Quote & ">" & NewLine));
+			}
+			if(LocalVars.Attributes.Type NEQ "any"){
+				GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfparam name=""" & LocalVars.VariablePrefix & arguments.Command.XMLAttributes.name & """ type=""" & LocalVars.Attributes.Type & """ default=""##" & LocalVars.VariablePrefix & arguments.Command.XMLAttributes.name & "##"">" & NewLine));
+			}
+		} else {
+			// i insert the param validator/setter
+			if(Len(LocalVars.Attributes.CheckDefault) GT 0) {
+				GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfif IsDefined(""" & LocalVars.Attributes.CheckDefault & """)>" & NewLine));
+				GeneratedContent.append(JavaCast("string", Indent(arguments.Level+1) & "<" & "cfparam name=""" & LocalVars.VariablePrefix & arguments.Command.XMLAttributes.name & """ type=""" & LocalVars.Attributes.Type & """ default=""##" & LocalVars.Attributes.CheckDefault & "##"">" & NewLine));
+				GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfelse>" & NewLine));
+				GeneratedContent.append(JavaCast("string", Indent(arguments.Level+1) & "<" & "cfparam name=""" & LocalVars.VariablePrefix & arguments.Command.XMLAttributes.name & """ type=""" & LocalVars.Attributes.Type & """ default=""" & LocalVars.Attributes.Value & """>" & NewLine));
+				GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "/cfif>" & NewLine));
+			} else {
+				GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfparam name=""" & LocalVars.VariablePrefix & arguments.Command.XMLAttributes.name & """ type=""" & LocalVars.Attributes.Type & """ default=""" & LocalVars.Attributes.Value & """>" & NewLine));
+			}
+		}
 	}
 // i handle structure appending (NEEDS A OVERWRITE ATTRIBUTE...but named something else bc of existing attribute)
 } else if(structKeyExists(arguments.Command.XMLAttributes, "collection")){
-	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfset structAppend(" & left(LocalVars.VariablePrefix, len(LocalVars.VariablePrefix) - 1) & ", " & arguments.Command.XMLAttributes.Collection & ")>" & NewLine));
+	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfset structAppend(" & left(LocalVars.VariablePrefix, len(LocalVars.VariablePrefix) - 1) & ", " & arguments.Command.XMLAttributes.Collection & ", " & LocalVars.Attributes.Overwrite & ")>" & NewLine));
 } else {
 	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfset " & LocalVars.Quote & LocalVars.Attributes.Value & LocalVars.Quote & ">" & NewLine));
 }
