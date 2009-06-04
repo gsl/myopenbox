@@ -9,7 +9,7 @@
 --->
 
 <cfif StructKeyExists(application, "MyOpenbox") 
-	AND application.MyOpenbox.Version.BuildNumber NEQ '037'>
+	AND application.MyOpenbox.Version.BuildNumber NEQ '038'>
 	<cfset StructDelete(application, "MyOpenbox")>
 </cfif>
 

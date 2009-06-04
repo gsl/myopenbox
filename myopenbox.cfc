@@ -18,8 +18,8 @@
     	<cfscript>
 		// i set the Version information
 		this.Version.Number="0";
-		this.Version.BuildNumber="037";
-		this.Version.BuildDate="2009.05.13";
+		this.Version.BuildNumber="038";
+		this.Version.BuildDate="2009.06.04";
 		</cfscript>
 		
 		<cfreturn this>
