@@ -36,6 +36,7 @@
 		<parameter name="FilterCircuitAttributes" value="Access,ConfigFileName,DateLastModified,FuseActions,Phases" />
 		<parameter name="FilterFuseActionAttributes" value="Access,Commands,TimeStamp" />
 		<parameter name="AccessList" value="Public,Internal,Private,Special,Any" />
+		<parameter name="CircuitRootPaths" value="" />
 	</parameters>
 	
 	<verbs>

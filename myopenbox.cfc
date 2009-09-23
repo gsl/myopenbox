@@ -18,8 +18,8 @@
     	<cfscript>
 		// i set the Version information
 		this.Version.Number="0";
-		this.Version.BuildNumber="038";
-		this.Version.BuildDate="2009.06.04";
+		this.Version.BuildNumber="039";
+		this.Version.BuildDate="2009.09.22";
 		</cfscript>
 		
 		<cfreturn this>
@@ -95,7 +95,7 @@
 	<cffunction name="ParseApplicationConfigurationFiles" 
 		access="private" 
 		hint="I parse the MyOpenbox application and default setup configuration files." 
-		output="false" 
+		output="true" 
 		returntype="void">
 		
 		<cfargument name="ApplicationDeclarations" type="any">
@@ -105,6 +105,8 @@
 		// i initialize the local vars
 		var SetupDeclarations=XMLParse(Read(ExpandPath(arguments.SetupConfigurationFile)));
 		var TickCount=GetTickCount();
+		var i="";
+		var CircuitRootArray=ArrayNew(1);
 		</cfscript>
 		
 		<cfscript>
@@ -140,8 +142,14 @@
 			this.Phases=StructNew();
 		}
 		
+		this.Circuits=StructNew();
 		// i set Circuits
-		this.Circuits=ParseCircuits();
+		CircuitRootArray=ListToArray(this.Parameters.CircuitRootPaths, ",");
+		for(i=1; i LTE ArrayLen(CircuitRootArray); i=i+1){
+			StructAppend(this.Circuits, ParseCircuits(GetDirectoryFromPath(GetBaseTemplatePath()) & CircuitRootArray[i], CircuitRootArray[i]), true);
+		}
+		
+		//this.Circuits=ParseCircuits();
 		
 		// i create the application level Phases' files
 		CreatePhaseFiles(this.Parameters.ApplicationPhases);
@@ -1545,17 +1553,21 @@
 	<cffunction name="Dump" 
     	hint="I am a cfscript replacement for cfdump." 
     	access="private" 
-    	output="false" 
+    	output="true" 
     	returntype="void">
     	
     	<cfargument name="Var" type="any">
     	<cfargument name="Label" type="string" default="">
     	<cfargument name="Expand" type="boolean" default="True">
+    	<cfargument name="Abort" type="boolean" default="false">
     	
     	<cfif Len(arguments.Label)>
 			<cfdump var="#arguments.Var#" label="#arguments.Label#" expand="#arguments.Expand#">
 		<cfelse>
 			<cfdump var="#arguments.Var#" expand="#arguments.Expand#">
+		</cfif>
+		<cfif arguments.Abort>
+			<cfabort />
 		</cfif>
     	
     </cffunction>
