@@ -14,12 +14,18 @@
     	hint="I initialize this component." 
     	output="false" 
     	returntype="struct">
+    	<cfargument name="Configuration" type="struct" default="#StructNew()#" />
     	
     	<cfscript>
 		// i set the Version information
 		this.Version.Number="0";
-		this.Version.BuildNumber="039";
-		this.Version.BuildDate="2009.09.22";
+		this.Version.BuildNumber="040";
+		this.Version.BuildDate="2009.09.28";
+		this.Configuration=arguments.Configuration;
+		if(NOT StructKeyExists(this.Configuration, "ApplicationConfigurationFile"))
+			this.Configuration.ApplicationConfigurationFile="cfg.myopenbox.cfm";
+		if(NOT StructKeyExists(this.Configuration, "SetupConfigurationFile"))
+			this.Configuration.SetupConfigurationFile="[myopenbox]/config.cfm";
 		</cfscript>
 		
 		<cfreturn this>
@@ -34,7 +40,7 @@
 		output="false" 
 		returntype="void">
 		
-		<cfargument name="ApplicationConfigurationFile" type="string" default="cfg.myopenbox.cfm">
+		<cfargument name="ApplicationConfigurationFile" type="string" default="#this.Configuration.ApplicationConfigurationFile#">
 		
 		<cfscript>
 		// i initialize the local vars
@@ -99,7 +105,7 @@
 		returntype="void">
 		
 		<cfargument name="ApplicationDeclarations" type="any">
-		<cfargument name="SetupConfigurationFile" type="string" default="[myopenbox]/config.cfm">
+		<cfargument name="SetupConfigurationFile" type="string" default="#this.Configuration.SetupConfigurationFile#">
 		
 		<cfscript>
 		// i initialize the local vars
