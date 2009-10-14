@@ -23,9 +23,9 @@
 		this.Version.BuildDate="2009.09.28";
 		this.Configuration=arguments.Configuration;
 		if(NOT StructKeyExists(this.Configuration, "ApplicationConfigurationFile"))
-			this.Configuration.ApplicationConfigurationFile="cfg.myopenbox.cfm";
+			this.Configuration.ApplicationConfigurationFile=GetDirectoryFromPath(GetCurrentTemplatePath()) & "../cfg.myopenbox.cfm";
 		if(NOT StructKeyExists(this.Configuration, "SetupConfigurationFile"))
-			this.Configuration.SetupConfigurationFile="[myopenbox]/config.cfm";
+			this.Configuration.SetupConfigurationFile=GetDirectoryFromPath(GetCurrentTemplatePath()) & "config.cfm";
 		</cfscript>
 		
 		<cfreturn this>
@@ -44,7 +44,7 @@
 		
 		<cfscript>
 		// i initialize the local vars
-		var RawXML=Read(ExpandPath(arguments.ApplicationConfigurationFile));
+		var RawXML=Read(arguments.ApplicationConfigurationFile);
 		var HashKey=Hash(RawXML);
 		</cfscript>
 		
@@ -109,7 +109,7 @@
 		
 		<cfscript>
 		// i initialize the local vars
-		var SetupDeclarations=XMLParse(Read(ExpandPath(arguments.SetupConfigurationFile)));
+		var SetupDeclarations=XMLParse(Read(arguments.SetupConfigurationFile));
 		var TickCount=GetTickCount();
 		var i="";
 		var CircuitRootArray=ArrayNew(1);
