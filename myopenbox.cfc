@@ -22,6 +22,8 @@
 		this.Version.BuildNumber="040";
 		this.Version.BuildDate="2009.09.28";
 		this.Configuration=arguments.Configuration;
+		this.Logs=StructNew();
+		this.Logs.Actions=QueryNew("timestamp,action,type,time", "date,varchar,varchar,integer");
 		if(NOT StructKeyExists(this.Configuration, "ApplicationConfigurationFile"))
 			this.Configuration.ApplicationConfigurationFile=GetDirectoryFromPath(GetCurrentTemplatePath()) & "../cfg.myopenbox.cfm";
 		if(NOT StructKeyExists(this.Configuration, "SetupConfigurationFile"))
@@ -55,8 +57,8 @@
 			OR NOT StructKeyExists(this.ApplicationConfigurationFile, "HashKey")
 			OR this.ApplicationConfigurationFile.HashKey NEQ HashKey 
 			OR (
-				StructKeyExists(url, "ForceReparsePassword") 
-				AND url.ForceReparsePassword EQ this.Parameters.ForceReparsePassword
+				StructKeyExists(url, "FWReparse") 
+				AND url.FWReparse EQ this.Parameters.FWReparse
 			)>
 			<!--- i lock the parsing of the MyOpenbox --->
 			<cflock name="#Hash(GetCurrentTemplatePath() & "_RunMyOpenbox")#" timeout="10">
@@ -67,8 +69,8 @@
 					OR NOT StructKeyExists(this.ApplicationConfigurationFile, "HashKey")
 					OR this.ApplicationConfigurationFile.HashKey NEQ HashKey 
 					OR (
-						StructKeyExists(url, "ForceReparsePassword") 
-						AND url.ForceReparsePassword EQ this.Parameters.ForceReparsePassword
+						StructKeyExists(url, "FWReparse") 
+						AND url.FWReparse EQ this.Parameters.FWReparse
 					)>
 					<cflock name="#Hash(GetCurrentTemplatePath() & "_RunMyOpenbox_inner")#" timeout="10">
 					
@@ -80,6 +82,7 @@
 					ParseApplicationConfigurationFiles(XMLParse(RawXML));
 					// i create a Hash reference in this for checks against the MyOpenbox configuration file
 					this.ApplicationConfigurationFile.HashKey=HashKey;
+					this.LogAction("MOBX Parsed", "FW");
 					</cfscript>
 					
 					</cflock>
@@ -166,6 +169,14 @@
 			this.Settings=StructNew();
 			// i create the file
 			CreateSettingsFile("MyOpenbox", arguments.ApplicationDeclarations.XMLRoot.settings);
+		}
+		
+		// i create the Routes file
+		this.Routes=CreateObject("component", "SES");
+		this.Routes.configure();
+		if(StructKeyExists(arguments.ApplicationDeclarations.XMLRoot, "routes")){
+			// i create the file
+			CreateRoutesFile("MyOpenbox", arguments.ApplicationDeclarations.XMLRoot.routes);
 		}
 		
 		// i store the parsed Configuration XML
@@ -728,7 +739,7 @@
 			}
 			
 			// i set a reference to the Phase into the return Circuit Phases structure
-			if(ListFindNoCase("PreFuseAction,PostFuseAction", PhaseName)){
+			if(ListFindNoCase(this.Parameters.CircuitPhases, PhaseName)){
 				Phases[PhaseName]["Attributes"]=CurrentNode["XMLAttributes"];
 				Phases[PhaseName]["Commands"]=CurrentNode["XMLChildren"];
 			} else {
@@ -867,6 +878,120 @@
 		// LOGS: i set a Logs.ProcessingTime value
 		if(this.Parameters.EnableLogs){
 			this.Logs.ProcessingTime.CreateSettingsFile[ListLast(ContainerVariable, ".")]=GetTickCount() - TickCount;
+			this.Logs.Requests.FileBuilds=this.Logs.Requests.FileBuilds + 1;
+		}
+		</cfscript>
+		
+		</cfif>
+		
+	</cffunction>
+	
+	<cffunction name="CreateRoutesFile" 
+		access="private" 
+		hint="." 
+		output="false" 
+		returntype="void">
+		
+		<cfargument name="Type" type="string">
+		<cfargument name="CurrentNode" type="any" default="">
+		
+		<cfscript>
+		// i initialize the local vars
+		var GeneratedContent=CreateObject("java", "java.lang.StringBuffer").init();
+		var ContainerVariable="";
+		var FileName="";
+		var Route=StructNew();
+		var i=0;
+		var NewLine=this.Parameters.Delimiters.NewLine;
+		var ThrowError=False;
+		var TickCount=GetTickCount();
+		var Setting=StructNew();
+		</cfscript>
+		
+		<cfif this.Parameters.ProcessingMode NEQ "Deployment">
+		
+		<cfscript>
+		if(arguments.Type EQ "MyOpenbox"){
+			ContainerVariable=this.Parameters.MyOpenboxObjectVariable;
+			FileName="routes";
+		}
+		
+		GeneratedContent.append(JavaCast("string", "<" & "cfsilent>" & NewLine));
+		GeneratedContent.append(JavaCast("string", "<" & "cfif ArrayLen(" & ContainerVariable & ".Routes.getRoutes()) EQ 0>" & NewLine));
+			GeneratedContent.append(JavaCast("string", Indent() & "<" & "cflock name=""##Hash(GetCurrentTemplatePath())##_SetRoutes"" timeout=""10"">" & NewLine));
+				GeneratedContent.append(JavaCast("string", Indent(2) & "<" & "cfscript>" & NewLine));
+				GeneratedContent.append(JavaCast("string", Indent(2) & "if(ArrayLen(" & ContainerVariable & ".Routes.getRoutes()) EQ 0){" & NewLine));
+					GeneratedContent.append(JavaCast("string", Indent(3) & "// i create the designated Routes" & NewLine));
+					// i determine if arguments.CurrentNode is available
+					if(IsXMLElem(arguments.CurrentNode) AND StructKeyExists(arguments.CurrentNode, "XMLChildren")){
+						if(this.Parameters.EnableLogs){
+							GeneratedContent.append(JavaCast("string", Indent(3) & "if(application.MyOpenbox.Parameters.EnableLogs) application.MyOpenbox.LogAction(""Adding Routes"");" ));
+
+						}
+						for(i=1; i LTE ArrayLen(arguments.CurrentNode.XMLChildren); i=i + 1){
+							// if this is a Setting command
+							if(arguments.CurrentNode.XMLChildren[i]["XMLName"] EQ "route"){
+								// i clear out the name/value holder Setting
+								Route=StructNew();
+								// i check for Pattern
+								if(StructKeyExists(arguments.CurrentNode.XMLChildren[i]["XMLAttributes"], "pattern")){
+									Setting.Pattern=arguments.CurrentNode.XMLChildren[i]["XMLAttributes"]["pattern"];
+								} else {
+									ThrowError=True;
+									Throw("MyOpenbox", "Error while processing Routes.", "No Pattern");
+								}
+								// i check for a Circuit
+								if(StructKeyExists(arguments.CurrentNode.XMLChildren[i]["XMLAttributes"], "circuit")){
+									Setting.Circuit=arguments.CurrentNode.XMLChildren[i]["XMLAttributes"]["circuit"];
+								}
+								// i check for a Fuse
+								if(StructKeyExists(arguments.CurrentNode.XMLChildren[i]["XMLAttributes"], "fuse")){
+									Setting.Fuse=arguments.CurrentNode.XMLChildren[i]["XMLAttributes"]["fuse"];
+								}
+								if(StructKeyExists(Setting, "Fuse") AND NOT StructKeyExists(Setting, "Circuit")) {
+									ThrowError=True;
+									Throw("MyOpenbox", "Error while processing Routes.", "Fuse with no circuit");
+								}
+								
+								// ERROR: i throw an error if necessary
+								if(ThrowError){
+									Throw("MyOpenbox", "Error while processing Routes.", "Please make sure all required attributes are included and valid in each route definition in the MyOpenbox configuration file.");
+								}
+								
+								// i add the Setting definition to GeneratedContent
+								GeneratedContent.append(JavaCast("string", Indent(3) & ContainerVariable & ".Routes.addRoute(""" & Setting.Pattern) & """");
+								if(StructKeyExists(Setting, "Circuit"))
+									GeneratedContent.append(JavaCast("string", ",""" & Setting.Circuit & """"));
+								if(StructKeyExists(Setting, "Fuse"))
+									GeneratedContent.append(JavaCast("string", ",""" & Setting.Fuse & """"));
+								GeneratedContent.append(JavaCast("string", ");" & NewLine));
+							} else {
+								// ERROR: i throw an error if necessary
+								Throw("MyOpenbox", "Error while processing Routes.", "Please make sure only &lt;route .../&gt; verbs are used in each Route definition in the MyOpenbox configuration file.");
+							}
+						}
+					}
+				GeneratedContent.append(JavaCast("string", Indent(2) & "}" & NewLine));
+				GeneratedContent.append(JavaCast("string", Indent(2) & "<" & "/cfscript>" & NewLine));
+			GeneratedContent.append(JavaCast("string", Indent() & "<" & "/cflock>" & NewLine));
+		GeneratedContent.append(JavaCast("string", "<" & "/cfif>" & NewLine));
+		GeneratedContent.append(JavaCast("string", "<" & "/cfsilent>" & NewLine));
+				
+		// i set GeneratedContent to a string value so i can clean out any internal references
+		GeneratedContent=GeneratedContent.ToString();
+		// i replace any internal references in {}s
+		GeneratedContent=ReplaceNoCase(GeneratedContent, "{MyOpenbox}", this.Parameters.MyOpenboxObjectVariable, "all");
+		GeneratedContent=ReplaceNoCase(GeneratedContent, "{Circuits}", this.Parameters.MyOpenboxObjectVariable & ".Circuits", "all");
+		GeneratedContent=ReplaceNoCase(GeneratedContent, "{Parameters}", this.Parameters.MyOpenboxObjectVariable & ".Parameters", "all");
+		GeneratedContent=ReplaceNoCase(GeneratedContent, "{Phases}", this.Parameters.MyOpenboxObjectVariable & ".Phases", "all");
+		GeneratedContent=ReplaceNoCase(GeneratedContent, "{Settings}", ContainerVariable & ".Settings", "all");
+		
+		// i write the GeneratedContent to a file
+		Write(FileName, GeneratedContent);
+			
+		// LOGS: i set a Logs.ProcessingTime value
+		if(this.Parameters.EnableLogs){
+			this.Logs.ProcessingTime.CreateRoutesFile[ListLast(ContainerVariable, ".")]=GetTickCount() - TickCount;
 			this.Logs.Requests.FileBuilds=this.Logs.Requests.FileBuilds + 1;
 		}
 		</cfscript>
@@ -1245,8 +1370,32 @@
 			GeneratedContent.append(JavaCast("string", "<!--- PHASE:RequestedFuseAction --->" & NewLine));
 			GeneratedContent.append(JavaCast("string", "<" & "cfset YourOpenbox.ThisPhase.Name=""RequestFuseAction"">" & NewLine));
 			GeneratedContent.append(JavaCast("string", NewLine));
+			
+			
+			// i setup the try/catch
+			GeneratedContent.append(JavaCast("string", "<" & "cfset _YourOpenbox.cfcatch=StructNew() />" & NewLine));
+			GeneratedContent.append(JavaCast("string", "<" & "cftry>" & NewLine));
+			
+			
+			// i render the fuseaction
 			temp=RenderCommands("FuseAction", arguments.FuseAction.Commands, "RequestedFuseAction", arguments.Circuit, arguments.FuseAction);
 			GeneratedContent.append(JavaCast("string", temp));
+			
+			GeneratedContent.append(JavaCast("string", "<" & "cfcatch type=""Any"">" & NewLine));
+			if(StructKeyExists(arguments.Circuit, "Phases") AND StructKeyExists(arguments.Circuit.Phases, "OnError")) {
+				GeneratedContent.append(JavaCast("string", Indent() & "<" & "cftry>" & NewLine));
+				GeneratedContent.append(JavaCast("string", Indent(2) & "<" & "cfinclude template=""phase.onerror." & lcase(arguments.circuit.name) & ".cfm"">" & NewLine));
+				GeneratedContent.append(JavaCast("string", Indent(2) & "<" & "cfcatch type=""Any"">" & NewLine));
+				GeneratedContent.append(JavaCast("string", Indent(2) & "<" & "cfset _YourOpenbox.cfcatch=cfcatch />" & NewLine));
+				GeneratedContent.append(JavaCast("string", Indent(2) & "<" & "/cfcatch>" & NewLine));
+				GeneratedContent.append(JavaCast("string", Indent() & "<" & "/cftry>" & NewLine));
+			} else {
+				GeneratedContent.append(JavaCast("string", Indent() & "<" & "cfset _YourOpenbox.cfcatch=cfcatch />" & NewLine));
+			}
+			GeneratedContent.append(JavaCast("string", "<" & "/cfcatch>" & NewLine));
+			GeneratedContent.append(JavaCast("string", "<" & "/cftry>" & NewLine));
+			
+			
 			GeneratedContent.append(JavaCast("string", "<" & "cfset StructDelete(YourOpenbox, ""ThisPhase"")>" & NewLine));
 			GeneratedContent.append(JavaCast("string", "<!--- End PHASE:RequestedFuseAction --->" & NewLine));
 			GeneratedContent.append(JavaCast("string", NewLine));
@@ -1263,14 +1412,22 @@
 			
 			GeneratedContent.append(JavaCast("string", "<" & "cfscript>" & NewLine));
 			GeneratedContent.append(JavaCast("string", "// i store and destroy the Circuit and FuseAction variables" & NewLine));
-			GeneratedContent.append(JavaCast("string", "_YourOpenbox.Circuits." & arguments.Circuit.Name & ".CRVs=CRVs;" & NewLine));
+			GeneratedContent.append(JavaCast("string", "_YourOpenbox.Circuits." & arguments.Circuit.Name & ".CRVs=variables.CRVs;" & NewLine));
 			GeneratedContent.append(JavaCast("string", "StructDelete(variables, ""CRVs"");" & NewLine));
 			GeneratedContent.append(JavaCast("string", "StructDelete(variables, ""FAVs"");" & NewLine));
 			GeneratedContent.append(JavaCast("string", "StructDelete(variables, ""XFAs"");" & NewLine));
 			GeneratedContent.append(JavaCast("string", "// i destroy this FuseAction's properties" & NewLine));
 			GeneratedContent.append(JavaCast("string", "StructDelete(YourOpenbox, ""ThisCircuit"");" & NewLine));
 			GeneratedContent.append(JavaCast("string", "StructDelete(YourOpenbox, ""ThisFuseAction"");" & NewLine));
-			GeneratedContent.append(JavaCast("string", "<" & "/cfscript>"));
+			GeneratedContent.append(JavaCast("string", "<" & "/cfscript>" & NewLine));
+			
+			GeneratedContent.append(JavaCast("string", NewLine));
+			
+			// i check for a value from a thrown exception and rethrow it, since cf8 doesn't have cffinally
+			GeneratedContent.append(JavaCast("string", "<" & "cfif NOT StructIsEmpty(_YourOpenbox.cfcatch)>" & NewLine));
+			GeneratedContent.append(JavaCast("string", Indent() & "<" & "cfthrow object=""##_YourOpenbox.cfcatch##"" />" & NewLine));
+			GeneratedContent.append(JavaCast("string", "<" & "/cfif>" & NewLine));
+			
 			
 			// i write the GeneratedContent to a file
 			Write("fuseaction." & arguments.Circuit.Name & "." & arguments.FuseAction.Name, GeneratedContent.ToString());
@@ -1500,13 +1657,29 @@
 		} 
 		// ...else if this is a custom tag, i do not "pass in" Form and URL variables to the custom tag call, use caller.attributes to access attributes from the calling template
 		// i set the DefaultFuseAction as the target FuseAction if necessary
+		/*
 		if(NOT StructKeyExists(RequestAttributes, this.Parameters.FuseActionVariable)){
 			RequestAttributes[this.Parameters.FuseActionVariable]=this.Parameters.DefaultFuseAction;
 		}
+		*/
 		</cfscript>
     	
 		<cfreturn RequestAttributes>
     	
+    </cffunction>
+    
+    <cffunction name="LogAction">
+    	<cfargument name="Action" />
+    	<cfargument name="Type" default="" />
+    	<cfargument name="Time" default="" />
+    	
+    	<cfif this.Parameters.EnableLogs>
+	    	<cfset QueryAddRow(this.Logs.Actions) />
+	    	<cfset QuerySetCell(this.Logs.Actions, "TimeStamp", Now()) />
+	    	<cfset QuerySetCell(this.Logs.Actions, "Action", arguments.Action) />
+	    	<cfset QuerySetCell(this.Logs.Actions, "Type", arguments.Type) />
+	    	<cfset QuerySetCell(this.Logs.Actions, "Time", arguments.Time) />
+	    </cfif>
     </cffunction>
 	
 	<!--- cffunction name="UTILITY METHODS" --->

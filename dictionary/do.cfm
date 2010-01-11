@@ -105,9 +105,18 @@ GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "!---
 GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfset _PushToActionStack(_YourOpenbox.Temp.DoFuseAction)>" & NewLine));
 GeneratedContent.append(JavaCast("string", NewLine));
 
+
+GeneratedContent.append(JavaCast("string", "<" & "cfset _YourOpenbox.cfcatch=StructNew() />" & NewLine));
+GeneratedContent.append(JavaCast("string", "<" & "cftry>" & NewLine));
+
 GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "!--- i include the FuseAction file --->" & NewLine));
 GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfinclude template=""fuseaction.##LCase(_YourOpenbox.Temp.DoFuseAction.FQName)##.cfm"">" & NewLine));
 GeneratedContent.append(JavaCast("string", NewLine));
+
+GeneratedContent.append(JavaCast("string", "<" & "cfcatch type=""Any"">" & NewLine));
+GeneratedContent.append(JavaCast("string", Indent() & "<" & "cfset _YourOpenbox.cfcatch=cfcatch />" & NewLine));
+GeneratedContent.append(JavaCast("string", "<" & "/cfcatch>" & NewLine));
+GeneratedContent.append(JavaCast("string", "<" & "/cftry>" & NewLine));
 
 // i insert the PopActionStack function
 GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "!--- i reinstate ThisPhase's, ThisCircuit's and ThisFuseAction's values from the ActionStack --->" & NewLine));
@@ -115,4 +124,9 @@ GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfse
 
 GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "!--- End DO --->" & NewLine));
 GeneratedContent.append(JavaCast("string", NewLine));
+
+// i check for a value from a thrown exception and rethrow it, since cf8 doesn't have cffinally
+GeneratedContent.append(JavaCast("string", "<" & "cfif NOT StructIsEmpty(_YourOpenbox.cfcatch)>" & NewLine));
+GeneratedContent.append(JavaCast("string", Indent() & "<" & "cfthrow object=""##_YourOpenbox.cfcatch##"" />" & NewLine));
+GeneratedContent.append(JavaCast("string", "<" & "/cfif>" & NewLine));
 </cfscript>
