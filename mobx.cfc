@@ -30,7 +30,7 @@
 		<!--- i apply application Routes --->
 		<cfif StructKeyExists(application.MyOpenbox, "Routes")>
 			<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/routes.cfm">
-			<cfset StructAppend(attributes, application.MyOpenbox.Routes.findRoute(cgi.Path_Info), false) />
+			<cfset StructAppend(attributes, application.MyOpenbox.Routes.findRoute(Replace(cgi.Path_Info, GetDirectoryFromPath(cgi.Script_Name), "")), false) />
 		</cfif>
 		
 		<cfscript>
