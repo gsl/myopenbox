@@ -19,7 +19,7 @@
     	<cfscript>
 		// i set the Version information
 		this.Version.Number="0";
-		this.Version.BuildNumber="043";
+		this.Version.BuildNumber="044";
 		this.Version.BuildDate="2010.01.15";
 		this.Configuration=arguments.Configuration;
 		this.Logs=StructNew();
@@ -932,7 +932,7 @@
 							// if this is a Setting command
 							if(arguments.CurrentNode.XMLChildren[i]["XMLName"] EQ "route"){
 								// i clear out the name/value holder Setting
-								Route=StructNew();
+								Setting=StructNew();
 								// i check for Pattern
 								if(StructKeyExists(arguments.CurrentNode.XMLChildren[i]["XMLAttributes"], "pattern")){
 									Setting.Pattern=arguments.CurrentNode.XMLChildren[i]["XMLAttributes"]["pattern"];
