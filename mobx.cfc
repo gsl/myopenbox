@@ -1,13 +1,17 @@
 <cfcomponent>
 	
 	<cffunction name="onApplicationStart">
-		<!--- i create the MyOpenbox object (if necessary) --->
 		<cfset application.MyOpenbox=CreateObject("component", "myopenbox").Init()>
 	</cffunction>
 	
 	<cffunction name="onRequestStart" 
 		returnType="void">
 		<cfargument name="targetPage" type="string" />
+		
+		<!--- i create the MyOpenbox object (if necessary) --->
+		<cfif NOT StructKeyExists(application, "MyOpenbox")>
+			<cfset application.MyOpenbox=CreateObject("component", "myopenbox").Init()>>
+		</cfif>
 		
 		<cfif (
 				StructKeyExists(url, "FWReinit") AND IsDefined("application.Myopenbox.Parameters.FWReinit")
