@@ -19,8 +19,8 @@
     	<cfscript>
 		// i set the Version information
 		this.Version.Number="0";
-		this.Version.BuildNumber="041";
-		this.Version.BuildDate="2010.01.11";
+		this.Version.BuildNumber="043";
+		this.Version.BuildDate="2010.01.15";
 		this.Configuration=arguments.Configuration;
 		this.Logs=StructNew();
 		this.Logs.Actions=QueryNew("timestamp,action,type,time", "date,varchar,varchar,integer");
