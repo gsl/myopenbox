@@ -51,6 +51,7 @@
 			formUtil.buildFormCollections(attributes);
 		} catch (Any e) {}
 		</cfscript>
+		
 		<!-- i  validate and configure the target FuseAction --->
 		<cfset application.MyOpenbox.RunFuseAction(attributes[application.MyOpenbox.Parameters.FuseActionVariable]) />
 <!---

@@ -33,6 +33,28 @@
 		<cfreturn this>
     
     </cffunction>
+    
+    <cffunction name="IsFWReinit" 
+		access="public"
+		output="false" 
+		returntype="boolean">
+		
+		<cfparam name="form" default="#StructNew()#">
+		<cfparam name="url"	 default="#StructNew()#">
+		
+		<cfreturn (StructKeyExists(url, "FWReinit") AND IsDefined("application.Myopenbox.Parameters.FWReinit") AND url.FWReinit EQ application.Myopenbox.Parameters.FWReinit) OR (StructKeyExists(form, "FWReinit") AND IsDefined("application.Myopenbox.Parameters.FWReinit") AND form.FWReinit EQ application.Myopenbox.Parameters.FWReinit) />
+	</cffunction>
+	
+	<cffunction name="IsFWReparse" 
+		access="public"
+		output="false" 
+		returntype="boolean">
+		
+		<cfparam name="form" default="#StructNew()#">
+		<cfparam name="url"	 default="#StructNew()#">
+		
+		<cfreturn (StructKeyExists(url, "FWReparse") AND IsDefined("application.Myopenbox.Parameters.FWReparse") AND url.FWReparse EQ application.Myopenbox.Parameters.FWReparse) OR (StructKeyExists(form, "FWReparse") AND IsDefined("application.Myopenbox.Parameters.FWReparse") AND form.FWReparse EQ application.Myopenbox.Parameters.FWReparse) />
+	</cffunction>
 	
 	<!--- cffunction name="RUNMYOPENBOX METHODS" --->
 	
