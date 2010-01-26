@@ -8,12 +8,7 @@
 		returnType="void">
 		<cfargument name="targetPage" type="string" />
 		
-		<!--- i create the MyOpenbox object (if necessary) --->
-		<cfif NOT StructKeyExists(application, "MyOpenbox")>
-			<cfset application.MyOpenbox=CreateObject("component", "myopenbox").Init()>>
-		</cfif>
-		
-		<cfif (
+		<cfif NOT StructKeyExists(application, "MyOpenbox") OR (
 				StructKeyExists(url, "FWReinit") AND IsDefined("application.Myopenbox.Parameters.FWReinit")
 				AND url.FWReinit EQ application.Myopenbox.Parameters.FWReinit
 			)>
@@ -70,11 +65,11 @@
 		<!--- i apply application Settings --->
 		<cfif StructKeyExists(application.MyOpenbox, "Settings")>
 			<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/settings.cfm">
-			<cfset YourOpenbox["Settings"]=Duplicate(application.MyOpenbox.Settings)>
 		</cfif>
 		
 		<!--- i include the YourOpenbox request file --->
-		<cfinclude template="youropenbox.cfm">
+		<cfinclude template="udf.youropenbox.cfm">
+		<cfset setYourOpenbox(attributes[application.MyOpenbox.Parameters.FuseActionVariable]) />
 		
 		<!--- i include the Init Phase --->
 		<cfif StructKeyExists(application.MyOpenbox.Phases, "Init") 
@@ -95,7 +90,8 @@
 		<cfargument name="targetPage" type="string" />
 		
 		<!--- i include the TargetFuseAction file --->
-		<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/fuseaction.#LCase(attributes[application.MyOpenbox.Parameters.FuseActionVariable])#.cfm">
+		<!--- <cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/fuseaction.#LCase(attributes[application.MyOpenbox.Parameters.FuseActionVariable])#.cfm"> --->
+		<cfset runEvent(attributes[application.MyOpenbox.Parameters.FuseActionVariable]) />
 		
 <!---
 		<cfif
@@ -119,7 +115,7 @@
 	<cffunction name="onRequestEnd" 
 		returnType="void">
 		<cfargument name="targetPage" type="string" />
-		
+		<!--- <cfdump var="#this#" label="#GetCurrentTemplatePath()#" /><cfabort /> --->
 		<!--- i include the PostProcess Phase --->
 		<cfif StructKeyExists(application.MyOpenbox.Phases, "PostProcess")>
 			<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/phase.postprocess.cfm">
@@ -139,6 +135,43 @@
 			<cfcookie name="CFToken" value="#session.CFToken#">
 		</cfif>
 		
+	</cffunction>
+	
+	<cffunction name="runEvent" 
+		returnType="void">
+		<cfargument name="Event" type="string" />
+		<cfif
+			StructKeyExists(application.Myopenbox.Circuits, ListFirst(arguments.Event, "."))
+			AND StructKeyExists(application.Myopenbox.Circuits[ListFirst(arguments.Event, ".")].Fuseactions, ListLast(arguments.Event, "."))
+		>
+			<!--- i include the PostProcess Phase --->
+			<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/fuseaction.#LCase(arguments.Event)#.cfm">
+		</cfif>
+	</cffunction>
+	
+	<cffunction name="setYourOpenbox" 
+		returnType="void">
+		<cfargument name="Event" type="string" />
+		
+		<cfscript>
+		// i set YourOpenbox defaults
+		YourOpenbox["TargetCircuit"]=application.MyOpenbox.GetCircuit(ListFirst(arguments.Event, "."));
+		YourOpenbox["TargetFuseAction"]=application.MyOpenbox.GetFuseAction(arguments.Event);
+		YourOpenbox["IsTargetCall"]=True;
+		YourOpenbox["IsSuperCall"]=False;
+		
+		// i set _YourOpenbox defaults
+		_YourOpenbox.ActionStack=ArrayNew(1);
+		_YourOpenbox.Circuits=StructNew();
+		_YourOpenbox.ContentStack=ArrayNew(1);
+		</cfscript>
+		
+		<!--- i apply TargetCircuit Settings --->
+		<cfif StructKeyExists(YourOpenbox.TargetCircuit, "Settings")>
+			<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/settings.#LCase(YourOpenbox.TargetCircuit.Name)#.cfm">
+		</cfif>
+		
+		<cfset YourOpenbox["Settings"]=Duplicate(application.MyOpenbox.Settings)>
 	</cffunction>
 	
 	<cffunction name="copyColdFireVariables" returntype="void" output="no" access="private" hint="Copies variables scoped variables defined in the ColdFire variables tab to the request scope so they are available to the coldfire.cfm debugging template.">
