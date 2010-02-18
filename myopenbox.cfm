@@ -28,8 +28,30 @@ attributes=application.MyOpenbox.SetAttributes(variables, GetBaseTagList());
 
 <!--- i apply application Routes --->
 <cfif StructKeyExists(application.MyOpenbox, "Routes") AND NOT IsDefined("ThisTag")>
+	<cfscript>
+	variables.items = structnew();
+	
+	// Get path_info
+	variables.items["pathInfo"] = cgi.path_info;
+	variables.items["scriptName"] = trim(reReplacenocase(cgi.script_name,"[/\\]index\.cfm",""));
+	
+	// Clean ContextRoots
+	if( len(getContextRoot()) ){
+		variables.items["pathInfo"] = replacenocase(variables.items["pathInfo"],getContextRoot(),"");
+		variables.items["scriptName"] = replacenocase(variables.items["scriptName"],getContextRoot(),"");
+	}	
+	// Clean up the path_info from index.cfm and nested pathing
+	variables.items["pathInfo"] = trim(reReplacenocase(variables.items["pathInfo"],"[/\\]index\.cfm",""));
+	// Clean up empty placeholders
+	variables.items["pathInfo"] = replace(variables.items["pathInfo"],"//","/","all");
+	if( len(variables.items["scriptName"]) ){
+		variables.items["pathInfo"] = replaceNocase(variables.items["pathInfo"],variables.items["scriptName"],'');
+	}
+	</cfscript>
+	
 	<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/routes.cfm">
-	<cfset StructAppend(attributes, application.MyOpenbox.Routes.findRoute(Replace(cgi.Path_Info, GetDirectoryFromPath(cgi.Script_Name), "")), false) />
+	<cfset StructAppend(attributes, application.MyOpenbox.Routes.findRoute(items["pathInfo"]), false) />
+	<cfset StructDelete(variables, "Items") />
 </cfif>
 
 <cfscript>
