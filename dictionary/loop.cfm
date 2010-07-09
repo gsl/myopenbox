@@ -34,6 +34,15 @@
 	// i insert the cfloop tag with the Item and Collection attributes
 	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfloop index=""" & arguments.Command.XMLAttributes.index & """ list=""" & arguments.Command.XMLAttributes.list & """ delimiters=""" & LocalVars.Attributes.Delimiters & """>" & NewLine));
 	</cfscript>
+
+<!--- Array loop --->
+<cfelseif StructKeyExists(arguments.Command.XMLAttributes, "index") 
+	AND StructKeyExists(arguments.Command.XMLAttributes, "array")>
+	
+	<cfscript>
+	// i insert the cfloop tag with the Item and Collection attributes
+	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfloop index=""" & arguments.Command.XMLAttributes.index & """ array=""" & arguments.Command.XMLAttributes.array & """>" & NewLine));
+	</cfscript>
 	
 <!--- Structure loop --->
 <cfelseif StructKeyExists(arguments.Command.XMLAttributes, "item") 
