@@ -1,5 +1,4 @@
 <cfsetting enablecfoutputonly="yes">
-
 <!--- 
 /////////////////////////////////// MYOPENBOX LICENSE (BETA) //////////////////////////////////
 // MyOpenbox authored by Tyler Silcox.
@@ -8,20 +7,13 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////
 --->
 
-<cfif StructKeyExists(application, "MyOpenbox") 
-	AND application.MyOpenbox.Version.BuildNumber NEQ '040'>
-	<cfset StructDelete(application, "MyOpenbox")>
-</cfif>
-
-<!--- i create the MyOpenbox object (if necessary) --->
-<cfif NOT StructKeyExists(application, "MyOpenbox")>
-	<cflock name="#Hash(GetCurrentTemplatePath())#_CreateMyOpenbox" timeout="10">
-		<cfif NOT StructKeyExists(application, "MyOpenbox")>
-			<cflock name="#Hash(GetCurrentTemplatePath())#_CreateMyOpenbox_inner" timeout="10">
-				<cfif NOT StructKeyExists(application, "MyOpenbox")>
-					<cfset application.MyOpenbox=CreateObject("component", "myopenbox").Init()>
-				</cfif>
-			</cflock>
+<cfif NOT StructKeyExists(application, "MyOpenbox")
+	OR application.MyOpenbox.IsFWReinit()>
+	<cflock name="myopenbox_create_#hash(getBaseTemplatePath())#" type="exclusive" timeout="5" throwontimeout="true">
+		<cfif NOT StructKeyExists(application, "MyOpenbox")
+			OR application.MyOpenbox.IsFWReinit()>
+			<cfset StructDelete(application, "MyOpenbox")>
+			<cfset application.MyOpenbox=CreateObject("component", "myopenbox").Init()>
 		</cfif>
 	</cflock>
 </cfif>
@@ -32,6 +24,54 @@ application.MyOpenbox.RunMyOpenbox();
 
 // i create the attributes "scope" and determine the value of the target FuseAction
 attributes=application.MyOpenbox.SetAttributes(variables, GetBaseTagList());
+</cfscript>
+
+<!--- i apply application Routes --->
+<cfif StructKeyExists(application.MyOpenbox, "Routes") AND NOT IsDefined("ThisTag")>
+	<cfscript>
+	variables.items = structnew();
+	
+	// Get path_info
+	variables.items["pathInfo"] = cgi.path_info;
+	variables.items["scriptName"] = trim(reReplacenocase(cgi.script_name,"[/\\]index\.cfm",""));
+	
+	// Clean ContextRoots
+	if( len(getContextRoot()) ){
+		variables.items["pathInfo"] = replacenocase(variables.items["pathInfo"],getContextRoot(),"");
+		variables.items["scriptName"] = replacenocase(variables.items["scriptName"],getContextRoot(),"");
+	}	
+	// Clean up the path_info from index.cfm and nested pathing
+	variables.items["pathInfo"] = trim(reReplacenocase(variables.items["pathInfo"],"[/\\]index\.cfm",""));
+	// Clean up empty placeholders
+	variables.items["pathInfo"] = replace(variables.items["pathInfo"],"//","/","all");
+	if( len(variables.items["scriptName"]) ){
+		variables.items["pathInfo"] = replaceNocase(variables.items["pathInfo"],variables.items["scriptName"],'');
+	}
+	</cfscript>
+	
+	<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/routes.cfm">
+	<cfset StructAppend(attributes, application.MyOpenbox.Routes.findRoute(items["pathInfo"]), false) />
+	<cfset StructDelete(variables, "Items") />
+</cfif>
+
+<cfscript>
+if(StructKeyExists(attributes, "Circuit") AND StructKeyExists(attributes, "Fuse")) {
+	attributes[application.MyOpenbox.Parameters.FuseActionVariable]=attributes.Circuit & "." & attributes.Fuse;
+} else if (StructKeyExists(attributes, "Circuit")) {
+	attributes[application.MyOpenbox.Parameters.FuseActionVariable]=attributes.Circuit & "." & "Home";
+} else if(StructKeyExists(attributes, "Fuse")) {
+	attributes[application.MyOpenbox.Parameters.FuseActionVariable]="Home" & "." & attributes.Fuse;
+}
+StructDelete(attributes, "Circuit");
+StructDelete(attributes, "Fuse");
+if(NOT StructKeyExists(attributes, application.MyOpenbox.Parameters.FuseActionVariable)){
+	attributes[application.MyOpenbox.Parameters.FuseActionVariable]=application.MyOpenbox.Parameters.DefaultFuseAction;
+}
+
+try {
+	formUtil = CreateObject('component', 'FormUtilities').init();
+	formUtil.buildFormCollections(attributes);
+} catch (Any e) {}
 </cfscript>
 
 <cfscript>
@@ -46,7 +86,8 @@ application.MyOpenbox.RunFuseAction(attributes[application.MyOpenbox.Parameters.
 </cfif>
 
 <!--- i include the YourOpenbox request file --->
-<cfinclude template="youropenbox.cfm">
+<cfinclude template="udf.youropenbox.cfm">
+<cfinclude template="act.youropenbox.cfm" />
 
 <!--- i include the Init Phase --->
 <cfif StructKeyExists(application.MyOpenbox.Phases, "Init") 
@@ -61,7 +102,12 @@ application.MyOpenbox.RunFuseAction(attributes[application.MyOpenbox.Parameters.
 </cfif>
 
 <!--- i include the TargetFuseAction file --->
-<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/fuseaction.#LCase(attributes[application.MyOpenbox.Parameters.FuseActionVariable])#.cfm">
+<cfif
+	StructKeyExists(application.Myopenbox.Circuits, ListFirst(attributes[application.MyOpenbox.Parameters.FuseActionVariable], "."))
+	AND StructKeyExists(application.Myopenbox.Circuits[ListFirst(attributes[application.MyOpenbox.Parameters.FuseActionVariable], ".")].Fuseactions, ListLast(attributes[application.MyOpenbox.Parameters.FuseActionVariable], "."))
+>
+	<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/fuseaction.#LCase(attributes[application.MyOpenbox.Parameters.FuseActionVariable])#.cfm">
+</cfif>
 
 <!--- i include the PostProcess Phase --->
 <cfif StructKeyExists(application.MyOpenbox.Phases, "PostProcess")>

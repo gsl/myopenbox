@@ -12,7 +12,8 @@
 		<parameter name="Delimiters.MaskedFileExtensions" value="cfm,cfml,js,htm,html" />
 		<parameter name="DefaultFuseAction" value="Home.Home" />
 		<parameter name="DefaultContentVariable" value="YourOpenbox.GeneratedContent" />
-		<parameter name="ForceReparsePassword" value="CreateUUID()" evaluate="true" />
+		<parameter name="FWReparse" value="" />
+		<parameter name="FWReinit" value="" />
 		<parameter name="FuseActionVariable" value="a" />
 		<parameter name="SelfFolder" value="[myopenbox]" />
 		<parameter name="SelfPath" value="[myopenbox]/" />
@@ -26,10 +27,10 @@
 		<parameter name="ParseWithComments" value="true" />
 		<parameter name="PrecedenceFormOrURL" value="form" />
 		<parameter name="StoreXML" value="false" />
-		<parameter name="CorePhases" value="Init,PreProcess,PreGlobalFuseAction,PreFuseAction,PostFuseAction,PostGlobalFuseAction,PostProcess,OnError" />
-		<parameter name="ApplicationPhases" value="Init,PreProcess,PreGlobalFuseAction,PostGlobalFuseAction,PostProcess,OnError" />
-		<parameter name="CircuitPhases" value="PreFuseAction,PostFuseAction" />
-		<parameter name="CircuitRelatedPhases" value="PreGlobalFuseAction,PreFuseAction,PostFuseAction,PostGlobalFuseAction" />
+		<parameter name="CorePhases" value="Init,PreProcess,PreGlobalFuseAction,PreFuseAction,PostFuseAction,PostGlobalFuseAction,PostProcess,OnError,OnMissing" />
+		<parameter name="ApplicationPhases" value="Init,PreProcess,PreGlobalFuseAction,PostGlobalFuseAction,PostProcess" />
+		<parameter name="CircuitPhases" value="PreFuseAction,PostFuseAction,OnError,OnMissing" />
+		<parameter name="CircuitRelatedPhases" value="PreGlobalFuseAction,PreFuseAction,PostFuseAction,PostGlobalFuseAction,OnError,OnMissing" />
 		<parameter name="ReservedCircuitAttributes" value="Access,ConfigFileName,DateLastModified,DirectoryPath,FuseActions,Name,Parent,Phases,RootPath,Settings,Title,UUId" />
 		<parameter name="ReservedDoAttributes" value="Action,Append,Variable,Template" />
 		<parameter name="ReservedFuseActionAttributes" value="Commands,Name,Title,TimeStamp" />
