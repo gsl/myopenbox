@@ -19,8 +19,8 @@
     	<cfscript>
 		// i set the Version information
 		this.Version.Number="0";
-		this.Version.BuildNumber="045";
-		this.Version.BuildDate="2010.01.28";
+		this.Version.BuildNumber="047";
+		this.Version.BuildDate="2010.07.09";
 		this.Configuration=arguments.Configuration;
 		this.Logs=StructNew();
 		this.Logs.Actions=QueryNew("timestamp,action,type,time", "date,varchar,varchar,integer");
@@ -806,6 +806,46 @@
 		
 	</cffunction>
 	
+	<cffunction name="ParseSettingValue" 
+		access="private" 
+		hint="." 
+		output="false" 
+		returntype="struct">
+		
+		<cfargument name="CurrentNode" type="any">
+		
+		<cfscript>
+		var Setting=StructNew();
+		var ThrowError=False;
+		</cfscript>
+				
+		<cfscript>
+		// i clear out the name/value holder Setting
+		Setting=StructNew();
+		// i check for Name
+		if(StructKeyExists(arguments.CurrentNode["XMLAttributes"], "name")){
+			Setting.Name=arguments.CurrentNode["XMLAttributes"]["name"];
+		} else {
+			ThrowError=True;
+		}
+		// i check for a Value
+		if(StructKeyExists(arguments.CurrentNode["XMLAttributes"], "value")){
+			Setting.Value=arguments.CurrentNode["XMLAttributes"]["value"];
+		} else if(Len(arguments.CurrentNode["XMLText"])){
+			Setting.Value=arguments.CurrentNode["XMLText"];
+		} else {
+			ThrowError=True;
+		}
+		// ERROR: i throw an error if necessary
+		if(ThrowError){
+			Throw("MyOpenbox", "Error while processing Settings.", "Please make sure all required attributes are included and valid in each Setting definition in the MyOpenbox configuration file.");
+		}
+		</cfscript>
+		
+		<cfreturn Setting>
+		
+	</cffunction>
+	
 	<cffunction name="CreateSettingsFile" 
 		access="private" 
 		hint="." 
@@ -815,16 +855,18 @@
 		<cfargument name="Type" type="string">
 		<cfargument name="CurrentNode" type="any" default="">
 		<cfargument name="CircuitName" type="string" default="">
+		<cfargument name="FilePath" type="string" default="#GetDirectoryFromPath(GetBaseTemplatePath())#">
 		
 		<cfscript>
 		// i initialize the local vars
 		var GeneratedContent=CreateObject("java", "java.lang.StringBuffer").init();
 		var ContainerVariable="";
 		var FileName="";
+		var Include=StructNew();
 		var Setting=StructNew();
 		var i=0;
+		var ii=0;
 		var NewLine=this.Parameters.Delimiters.NewLine;
-		var ThrowError=False;
 		var TickCount=GetTickCount();
 		</cfscript>
 		
@@ -850,29 +892,25 @@
 						for(i=1; i LTE ArrayLen(arguments.CurrentNode.XMLChildren); i=i + 1){
 							// if this is a Setting command
 							if(arguments.CurrentNode.XMLChildren[i]["XMLName"] EQ "setting"){
-								// i clear out the name/value holder Setting
-								Setting=StructNew();
-								// i check for Name
-								if(StructKeyExists(arguments.CurrentNode.XMLChildren[i]["XMLAttributes"], "name")){
-									Setting.Name=arguments.CurrentNode.XMLChildren[i]["XMLAttributes"]["name"];
+								if(StructKeyExists(arguments.CurrentNode.XMLChildren[i]["XMLAttributes"], "include")){
+									// i read and parse the settings file
+									Include.FileName = arguments.FilePath & arguments.CurrentNode.XMLChildren[i]["XMLAttributes"]["include"] & ".cfm";
+									Include.Raw = Read(Include.FileName);
+									if(Len(Include.Raw)){
+										Include.Parsed = XMLParse(Include.Raw);
+										for(ii=1; ii LTE ArrayLen(Include.Parsed.XmlRoot.XMLChildren); ii=ii + 1){
+											// i parse out the name and value
+											Setting=ParseSettingValue(Include.Parsed.XmlRoot.XMLChildren[ii]);
+											// i add the Setting definition to GeneratedContent
+											GeneratedContent.append(JavaCast("string", Indent(3) & "SetVariable(""" & ContainerVariable & ".Settings." & Setting.Name & """, """ & Setting.Value & """);" & NewLine));
+										}										
+									}
 								} else {
-									ThrowError=True;
+									// i parse out the name and value
+									Setting=ParseSettingValue(arguments.CurrentNode.XMLChildren[i]);
+									// i add the Setting definition to GeneratedContent
+									GeneratedContent.append(JavaCast("string", Indent(3) & "SetVariable(""" & ContainerVariable & ".Settings." & Setting.Name & """, """ & Setting.Value & """);" & NewLine));
 								}
-								// i check for a Value
-								if(StructKeyExists(arguments.CurrentNode.XMLChildren[i]["XMLAttributes"], "value")){
-									Setting.Value=arguments.CurrentNode.XMLChildren[i]["XMLAttributes"]["value"];
-								} else if(Len(arguments.CurrentNode.XMLChildren[i]["XMLText"])){
-									Setting.Value=arguments.CurrentNode.XMLChildren[i]["XMLText"];
-								} else {
-									ThrowError=True;
-								}
-								// ERROR: i throw an error if necessary
-								if(ThrowError){
-									Throw("MyOpenbox", "Error while processing Settings.", "Please make sure all required attributes are included and valid in each Setting definition in the MyOpenbox configuration file.");
-								}
-								
-								// i add the Setting definition to GeneratedContent
-								GeneratedContent.append(JavaCast("string", Indent(3) & "SetVariable(""" & ContainerVariable & ".Settings." & Setting.Name & """, """ & Setting.Value & """);" & NewLine));
 							} else {
 								// ERROR: i throw an error if necessary
 								Throw("MyOpenbox", "Error while processing Settings.", "Please make sure only &lt;setting .../&gt; verbs are used in each Setting definition in the MyOpenbox configuration file.");
