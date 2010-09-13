@@ -64,6 +64,7 @@
 		<verb name="Relocate" />
 		<verb name="SecondaryCall" template="Stage" />
 		<verb name="Set" template="SetVariable" />
+		<verb name="Script" />
 		<verb name="SuperCall" template="Stage" />
 		<verb name="Switch" />
 		<verb name="TargetCall" template="Stage" />
