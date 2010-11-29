@@ -210,3 +210,96 @@
 	</cfscript>
 
 </cffunction>
+
+<cffunction name="_PushToPhaseStack" 
+	hint="." 
+	output="no" 
+	returntype="void">
+	
+	<cfargument name="DoFuseAction" type="struct" default="#StructNew()#">
+	<cfargument name="IsSetSuper" type="boolean" default="false">
+	
+	<cfscript>
+	// i initialize the local vars
+	var i=0;
+	</cfscript>
+	
+	<cfscript>
+	// i insert a new row into the ActionStack
+	ArrayAppend(_YourOpenbox.ActionStack, StructNew());
+	i=ArrayLen(_YourOpenbox.ActionStack);
+	
+	// i include PassThrough variables (if assigned)
+	if(StructKeyExists(arguments.DoFuseAction, "PassThroughs")){
+		_YourOpenbox.ActionStack[i]["PassThroughs"]=arguments.DoFuseAction.PassThroughs;
+	}
+	
+	// i process the YourOpenbox, Circuit, and FuseAction variables
+	if(StructKeyExists(YourOpenbox, "ThisPhase")){
+		_YourOpenbox.ActionStack[i]["ThisPhase"]=YourOpenbox.ThisPhase;
+	}
+	if(StructKeyExists(YourOpenbox, "CallerCircuit")){
+		_YourOpenbox.ActionStack[i]["CallerCircuit"]=YourOpenbox.CallerCircuit;
+		StructDelete(YourOpenbox, "CallerCircuit");
+	}
+	if(StructKeyExists(YourOpenbox, "CallerFuseAction")){
+		_YourOpenbox.ActionStack[i]["CallerFuseAction"]=YourOpenbox.CallerFuseAction;
+		StructDelete(YourOpenbox, "CallerFuseAction");
+	}	
+	if(StructKeyExists(YourOpenbox, "ThisCircuit")){
+		_YourOpenbox.ActionStack[i]["ThisCircuit"]=YourOpenbox.ThisCircuit;
+		_YourOpenbox.Circuits[YourOpenbox.ThisCircuit.Name]["CRVs"]=CRVs;
+		YourOpenbox.CallerCircuit=YourOpenbox.ThisCircuit;
+		StructDelete(YourOpenbox, "ThisCircuit");
+		StructDelete(variables, "CRVs");
+	}	
+	if(StructKeyExists(YourOpenbox, "ThisFuseAction")){
+		_YourOpenbox.ActionStack[i]["ThisFuseAction"]=YourOpenbox.ThisFuseAction;
+	}
+	_YourOpenbox.ActionStack[i]["IsTargetCall"]=YourOpenbox.IsTargetCall;
+	_YourOpenbox.ActionStack[i]["IsSuperCall"]=YourOpenbox.IsSuperCall;
+	YourOpenbox.IsTargetCall=False;
+	</cfscript>
+	
+</cffunction>
+
+<cffunction name="_PopPhaseStack" 
+	hint="." 
+	output="no" 
+	returntype="void">
+	
+	<cfscript>
+	// i initialize the local vars
+	var i=ArrayLen(_YourOpenbox.ActionStack);
+	</cfscript>
+	
+	<cfscript>
+	// i reinstate ThisPhase's, ThisCircuit's and ThisFuseAction's values from the ActionStack
+	if(StructKeyExists(_YourOpenbox.ActionStack[i], "ThisPhase")){
+		YourOpenbox.ThisPhase=_YourOpenbox.ActionStack[i]["ThisPhase"];
+	}
+	if(StructKeyExists(_YourOpenbox.ActionStack[i], "ThisCircuit")){
+		YourOpenbox.ThisCircuit=_YourOpenbox.ActionStack[i]["ThisCircuit"];
+		CRVs=_YourOpenbox.Circuits[YourOpenbox.ThisCircuit.Name]["CRVs"];
+	}
+	if(StructKeyExists(_YourOpenbox.ActionStack[i], "ThisFuseAction")){
+		YourOpenbox.ThisFuseAction=_YourOpenbox.ActionStack[i]["ThisFuseAction"];
+	}
+	if(StructKeyExists(_YourOpenbox.ActionStack[i], "CallerCircuit")){
+		YourOpenbox.CallerCircuit=_YourOpenbox.ActionStack[i]["CallerCircuit"];
+	} else if(StructKeyExists(YourOpenbox, "CallerCircuit")){
+		StructDelete(YourOpenbox, "CallerCircuit");
+	}
+	if(StructKeyExists(_YourOpenbox.ActionStack[i], "CallerFuseAction")){
+		YourOpenbox.CallerFuseAction=_YourOpenbox.ActionStack[i]["CallerFuseAction"];
+	} else if(StructKeyExists(YourOpenbox, "CallerFuseAction")){
+		StructDelete(YourOpenbox, "CallerFuseAction");
+	}
+	YourOpenbox.IsTargetCall=_YourOpenbox.ActionStack[i]["IsTargetCall"];
+	YourOpenbox.IsSuperCall=_YourOpenbox.ActionStack[i]["IsSuperCall"];
+	
+	// i remove the instance from the ActionStack
+	ArrayDeleteAt(_YourOpenbox.ActionStack, i);
+	</cfscript>
+	
+</cffunction>

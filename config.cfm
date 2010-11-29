@@ -75,6 +75,10 @@
 		
 		<verb name="Try" />
 		<verb name="Catch" />
+		
+		<verb name="Continue" />
+		<verb name="AndThen" template="PhaseConditional" />
+		<verb name="NoAndThen" template="PhaseConditional" />
 	</verbs>
 	
 </myopenbox>

@@ -1121,9 +1121,9 @@
 					IsCircuitRelated=False;
 				}
 				
-				// i insert the PushToActionStack function
+				// i insert the PushToPhaseStack function
 				GeneratedContent.append(JavaCast("string", "<!--- i process the YourOpenbox, Circuit, and FuseAction variables --->" & NewLine));
-				GeneratedContent.append(JavaCast("string", "<" & "cfset _PushToActionStack()>" & NewLine));
+				GeneratedContent.append(JavaCast("string", "<" & "cfset _PushToPhaseStack()>" & NewLine));
 				GeneratedContent.append(JavaCast("string", NewLine));
 				
 				// if this is a Circuit related Circuit Phase
@@ -1157,12 +1157,11 @@
 					GeneratedContent.append(JavaCast("string", NewLine));
 				}
 					
-				// i insert the PopActionStack function
+				// i insert the PopPhaseStack function
 				GeneratedContent.append(JavaCast("string", "<!--- i reinstate ThisPhase's, ThisCircuit's and ThisFuseAction's values from the ActionStack --->" & NewLine));
-				GeneratedContent.append(JavaCast("string", "<" & "cfset _PopActionStack()>" & NewLine));
+				GeneratedContent.append(JavaCast("string", "<" & "cfset _PopPhaseStack()>" & NewLine));
 				GeneratedContent.append(JavaCast("string", NewLine));
 			}
-			GeneratedContent.append(JavaCast("string", "<" & "cfset StructDelete(YourOpenbox, ""ThisPhase"")>" & NewLine));
 			
 			// i write the GeneratedContent to a file
 			Write("phase." & arguments.PhaseName, GeneratedContent.ToString());
