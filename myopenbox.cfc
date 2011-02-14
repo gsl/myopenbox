@@ -1297,13 +1297,13 @@
 		<cfscript>		
 		// i check the QualifiedFuseAction to make sure it is valid
 		if(ListLen(arguments.QualifiedFuseAction, ".") NEQ 2){
-			Throw("MyOpenbox", "The FuseAction supplied is invalid.", "Please check the value of FuseAction to make sure it exists and/or is a valid fully qualified FuseAction.", "FuseAction = #arguments.QualifiedFuseAction#");
+			Throw("MyOpenbox", "The FuseAction supplied is invalid.", "Please check the value of FuseAction (#arguments.QualifiedFuseAction#) to make sure it exists and/or is a valid fully qualified FuseAction.", "FuseAction = #arguments.QualifiedFuseAction#");
 		// i check the CircuitValue
 		} else if(NOT StructKeyExists(this.Circuits, CircuitValue)){
-			Throw("MyOpenbox", "The Circuit requested is invalid.", "Please check the value of Circuit to make sure it exists and/or is valid.", "FuseAction = #arguments.QualifiedFuseAction#");
+			Throw("MyOpenbox", "The Circuit requested is invalid.", "Please check the value of Circuit (#CircuitValue#) to make sure it exists and/or is valid.", "FuseAction = #arguments.QualifiedFuseAction#");
 		// i check the FuseActionValue
 		} else if(NOT StructKeyExists(this.Circuits[CircuitValue]["FuseActions"], FuseActionValue)){
-			Throw("MyOpenbox", "The FuseAction requested is invalid.", "Please check the value of FuseAction (#arguments.QualifiedFuseAction#) to make sure it exists and/or is valid.");
+			Throw("MyOpenbox", "The FuseAction requested is invalid.", "Please check the value of FuseAction (#CircuitValue#.#FuseActionValue#) to make sure it exists and/or is valid.");
 		} 
 		// i check the Access of the arguments.QualifiedFuseAction
 		/* else if(this.Circuits[CircuitValue]["FuseActions"][FuseActionValue]["Access"] NEQ "Public"){
