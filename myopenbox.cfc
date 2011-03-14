@@ -19,8 +19,8 @@
     	<cfscript>
 		// i set the Version information
 		this.Version.Number="0";
-		this.Version.BuildNumber="048";
-		this.Version.BuildDate="2010.09.17";
+		this.Version.BuildNumber="049";
+		this.Version.BuildDate="2011.02.14";
 		this.Configuration=arguments.Configuration;
 		this.Logs=StructNew();
 		this.Logs.Actions=QueryNew("timestamp,action,type,time", "date,varchar,varchar,integer");
@@ -1121,9 +1121,9 @@
 					IsCircuitRelated=False;
 				}
 				
-				// i insert the PushToActionStack function
+				// i insert the PushToPhaseStack function
 				GeneratedContent.append(JavaCast("string", "<!--- i process the YourOpenbox, Circuit, and FuseAction variables --->" & NewLine));
-				GeneratedContent.append(JavaCast("string", "<" & "cfset _PushToActionStack()>" & NewLine));
+				GeneratedContent.append(JavaCast("string", "<" & "cfset _PushToPhaseStack()>" & NewLine));
 				GeneratedContent.append(JavaCast("string", NewLine));
 				
 				// if this is a Circuit related Circuit Phase
@@ -1157,12 +1157,11 @@
 					GeneratedContent.append(JavaCast("string", NewLine));
 				}
 					
-				// i insert the PopActionStack function
+				// i insert the PopPhaseStack function
 				GeneratedContent.append(JavaCast("string", "<!--- i reinstate ThisPhase's, ThisCircuit's and ThisFuseAction's values from the ActionStack --->" & NewLine));
-				GeneratedContent.append(JavaCast("string", "<" & "cfset _PopActionStack()>" & NewLine));
+				GeneratedContent.append(JavaCast("string", "<" & "cfset _PopPhaseStack()>" & NewLine));
 				GeneratedContent.append(JavaCast("string", NewLine));
 			}
-			GeneratedContent.append(JavaCast("string", "<" & "cfset StructDelete(YourOpenbox, ""ThisPhase"")>" & NewLine));
 			
 			// i write the GeneratedContent to a file
 			Write("phase." & arguments.PhaseName, GeneratedContent.ToString());
@@ -1298,13 +1297,13 @@
 		<cfscript>		
 		// i check the QualifiedFuseAction to make sure it is valid
 		if(ListLen(arguments.QualifiedFuseAction, ".") NEQ 2){
-			Throw("MyOpenbox", "The FuseAction supplied is invalid.", "Please check the value of FuseAction to make sure it exists and/or is a valid fully qualified FuseAction.", "FuseAction = #arguments.QualifiedFuseAction#");
+			Throw("MyOpenbox", "The FuseAction supplied is invalid.", "Please check the value of FuseAction (#arguments.QualifiedFuseAction#) to make sure it exists and/or is a valid fully qualified FuseAction.", "FuseAction = #arguments.QualifiedFuseAction#");
 		// i check the CircuitValue
 		} else if(NOT StructKeyExists(this.Circuits, CircuitValue)){
-			Throw("MyOpenbox", "The Circuit requested is invalid.", "Please check the value of Circuit to make sure it exists and/or is valid.", "FuseAction = #arguments.QualifiedFuseAction#");
+			Throw("MyOpenbox", "The Circuit requested is invalid.", "Please check the value of Circuit (#CircuitValue#) to make sure it exists and/or is valid.", "FuseAction = #arguments.QualifiedFuseAction#");
 		// i check the FuseActionValue
 		} else if(NOT StructKeyExists(this.Circuits[CircuitValue]["FuseActions"], FuseActionValue)){
-			Throw("MyOpenbox", "The FuseAction requested is invalid.", "Please check the value of FuseAction (#arguments.QualifiedFuseAction#) to make sure it exists and/or is valid.");
+			Throw("MyOpenbox", "The FuseAction requested is invalid.", "Please check the value of FuseAction (#CircuitValue#.#FuseActionValue#) to make sure it exists and/or is valid.");
 		} 
 		// i check the Access of the arguments.QualifiedFuseAction
 		/* else if(this.Circuits[CircuitValue]["FuseActions"][FuseActionValue]["Access"] NEQ "Public"){
