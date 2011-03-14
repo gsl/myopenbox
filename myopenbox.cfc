@@ -1470,6 +1470,12 @@
 			GeneratedContent.append(JavaCast("string", "<!--- End PHASE:PostFuseAction/PostGlobalFuseAction --->" & NewLine));
 			GeneratedContent.append(JavaCast("string", NewLine));
 			
+			// i check for a value from a thrown exception and rethrow it, since cf8 doesn't have cffinally
+			GeneratedContent.append(JavaCast("string", "<" & "cfif NOT StructIsEmpty(_YourOpenbox.cfcatch)>" & NewLine));
+			GeneratedContent.append(JavaCast("string", Indent() & "<" & "cfthrow object=""##_YourOpenbox.cfcatch##"" />" & NewLine));
+			GeneratedContent.append(JavaCast("string", "<" & "/cfif>" & NewLine));
+			GeneratedContent.append(JavaCast("string", NewLine));
+			
 			GeneratedContent.append(JavaCast("string", "<" & "cfscript>" & NewLine));
 			GeneratedContent.append(JavaCast("string", "// i store and destroy the Circuit and FuseAction variables" & NewLine));
 			GeneratedContent.append(JavaCast("string", "_YourOpenbox.Circuits." & arguments.Circuit.Name & ".CRVs=variables.CRVs;" & NewLine));
@@ -1480,14 +1486,6 @@
 			GeneratedContent.append(JavaCast("string", "StructDelete(YourOpenbox, ""ThisCircuit"");" & NewLine));
 			GeneratedContent.append(JavaCast("string", "StructDelete(YourOpenbox, ""ThisFuseAction"");" & NewLine));
 			GeneratedContent.append(JavaCast("string", "<" & "/cfscript>" & NewLine));
-			
-			GeneratedContent.append(JavaCast("string", NewLine));
-			
-			// i check for a value from a thrown exception and rethrow it, since cf8 doesn't have cffinally
-			GeneratedContent.append(JavaCast("string", "<" & "cfif NOT StructIsEmpty(_YourOpenbox.cfcatch)>" & NewLine));
-			GeneratedContent.append(JavaCast("string", Indent() & "<" & "cfthrow object=""##_YourOpenbox.cfcatch##"" />" & NewLine));
-			GeneratedContent.append(JavaCast("string", "<" & "/cfif>" & NewLine));
-			
 			
 			// i write the GeneratedContent to a file
 			Write("fuseaction." & arguments.Circuit.Name & "." & arguments.FuseAction.Name, GeneratedContent.ToString());

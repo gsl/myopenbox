@@ -13,6 +13,10 @@
 	var i=0;
 	</cfscript>
 	
+	<cfif NOT StructIsEmpty(_YourOpenbox.cfcatch)>
+		<cfthrow object="#_YourOpenbox.cfcatch#" />
+	</cfif>
+	
 	<cfscript>
 	// i insert a new row into the ActionStack
 	ArrayAppend(_YourOpenbox.ActionStack, StructNew());
@@ -67,6 +71,10 @@
 	// i initialize the local vars
 	var i=ArrayLen(_YourOpenbox.ActionStack);
 	</cfscript>
+	
+	<cfif NOT StructIsEmpty(_YourOpenbox.cfcatch)>
+		<cfthrow object="#_YourOpenbox.cfcatch#" />
+	</cfif>
 	
 	<cfscript>
 	// i reinstate ThisPhase's, ThisCircuit's and ThisFuseAction's values from the ActionStack
