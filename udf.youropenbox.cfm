@@ -13,7 +13,7 @@
 	var i=0;
 	</cfscript>
 	
-	<cfif NOT StructIsEmpty(_YourOpenbox.cfcatch)>
+	<cfif StructKeyExists(_YourOpenbox, "cfcatch") AND NOT StructIsEmpty(_YourOpenbox.cfcatch)>
 		<cfthrow object="#_YourOpenbox.cfcatch#" />
 	</cfif>
 	
@@ -72,7 +72,7 @@
 	var i=ArrayLen(_YourOpenbox.ActionStack);
 	</cfscript>
 	
-	<cfif NOT StructIsEmpty(_YourOpenbox.cfcatch)>
+	<cfif StructKeyExists(_YourOpenbox, "cfcatch") AND NOT StructIsEmpty(_YourOpenbox.cfcatch)>
 		<cfthrow object="#_YourOpenbox.cfcatch#" />
 	</cfif>
 	
