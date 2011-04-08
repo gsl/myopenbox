@@ -45,7 +45,7 @@ attributes=application.MyOpenbox.SetAttributes(variables, GetBaseTagList());
 	// Clean up empty placeholders
 	variables.items["pathInfo"] = replace(variables.items["pathInfo"],"//","/","all");
 	if( len(variables.items["scriptName"]) ){
-		variables.items["pathInfo"] = replaceNocase(variables.items["pathInfo"],variables.items["scriptName"],'');
+		variables.items["pathInfo"] = replaceNocase(variables.items["pathInfo"],variables.items["scriptName"] & "/",'');
 	}
 	</cfscript>
 	
