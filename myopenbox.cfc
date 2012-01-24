@@ -962,10 +962,13 @@
 		var FileName="";
 		var Route=StructNew();
 		var i=0;
+		var j=0;
 		var NewLine=this.Parameters.Delimiters.NewLine;
 		var ThrowError=False;
 		var TickCount=GetTickCount();
 		var Setting=StructNew();
+		var att="";
+		var v="";
 		</cfscript>
 		
 		<cfif this.Parameters.ProcessingMode NEQ "Deployment">
@@ -993,6 +996,7 @@
 							if(arguments.CurrentNode.XMLChildren[i]["XMLName"] EQ "route"){
 								// i clear out the name/value holder Setting
 								Setting=StructNew();
+								Setting.Vars=ArrayNew(1);
 								// i check for Pattern
 								if(StructKeyExists(arguments.CurrentNode.XMLChildren[i]["XMLAttributes"], "pattern")){
 									Setting.Pattern=arguments.CurrentNode.XMLChildren[i]["XMLAttributes"]["pattern"];
@@ -1012,6 +1016,21 @@
 									ThrowError=True;
 									Throw("MyOpenbox", "Error while processing Routes.", "Fuse with no circuit");
 								}
+								// set the vars for a route based on any attributes not already known
+								for(att in arguments.CurrentNode.XMLChildren[i]["XMLAttributes"]) {
+									if(NOT ListFindNoCase("circuit,fuse,pattern", att)) {
+										v=StructNew();
+										if(ListLen(att, ".") GT 1) {
+											v.scope=Left(att, Len(att)-Len(ListLast(att, "."))-1);
+											v.name=ListLast(att, ".");
+										} else {
+											v.scope="";
+											v.name=att;
+										}
+										v.value=arguments.CurrentNode.XMLChildren[i]["XMLAttributes"][att];
+										ArrayAppend(Setting.Vars, v);
+									}
+								}
 								
 								// ERROR: i throw an error if necessary
 								if(ThrowError){
@@ -1024,6 +1043,21 @@
 									GeneratedContent.append(JavaCast("string", ",""" & Setting.Circuit & """"));
 								if(StructKeyExists(Setting, "Fuse"))
 									GeneratedContent.append(JavaCast("string", ",""" & Setting.Fuse & """"));
+								if(ArrayLen(Setting.Vars) GT 0) {
+									GeneratedContent.append(JavaCast("string", ", "));
+									GeneratedContent.append(JavaCast("string", "["));
+									for(j=1; j LTE ArrayLen(Setting.Vars); j=j + 1) {
+										if(j NEQ 1) {
+											GeneratedContent.append(JavaCast("string", ", "));
+										}
+										GeneratedContent.append(JavaCast("string", "{"));
+										GeneratedContent.append(JavaCast("string", "Name=""" & Setting.Vars[j].Name & """"));
+										GeneratedContent.append(JavaCast("string", ",Scope=""" & Setting.Vars[j].Scope & """"));
+										GeneratedContent.append(JavaCast("string", ",Value=""" & Setting.Vars[j].Value & """"));
+										GeneratedContent.append(JavaCast("string", "}"));
+									}
+									GeneratedContent.append(JavaCast("string", "]"));
+								}
 								GeneratedContent.append(JavaCast("string", ");" & NewLine));
 							} else {
 								// ERROR: i throw an error if necessary
@@ -1036,6 +1070,12 @@
 			GeneratedContent.append(JavaCast("string", Indent() & "<" & "/cflock>" & NewLine));
 		GeneratedContent.append(JavaCast("string", "<" & "/cfif>" & NewLine));
 		GeneratedContent.append(JavaCast("string", "<" & "/cfsilent>" & NewLine));
+		
+/*
+		GeneratedContent.append(JavaCast("string", "<" & "cfdump var=""##application.MyOpenbox.Routes.GetRoutes()##"" label=""##GetCurrentTemplatePath()##"" />" & NewLine));
+		GeneratedContent.append(JavaCast("string", "<" & "cfabort />" & NewLine));
+*/
+		
 				
 		// i set GeneratedContent to a string value so i can clean out any internal references
 		GeneratedContent=GeneratedContent.ToString();

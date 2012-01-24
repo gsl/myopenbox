@@ -44,6 +44,7 @@ Modified for MyOpenbox framework 1/11/2010
 		<cfargument name="pattern" 				 type="string" 	required="true"  hint="The pattern to match against the URL." />
 		<cfargument name="circuit" 				 type="string" 	required="false" hint="The handler to execute if pattern matched.">
 		<cfargument name="fuse"  				 type="any" 	required="false" hint="The action in a handler to execute if a pattern is matched.  This can also be a structure or JSON structured based on the HTTP method(GET,POST,PUT,DELETE). ex: {GET:'show', PUT:'update', DELETE:'delete', POST:'save'}">
+		<cfargument name="vars" type="array" default="#ArrayNew(1)#" required="false" />
 		<!--- ************************************************************* --->
 		<cfscript>
 		var thisRoute = structNew();
@@ -149,6 +150,8 @@ Modified for MyOpenbox framework 1/11/2010
 			thisRoute.regexPattern = thisRoute.regexPattern & thisRegex & "/";
 			
 		} // end looping of pattern optionals
+		
+		thisRoute.vars=arguments.vars;
 		
 		// Finally add it to the routing table
 		ArrayAppend(getRoutes(), thisRoute);

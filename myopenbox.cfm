@@ -50,8 +50,20 @@ attributes=application.MyOpenbox.SetAttributes(variables, GetBaseTagList());
 	</cfscript>
 	
 	<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/routes.cfm">
-	<cfset StructAppend(attributes, application.MyOpenbox.Routes.findRoute(items["pathInfo"]), false) />
+	<cfset variables._FoundRoute=application.MyOpenbox.Routes.findRoute(items["pathInfo"]) />
+	<cfset StructAppend(attributes, variables._FoundRoute, false) />
+	<cfif StructKeyExists(variables._FoundRoute, "Vars")>
+		<cfloop from="1" to="#ArrayLen(variables._FoundRoute.Vars)#" step="1" index="_i">
+			<cfif Len(variables._FoundRoute.Vars[_i].Scope) GT 0>
+				<cfset setVariable(variables._FoundRoute.Vars[_i].Scope & "." & variables._FoundRoute.Vars[_i].Name, variables._FoundRoute.Vars[_i].Value) />
+			<cfelse>
+				<cfset setVariable("attributes." & variables._FoundRoute.Vars[_i].Name, variables._FoundRoute.Vars[_i].Value) />
+			</cfif>
+		</cfloop>
+	</cfif>
 	<cfset StructDelete(variables, "Items") />
+	<cfset StructDelete(variables, "_FoundRoute") />
+	<cfset StructDelete(variables, "_i") />
 </cfif>
 
 <cfscript>
