@@ -61,15 +61,17 @@ Modified for MyOpenbox framework 1/11/2010
 		}
 		
 		// Add trailing / to make it easier to parse
-		if( right(thisRoute.pattern,1) IS NOT "/" ){
-			thisRoute.pattern = thisRoute.pattern & "/";
+		if( left(thisRoute.pattern,1) IS NOT "/" ){
+			thisRoute.pattern = "/" & thisRoute.pattern;
 		}		
 		// Cleanup initial /
-		if( left(thisRoute.pattern,1) IS "/" ){
+		if( Len(thisRoute.pattern) GT 1 AND right(thisRoute.pattern,1) IS "/" ){
+/*
 			if( thisRoute.pattern eq "/" ){ 
 				$throw(message="Pattern is empty, please verify the pattern is valid. Route: #thisRoute.toString()#",type="SES.InvalidRoute");
 			}
-			thisRoute.pattern = right(thisRoute.pattern,len(thisRoute.pattern)-1);
+*/
+			thisRoute.pattern = left(thisRoute.pattern,len(thisRoute.pattern)-1);
 		}
 		
 		// Check if we have optional args by looking for a ?
@@ -98,14 +100,14 @@ Modified for MyOpenbox framework 1/11/2010
 				// ALPHANUMERICAL OPTIONAL
 				case "alphanumeric" : {
 					if( find(":",thisPattern) ){
-						thisRegex = "(" & REReplace(thisPattern,":(.[^-]*)","[^/]");
+						thisRegex = "(" & REReplace(thisPattern,":(.[^-]*)",".");
 						// Check Digits Repetions
 						if( find("{",thisPattern) ){
 							thisRegex = listFirst(thisRegex,"{") & "{#listLast(thisPattern,"{")#)";
 							arrayAppend(thisRoute.patternParams,replace(listFirst(thisPattern,"{"),":",""));
 						}
 						else{
-							thisRegex = thisRegex & "+?)";
+							thisRegex = thisRegex & "+)";
 							arrayAppend(thisRoute.patternParams,thisPatternParam);
 						}
 					}
@@ -123,7 +125,7 @@ Modified for MyOpenbox framework 1/11/2010
 						thisRegex = listFirst(thisRegex,"{") & "{#listLast(thisPattern,"{")#)";
 					}
 					else{
-						thisRegex = thisRegex & "+?)";
+						thisRegex = thisRegex & "+)";
 					}
 					// Add Route Param
 					arrayAppend(thisRoute.patternParams,thisPatternParam);
@@ -138,7 +140,7 @@ Modified for MyOpenbox framework 1/11/2010
 						thisRegex = listFirst(thisRegex,"{") & "{#listLast(thisPattern,"{")#)";
 					}
 					else{
-						thisRegex = thisRegex & "+?)";
+						thisRegex = thisRegex & "+)";
 					}
 					// Add Route Param
 					arrayAppend(thisRoute.patternParams,thisPatternParam);
@@ -147,7 +149,7 @@ Modified for MyOpenbox framework 1/11/2010
 			} //end pattern type detection switch
 			
 			// Add Regex Created To Pattern
-			thisRoute.regexPattern = thisRoute.regexPattern & thisRegex & "/";
+			thisRoute.regexPattern = thisRoute.regexPattern & "/" & thisRegex;
 			
 		} // end looping of pattern optionals
 		
@@ -227,12 +229,12 @@ Modified for MyOpenbox framework 1/11/2010
 			// fix URL vars after ?
 			//requestString = fixIISURLVars(requestString,rc);
 			//Remove the leading slash
-			if( len(requestString) GT 1 AND left(requestString,1) eq "/" ){
-				requestString = right(requestString,len(requestString)-1);
+			if( len(requestString) GT 1 AND right(requestString,1) eq "/" ){
+				requestString = left(requestString,len(requestString)-1);
 			}
 			// Add ending slash
-			if( right(requestString,1) IS NOT "/" ){
-				requestString = requestString & "/";
+			if( left(requestString,1) IS NOT "/" ){
+				requestString = "/" & requestString;
 			}
 			
 			// Let's Find a Route, Loop over all the routes array
