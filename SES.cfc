@@ -237,10 +237,12 @@ Modified for MyOpenbox framework 1/11/2010
 				requestString = "/" & requestString;
 			}
 			
+			params.requestString=requestString;
+			
 			// Let's Find a Route, Loop over all the routes array
 			for(i=1; i lte _routesLength; i=i+1){
 				// Match The route to request String
-				match = reFindNoCase(_routes[i].regexPattern,requestString,1,true);
+				match = reFindNoCase("^" & _routes[i].regexPattern & "$",requestString,1,true);
 				//writedump(match);
 				if( match.len[1] IS NOT 0 AND match.pos[1] EQ 1 ){
 					// Setup the found Route
