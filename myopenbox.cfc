@@ -1038,25 +1038,23 @@
 								}
 								
 								// i add the Setting definition to GeneratedContent
+								if(ArrayLen(Setting.Vars) GT 0) {
+									GeneratedContent.append(JavaCast("string", "_vars=ArrayNew(1);" & NewLine));
+									for(j=1; j LTE ArrayLen(Setting.Vars); j=j + 1) {
+										GeneratedContent.append(JavaCast("string", "_var=StructNew();" & NewLine));
+										GeneratedContent.append(JavaCast("string", "_var.Name=""" & Setting.Vars[j].Name & """;" & NewLine));
+										GeneratedContent.append(JavaCast("string", "_var.Scope=""" & Setting.Vars[j].Scope & """;" & NewLine));
+										GeneratedContent.append(JavaCast("string", "_var.Value=""" & Setting.Vars[j].Value & """;" & NewLine));
+										GeneratedContent.append(JavaCast("string", "ArrayAppend(_vars, _var);" & NewLine));
+									}
+								}
 								GeneratedContent.append(JavaCast("string", Indent(3) & ContainerVariable & ".Routes.addRoute(""" & Setting.Pattern) & """");
 								if(StructKeyExists(Setting, "Circuit"))
 									GeneratedContent.append(JavaCast("string", ",""" & Setting.Circuit & """"));
 								if(StructKeyExists(Setting, "Fuse"))
 									GeneratedContent.append(JavaCast("string", ",""" & Setting.Fuse & """"));
 								if(ArrayLen(Setting.Vars) GT 0) {
-									GeneratedContent.append(JavaCast("string", ", "));
-									GeneratedContent.append(JavaCast("string", "["));
-									for(j=1; j LTE ArrayLen(Setting.Vars); j=j + 1) {
-										if(j NEQ 1) {
-											GeneratedContent.append(JavaCast("string", ", "));
-										}
-										GeneratedContent.append(JavaCast("string", "{"));
-										GeneratedContent.append(JavaCast("string", "Name=""" & Setting.Vars[j].Name & """"));
-										GeneratedContent.append(JavaCast("string", ",Scope=""" & Setting.Vars[j].Scope & """"));
-										GeneratedContent.append(JavaCast("string", ",Value=""" & Setting.Vars[j].Value & """"));
-										GeneratedContent.append(JavaCast("string", "}"));
-									}
-									GeneratedContent.append(JavaCast("string", "]"));
+									GeneratedContent.append(JavaCast("string", ", _vars"));
 								}
 								GeneratedContent.append(JavaCast("string", ");" & NewLine));
 							} else {
