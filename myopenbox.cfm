@@ -8,9 +8,11 @@
 --->
 
 <cfif NOT StructKeyExists(application, "MyOpenbox")
+	OR NOT StructKeyExists(application.MyOpenbox, "IsFWReinit")
 	OR application.MyOpenbox.IsFWReinit()>
 	<cflock name="myopenbox_create_#hash(getBaseTemplatePath())#" type="exclusive" timeout="5" throwontimeout="true">
 		<cfif NOT StructKeyExists(application, "MyOpenbox")
+			OR NOT StructKeyExists(application.MyOpenbox, "IsFWReinit")
 			OR application.MyOpenbox.IsFWReinit()>
 			<cfset StructDelete(application, "MyOpenbox")>
 			<cfset application.MyOpenbox=CreateObject("component", "myopenbox").Init()>
