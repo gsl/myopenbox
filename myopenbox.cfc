@@ -106,6 +106,9 @@
 					this.ApplicationConfigurationFile.HashKey=HashKey;
 					this.LogAction("MOBX Parsed", "FW");
 					</cfscript>
+					<cfif this.Parameters.ProcessingMode EQ "Deployment" AND (this.IsFWReparse() OR this.IsFWReinit())>
+						<cfset CreateAllCircuitAndFuseactionFiles() />
+					</cfif>
 					
 					</cflock>
 				</cfif>
@@ -782,6 +785,23 @@
 	
 	</cffunction>
 	
+	<cffunction name="CreateAllCircuitAndFuseactionFiles"
+		access="private"
+		output="false"
+		returnType="void">
+		<cfscript>
+		var CircuitValue="";
+		var FuseValue="";
+		</cfscript>
+		
+		<cfloop collection="#this.Circuits#" item="CircuitValue">
+			<cfset CreateCircuitFiles(this.Circuits[CircuitValue]) />
+			<cfloop collection="#this.Circuits[CircuitValue]["Fuseactions"]#" item="FuseValue">
+				<cfset CreateFuseActionFile(this.Circuits[CircuitValue], this.Circuits[CircuitValue]["Fuseactions"][FuseValue]) />
+			</cfloop>
+		</cfloop>
+	</cffunction>
+	
 	<cffunction name="CreateCircuitFiles" 
 		access="private" 
 		hint="." 
@@ -870,7 +890,7 @@
 		var TickCount=GetTickCount();
 		</cfscript>
 		
-		<cfif this.Parameters.ProcessingMode NEQ "Deployment">
+		<cfif this.Parameters.ProcessingMode NEQ "Deployment" OR (this.IsFWreparse() OR this.IsFWReinit())>
 		
 		<cfscript>
 		if(arguments.Type EQ "MyOpenbox"){
@@ -971,7 +991,7 @@
 		var v="";
 		</cfscript>
 		
-		<cfif this.Parameters.ProcessingMode NEQ "Deployment">
+		<cfif this.Parameters.ProcessingMode NEQ "Deployment" OR (this.IsFWreparse() OR this.IsFWReinit())>
 		
 		<cfscript>
 		if(arguments.Type EQ "MyOpenbox"){
@@ -1141,7 +1161,7 @@
 		</cfscript>
 		
 		<cfscript>
-		if(this.Parameters.ProcessingMode NEQ "Deployment"){
+		if(this.Parameters.ProcessingMode NEQ "Deployment" OR (this.IsFWreparse() OR this.IsFWReinit())){
 			GeneratedContent.append(JavaCast("string", "<" & "cfset YourOpenbox.ThisPhase.Name=""" & arguments.PhaseName & """>" & NewLine));
 			GeneratedContent.append(JavaCast("string", NewLine));
 			
@@ -1235,7 +1255,7 @@
 		var temp="";
 		</cfscript>
 		
-		<cfif this.Parameters.ProcessingMode NEQ "Deployment">
+		<cfif this.Parameters.ProcessingMode NEQ "Deployment" OR (this.IsFWreparse() OR this.IsFWReinit())>
 		
 			<cfloop item="Phase" collection="#arguments.Circuit.Phases#">
 			
@@ -1332,6 +1352,8 @@
 		FuseActionValue=ListLast(arguments.QualifiedFuseAction, ".");
 		</cfscript>
 		
+		<cfif this.Parameters.ProcessingMode NEQ "Deployment">
+		
 		<cfscript>		
 		// i check the QualifiedFuseAction to make sure it is valid
 		if(ListLen(arguments.QualifiedFuseAction, ".") NEQ 2){
@@ -1375,6 +1397,8 @@
 				</cfscript>
 			</cflock>
 		</cfif>
+		
+		</cfif>
 	
 	</cffunction>
 	
@@ -1408,136 +1432,132 @@
 		var temp="";
 		</cfscript>
 		
-		<cfif this.Parameters.ProcessingMode NEQ "Deployment">
+		<cfscript>
+		// i insert the Settings file if Settings exists
+		if(StructKeyExists(arguments.Circuit, "Settings")){
+			GeneratedContent.append(JavaCast("string", "<!--- i include this Circuit's Settings file --->" & NewLine));
+			GeneratedContent.append(JavaCast("string", "<" & "cfinclude template=""settings." & LCase(arguments.Circuit.Name) & ".cfm"">" & NewLine));
+			GeneratedContent.append(JavaCast("string", NewLine));
+		}
 		
-			<cfscript>
-			// i insert the Settings file if Settings exists
-			if(StructKeyExists(arguments.Circuit, "Settings")){
-				GeneratedContent.append(JavaCast("string", "<!--- i include this Circuit's Settings file --->" & NewLine));
-				GeneratedContent.append(JavaCast("string", "<" & "cfinclude template=""settings." & LCase(arguments.Circuit.Name) & ".cfm"">" & NewLine));
-				GeneratedContent.append(JavaCast("string", NewLine));
-			}
-			
-			GeneratedContent.append(JavaCast("string", "<" & "cfscript>" & NewLine));
-			GeneratedContent.append(JavaCast("string", "// i set this FuseAction's properties" & NewLine));
-			GeneratedContent.append(JavaCast("string", "YourOpenbox.ThisCircuit=application.MyOpenbox.GetCircuit(""" & arguments.Circuit.Name & """);" & NewLine));
-			GeneratedContent.append(JavaCast("string", "YourOpenbox.ThisFuseAction=application.MyOpenbox.GetFuseAction(""" & arguments.Circuit.Name & "." & arguments.FuseAction.Name & """);" & NewLine));
-			GeneratedContent.append(JavaCast("string", "YourOpenbox.ThisFuseAction.UUId=Insert(""-"", CreateUUID(), 23);" & NewLine));
-			GeneratedContent.append(JavaCast("string", "YourOpenbox.IsSuperCall=False;" & NewLine));
-			GeneratedContent.append(JavaCast("string", "// i set the Circuit and FuseAction variables" & NewLine));
-			
-			// added/changed on 12/1/08 - all Circuits will now get Keys in _YourOpenbox.Circuits
-			GeneratedContent.append(JavaCast("string", "if(NOT StructKeyExists(_YourOpenbox.Circuits, """ & arguments.Circuit.Name & """) OR NOT StructKeyExists(_YourOpenbox.Circuits." & arguments.Circuit.Name & ", ""CRVs"")){" & NewLine));
-				GeneratedContent.append(JavaCast("string", Indent() & "_YourOpenbox.Circuits[""" & arguments.Circuit.Name & """][""CRVs""]=StructNew();" & NewLine));
-			GeneratedContent.append(JavaCast("string", "}" & NewLine));
-			GeneratedContent.append(JavaCast("string", "variables.CRVs=_YourOpenbox.Circuits." & arguments.Circuit.Name & ".CRVs;" & NewLine));
-			
-			// GeneratedContent.append(JavaCast("string", "if(StructKeyExists(_YourOpenbox.Circuits, """ & arguments.Circuit.Name & """) AND StructKeyExists(_YourOpenbox.Circuits." & arguments.Circuit.Name & ", ""CRVs"")){" & NewLine));
-			// 	GeneratedContent.append(JavaCast("string", Indent() & "variables.CRVs=_YourOpenbox.Circuits." & arguments.Circuit.Name & ".CRVs;" & NewLine));
-			// GeneratedContent.append(JavaCast("string", "} else {" & NewLine));
-			// 	GeneratedContent.append(JavaCast("string", Indent() & "variables.CRVs=StructNew();" & NewLine));
-			// GeneratedContent.append(JavaCast("string", "}" & NewLine));
-			GeneratedContent.append(JavaCast("string", "// i set empty local FuseAction variable structures" & NewLine));
-			GeneratedContent.append(JavaCast("string", "variables.FAVs=StructNew();" & NewLine));
-			GeneratedContent.append(JavaCast("string", "variables.XFAs=StructNew();" & NewLine));
-			GeneratedContent.append(JavaCast("string", "// i check for PassThrough variables (from DO calls)" & NewLine));
-			GeneratedContent.append(JavaCast("string", "if(ArrayLen(_YourOpenbox.ActionStack) AND StructKeyExists(_YourOpenbox.ActionStack[ArrayLen(_YourOpenbox.ActionStack)], ""PassThroughs"")){" & NewLine));
-				GeneratedContent.append(JavaCast("string", Indent() & "// i check/set FuseAction Variables (FAVs)" & NewLine));
-				GeneratedContent.append(JavaCast("string", Indent() & "if(StructKeyExists(_YourOpenbox.ActionStack[ArrayLen(_YourOpenbox.ActionStack)][""PassThroughs""], ""FAVs"")){" & NewLine));
-					GeneratedContent.append(JavaCast("string", Indent(2) & "variables.FAVs=_YourOpenbox.ActionStack[ArrayLen(_YourOpenbox.ActionStack)][""PassThroughs""][""FAVs""];" & NewLine));
-				GeneratedContent.append(JavaCast("string", Indent() & "}" & NewLine));
-				GeneratedContent.append(JavaCast("string", Indent() & "// i check/set Exit FuseActions (XFAs)" & NewLine));
-				GeneratedContent.append(JavaCast("string", Indent() & "if(StructKeyExists(_YourOpenbox.ActionStack[ArrayLen(_YourOpenbox.ActionStack)][""PassThroughs""], ""XFAs"")){" & NewLine));
-					GeneratedContent.append(JavaCast("string", Indent(2) & "variables.XFAs=_YourOpenbox.ActionStack[ArrayLen(_YourOpenbox.ActionStack)][""PassThroughs""][""XFAs""];" & NewLine));
-				GeneratedContent.append(JavaCast("string", Indent() & "}" & NewLine));
-			GeneratedContent.append(JavaCast("string", "}" & NewLine));
-			GeneratedContent.append(JavaCast("string", "<" & "/cfscript>" & NewLine));
-			GeneratedContent.append(JavaCast("string", NewLine));
-			
-			GeneratedContent.append(JavaCast("string", "<!--- PHASE:PreFuseAction/PreGlobalFuseAction --->" & NewLine));
-			if(StructKeyExists(this.Phases, "PreGlobalFuseAction")){
-				GeneratedContent.append(JavaCast("string", "<" & "cfinclude template=""phase.preglobalfuseaction.cfm"">" & NewLine));
-			}
-			if(StructKeyExists(arguments.Circuit, "Phases") AND StructKeyExists(arguments.Circuit.Phases, "PreFuseAction")){
-				GeneratedContent.append(JavaCast("string", "<" & "cfinclude template=""phase.prefuseaction." & lcase(arguments.circuit.name) & ".cfm"">" & NewLine));
-			}
-			GeneratedContent.append(JavaCast("string", "<!--- End PHASE:PreFuseAction/PreGlobalFuseAction --->" & NewLine));
-			GeneratedContent.append(JavaCast("string", NewLine));
-			
-			GeneratedContent.append(JavaCast("string", "<!--- PHASE:RequestedFuseAction --->" & NewLine));
-			GeneratedContent.append(JavaCast("string", "<" & "cfset YourOpenbox.ThisPhase.Name=""RequestFuseAction"">" & NewLine));
-			GeneratedContent.append(JavaCast("string", NewLine));
-			
-			
-			// i setup the try/catch
-			GeneratedContent.append(JavaCast("string", "<" & "cfset _YourOpenbox.cfcatch=StructNew() />" & NewLine));
-			GeneratedContent.append(JavaCast("string", "<" & "cftry>" & NewLine));
-			
-			
-			// i render the fuseaction
-			temp=RenderCommands("FuseAction", arguments.FuseAction.Commands, "RequestedFuseAction", arguments.Circuit, arguments.FuseAction);
-			GeneratedContent.append(JavaCast("string", temp));
-			
-			GeneratedContent.append(JavaCast("string", "<" & "cfcatch type=""Any"">" & NewLine));
-			if(StructKeyExists(arguments.Circuit, "Phases") AND StructKeyExists(arguments.Circuit.Phases, "OnError")) {
-				GeneratedContent.append(JavaCast("string", Indent() & "<" & "cftry>" & NewLine));
-				GeneratedContent.append(JavaCast("string", Indent(2) & "<" & "cfinclude template=""phase.onerror." & lcase(arguments.circuit.name) & ".cfm"">" & NewLine));
-				GeneratedContent.append(JavaCast("string", Indent(2) & "<" & "cfcatch type=""Any"">" & NewLine));
-				GeneratedContent.append(JavaCast("string", Indent(2) & "<" & "cfset _YourOpenbox.cfcatch=cfcatch />" & NewLine));
-				GeneratedContent.append(JavaCast("string", Indent(2) & "<" & "/cfcatch>" & NewLine));
-				GeneratedContent.append(JavaCast("string", Indent() & "<" & "/cftry>" & NewLine));
-			} else {
-				GeneratedContent.append(JavaCast("string", Indent() & "<" & "cfset _YourOpenbox.cfcatch=cfcatch />" & NewLine));
-			}
-			GeneratedContent.append(JavaCast("string", "<" & "/cfcatch>" & NewLine));
-			GeneratedContent.append(JavaCast("string", "<" & "/cftry>" & NewLine));
-			
-			
-			GeneratedContent.append(JavaCast("string", "<" & "cfset StructDelete(YourOpenbox, ""ThisPhase"")>" & NewLine));
-			GeneratedContent.append(JavaCast("string", "<!--- End PHASE:RequestedFuseAction --->" & NewLine));
-			GeneratedContent.append(JavaCast("string", NewLine));
-			
-			GeneratedContent.append(JavaCast("string", "<!--- PHASE:PostFuseAction/PostGlobalFuseAction --->" & NewLine));
-			if(StructKeyExists(arguments.Circuit, "Phases") AND StructKeyExists(arguments.Circuit.Phases, "PostFuseAction")){
-				GeneratedContent.append(JavaCast("string", "<" & "cfinclude template=""phase.postfuseaction." & lcase(arguments.circuit.name) & ".cfm"">" & NewLine));
-			}
-			if(StructKeyExists(this.Phases, "PostGlobalFuseAction")){
-				GeneratedContent.append(JavaCast("string", "<" & "cfinclude template=""phase.postglobalfuseaction.cfm"">" & NewLine));
-			}
-			GeneratedContent.append(JavaCast("string", "<!--- End PHASE:PostFuseAction/PostGlobalFuseAction --->" & NewLine));
-			GeneratedContent.append(JavaCast("string", NewLine));
-			
-			// i check for a value from a thrown exception and rethrow it, since cf8 doesn't have cffinally
-			GeneratedContent.append(JavaCast("string", "<" & "cfif NOT StructIsEmpty(_YourOpenbox.cfcatch)>" & NewLine));
-			GeneratedContent.append(JavaCast("string", Indent() & "<" & "cfthrow object=""##_YourOpenbox.cfcatch##"" />" & NewLine));
-			GeneratedContent.append(JavaCast("string", "<" & "/cfif>" & NewLine));
-			GeneratedContent.append(JavaCast("string", NewLine));
-			
-			GeneratedContent.append(JavaCast("string", "<" & "cfscript>" & NewLine));
-			GeneratedContent.append(JavaCast("string", "// i store and destroy the Circuit and FuseAction variables" & NewLine));
-			GeneratedContent.append(JavaCast("string", "_YourOpenbox.Circuits." & arguments.Circuit.Name & ".CRVs=variables.CRVs;" & NewLine));
-			GeneratedContent.append(JavaCast("string", "StructDelete(variables, ""CRVs"");" & NewLine));
-			GeneratedContent.append(JavaCast("string", "StructDelete(variables, ""FAVs"");" & NewLine));
-			GeneratedContent.append(JavaCast("string", "StructDelete(variables, ""XFAs"");" & NewLine));
-			GeneratedContent.append(JavaCast("string", "// i destroy this FuseAction's properties" & NewLine));
-			GeneratedContent.append(JavaCast("string", "StructDelete(YourOpenbox, ""ThisCircuit"");" & NewLine));
-			GeneratedContent.append(JavaCast("string", "StructDelete(YourOpenbox, ""ThisFuseAction"");" & NewLine));
-			GeneratedContent.append(JavaCast("string", "<" & "/cfscript>" & NewLine));
-			
-			// i write the GeneratedContent to a file
-			Write("fuseaction." & arguments.Circuit.Name & "." & arguments.FuseAction.Name, GeneratedContent.ToString());
-			
-			// i set a TimeStamp to keep each FuseAction current with MyOpenbox
-			this.Circuits[arguments.Circuit.Name]["FuseActions"][arguments.FuseAction.Name]["TimeStamp"]=this.TimeStamp;
-			
-			// i set a ProcessingTime
-			if(this.Parameters.EnableLogs){
-				this.Logs.ProcessingTime.CreateFuseActionFile[arguments.Circuit.Name & "." & arguments.FuseAction.Name]=GetTickCount() - TickCount;
-				this.Logs.Requests.FileBuilds=this.Logs.Requests.FileBuilds + 1;
-			}
-			</cfscript>
+		GeneratedContent.append(JavaCast("string", "<" & "cfscript>" & NewLine));
+		GeneratedContent.append(JavaCast("string", "// i set this FuseAction's properties" & NewLine));
+		GeneratedContent.append(JavaCast("string", "YourOpenbox.ThisCircuit=application.MyOpenbox.GetCircuit(""" & arguments.Circuit.Name & """);" & NewLine));
+		GeneratedContent.append(JavaCast("string", "YourOpenbox.ThisFuseAction=application.MyOpenbox.GetFuseAction(""" & arguments.Circuit.Name & "." & arguments.FuseAction.Name & """);" & NewLine));
+		GeneratedContent.append(JavaCast("string", "YourOpenbox.ThisFuseAction.UUId=Insert(""-"", CreateUUID(), 23);" & NewLine));
+		GeneratedContent.append(JavaCast("string", "YourOpenbox.IsSuperCall=False;" & NewLine));
+		GeneratedContent.append(JavaCast("string", "// i set the Circuit and FuseAction variables" & NewLine));
 		
-		</cfif>
+		// added/changed on 12/1/08 - all Circuits will now get Keys in _YourOpenbox.Circuits
+		GeneratedContent.append(JavaCast("string", "if(NOT StructKeyExists(_YourOpenbox.Circuits, """ & arguments.Circuit.Name & """) OR NOT StructKeyExists(_YourOpenbox.Circuits." & arguments.Circuit.Name & ", ""CRVs"")){" & NewLine));
+			GeneratedContent.append(JavaCast("string", Indent() & "_YourOpenbox.Circuits[""" & arguments.Circuit.Name & """][""CRVs""]=StructNew();" & NewLine));
+		GeneratedContent.append(JavaCast("string", "}" & NewLine));
+		GeneratedContent.append(JavaCast("string", "variables.CRVs=_YourOpenbox.Circuits." & arguments.Circuit.Name & ".CRVs;" & NewLine));
+		
+		// GeneratedContent.append(JavaCast("string", "if(StructKeyExists(_YourOpenbox.Circuits, """ & arguments.Circuit.Name & """) AND StructKeyExists(_YourOpenbox.Circuits." & arguments.Circuit.Name & ", ""CRVs"")){" & NewLine));
+		// 	GeneratedContent.append(JavaCast("string", Indent() & "variables.CRVs=_YourOpenbox.Circuits." & arguments.Circuit.Name & ".CRVs;" & NewLine));
+		// GeneratedContent.append(JavaCast("string", "} else {" & NewLine));
+		// 	GeneratedContent.append(JavaCast("string", Indent() & "variables.CRVs=StructNew();" & NewLine));
+		// GeneratedContent.append(JavaCast("string", "}" & NewLine));
+		GeneratedContent.append(JavaCast("string", "// i set empty local FuseAction variable structures" & NewLine));
+		GeneratedContent.append(JavaCast("string", "variables.FAVs=StructNew();" & NewLine));
+		GeneratedContent.append(JavaCast("string", "variables.XFAs=StructNew();" & NewLine));
+		GeneratedContent.append(JavaCast("string", "// i check for PassThrough variables (from DO calls)" & NewLine));
+		GeneratedContent.append(JavaCast("string", "if(ArrayLen(_YourOpenbox.ActionStack) AND StructKeyExists(_YourOpenbox.ActionStack[ArrayLen(_YourOpenbox.ActionStack)], ""PassThroughs"")){" & NewLine));
+			GeneratedContent.append(JavaCast("string", Indent() & "// i check/set FuseAction Variables (FAVs)" & NewLine));
+			GeneratedContent.append(JavaCast("string", Indent() & "if(StructKeyExists(_YourOpenbox.ActionStack[ArrayLen(_YourOpenbox.ActionStack)][""PassThroughs""], ""FAVs"")){" & NewLine));
+				GeneratedContent.append(JavaCast("string", Indent(2) & "variables.FAVs=_YourOpenbox.ActionStack[ArrayLen(_YourOpenbox.ActionStack)][""PassThroughs""][""FAVs""];" & NewLine));
+			GeneratedContent.append(JavaCast("string", Indent() & "}" & NewLine));
+			GeneratedContent.append(JavaCast("string", Indent() & "// i check/set Exit FuseActions (XFAs)" & NewLine));
+			GeneratedContent.append(JavaCast("string", Indent() & "if(StructKeyExists(_YourOpenbox.ActionStack[ArrayLen(_YourOpenbox.ActionStack)][""PassThroughs""], ""XFAs"")){" & NewLine));
+				GeneratedContent.append(JavaCast("string", Indent(2) & "variables.XFAs=_YourOpenbox.ActionStack[ArrayLen(_YourOpenbox.ActionStack)][""PassThroughs""][""XFAs""];" & NewLine));
+			GeneratedContent.append(JavaCast("string", Indent() & "}" & NewLine));
+		GeneratedContent.append(JavaCast("string", "}" & NewLine));
+		GeneratedContent.append(JavaCast("string", "<" & "/cfscript>" & NewLine));
+		GeneratedContent.append(JavaCast("string", NewLine));
+		
+		GeneratedContent.append(JavaCast("string", "<!--- PHASE:PreFuseAction/PreGlobalFuseAction --->" & NewLine));
+		if(StructKeyExists(this.Phases, "PreGlobalFuseAction")){
+			GeneratedContent.append(JavaCast("string", "<" & "cfinclude template=""phase.preglobalfuseaction.cfm"">" & NewLine));
+		}
+		if(StructKeyExists(arguments.Circuit, "Phases") AND StructKeyExists(arguments.Circuit.Phases, "PreFuseAction")){
+			GeneratedContent.append(JavaCast("string", "<" & "cfinclude template=""phase.prefuseaction." & lcase(arguments.circuit.name) & ".cfm"">" & NewLine));
+		}
+		GeneratedContent.append(JavaCast("string", "<!--- End PHASE:PreFuseAction/PreGlobalFuseAction --->" & NewLine));
+		GeneratedContent.append(JavaCast("string", NewLine));
+		
+		GeneratedContent.append(JavaCast("string", "<!--- PHASE:RequestedFuseAction --->" & NewLine));
+		GeneratedContent.append(JavaCast("string", "<" & "cfset YourOpenbox.ThisPhase.Name=""RequestFuseAction"">" & NewLine));
+		GeneratedContent.append(JavaCast("string", NewLine));
+		
+		
+		// i setup the try/catch
+		GeneratedContent.append(JavaCast("string", "<" & "cfset _YourOpenbox.cfcatch=StructNew() />" & NewLine));
+		GeneratedContent.append(JavaCast("string", "<" & "cftry>" & NewLine));
+		
+		
+		// i render the fuseaction
+		temp=RenderCommands("FuseAction", arguments.FuseAction.Commands, "RequestedFuseAction", arguments.Circuit, arguments.FuseAction);
+		GeneratedContent.append(JavaCast("string", temp));
+		
+		GeneratedContent.append(JavaCast("string", "<" & "cfcatch type=""Any"">" & NewLine));
+		if(StructKeyExists(arguments.Circuit, "Phases") AND StructKeyExists(arguments.Circuit.Phases, "OnError")) {
+			GeneratedContent.append(JavaCast("string", Indent() & "<" & "cftry>" & NewLine));
+			GeneratedContent.append(JavaCast("string", Indent(2) & "<" & "cfinclude template=""phase.onerror." & lcase(arguments.circuit.name) & ".cfm"">" & NewLine));
+			GeneratedContent.append(JavaCast("string", Indent(2) & "<" & "cfcatch type=""Any"">" & NewLine));
+			GeneratedContent.append(JavaCast("string", Indent(2) & "<" & "cfset _YourOpenbox.cfcatch=cfcatch />" & NewLine));
+			GeneratedContent.append(JavaCast("string", Indent(2) & "<" & "/cfcatch>" & NewLine));
+			GeneratedContent.append(JavaCast("string", Indent() & "<" & "/cftry>" & NewLine));
+		} else {
+			GeneratedContent.append(JavaCast("string", Indent() & "<" & "cfset _YourOpenbox.cfcatch=cfcatch />" & NewLine));
+		}
+		GeneratedContent.append(JavaCast("string", "<" & "/cfcatch>" & NewLine));
+		GeneratedContent.append(JavaCast("string", "<" & "/cftry>" & NewLine));
+		
+		
+		GeneratedContent.append(JavaCast("string", "<" & "cfset StructDelete(YourOpenbox, ""ThisPhase"")>" & NewLine));
+		GeneratedContent.append(JavaCast("string", "<!--- End PHASE:RequestedFuseAction --->" & NewLine));
+		GeneratedContent.append(JavaCast("string", NewLine));
+		
+		GeneratedContent.append(JavaCast("string", "<!--- PHASE:PostFuseAction/PostGlobalFuseAction --->" & NewLine));
+		if(StructKeyExists(arguments.Circuit, "Phases") AND StructKeyExists(arguments.Circuit.Phases, "PostFuseAction")){
+			GeneratedContent.append(JavaCast("string", "<" & "cfinclude template=""phase.postfuseaction." & lcase(arguments.circuit.name) & ".cfm"">" & NewLine));
+		}
+		if(StructKeyExists(this.Phases, "PostGlobalFuseAction")){
+			GeneratedContent.append(JavaCast("string", "<" & "cfinclude template=""phase.postglobalfuseaction.cfm"">" & NewLine));
+		}
+		GeneratedContent.append(JavaCast("string", "<!--- End PHASE:PostFuseAction/PostGlobalFuseAction --->" & NewLine));
+		GeneratedContent.append(JavaCast("string", NewLine));
+		
+		// i check for a value from a thrown exception and rethrow it, since cf8 doesn't have cffinally
+		GeneratedContent.append(JavaCast("string", "<" & "cfif NOT StructIsEmpty(_YourOpenbox.cfcatch)>" & NewLine));
+		GeneratedContent.append(JavaCast("string", Indent() & "<" & "cfthrow object=""##_YourOpenbox.cfcatch##"" />" & NewLine));
+		GeneratedContent.append(JavaCast("string", "<" & "/cfif>" & NewLine));
+		GeneratedContent.append(JavaCast("string", NewLine));
+		
+		GeneratedContent.append(JavaCast("string", "<" & "cfscript>" & NewLine));
+		GeneratedContent.append(JavaCast("string", "// i store and destroy the Circuit and FuseAction variables" & NewLine));
+		GeneratedContent.append(JavaCast("string", "_YourOpenbox.Circuits." & arguments.Circuit.Name & ".CRVs=variables.CRVs;" & NewLine));
+		GeneratedContent.append(JavaCast("string", "StructDelete(variables, ""CRVs"");" & NewLine));
+		GeneratedContent.append(JavaCast("string", "StructDelete(variables, ""FAVs"");" & NewLine));
+		GeneratedContent.append(JavaCast("string", "StructDelete(variables, ""XFAs"");" & NewLine));
+		GeneratedContent.append(JavaCast("string", "// i destroy this FuseAction's properties" & NewLine));
+		GeneratedContent.append(JavaCast("string", "StructDelete(YourOpenbox, ""ThisCircuit"");" & NewLine));
+		GeneratedContent.append(JavaCast("string", "StructDelete(YourOpenbox, ""ThisFuseAction"");" & NewLine));
+		GeneratedContent.append(JavaCast("string", "<" & "/cfscript>" & NewLine));
+		
+		// i write the GeneratedContent to a file
+		Write("fuseaction." & arguments.Circuit.Name & "." & arguments.FuseAction.Name, GeneratedContent.ToString());
+		
+		// i set a TimeStamp to keep each FuseAction current with MyOpenbox
+		this.Circuits[arguments.Circuit.Name]["FuseActions"][arguments.FuseAction.Name]["TimeStamp"]=this.TimeStamp;
+		
+		// i set a ProcessingTime
+		if(this.Parameters.EnableLogs){
+			this.Logs.ProcessingTime.CreateFuseActionFile[arguments.Circuit.Name & "." & arguments.FuseAction.Name]=GetTickCount() - TickCount;
+			this.Logs.Requests.FileBuilds=this.Logs.Requests.FileBuilds + 1;
+		}
+		</cfscript>
     
     </cffunction>
 	
@@ -1915,6 +1935,8 @@
 		
 		<cfargument name="FileName" type="string">
 		<cfargument name="Content" type="string">
+		
+		<cfset this.LogAction("Write File", FileName) />
 		
 		<cffile action="write" 
 			file="#ExpandPath(this.Parameters.Cache.Path & LCase(arguments.FileName) & ".cfm")#" 
