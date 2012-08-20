@@ -82,10 +82,12 @@ if(NOT StructKeyExists(attributes, application.MyOpenbox.Parameters.FuseActionVa
 	attributes[application.MyOpenbox.Parameters.FuseActionVariable]=application.MyOpenbox.Parameters.DefaultFuseAction;
 }
 
+/*
 try {
 	formUtil = CreateObject('component', 'FormUtilities').init();
 	formUtil.buildFormCollections(attributes);
 } catch (Any e) {}
+*/
 </cfscript>
 
 <cfscript>
