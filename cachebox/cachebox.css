@@ -1,0 +1,274 @@
+@charset "utf-8";
+/* CSS Document */
+
+body, div, p, td { 
+	font-family: Verdana, Geneva, sans-serif; 
+} 
+
+body { 
+	font-size: .85em; 
+	margin: 0px; 
+} 
+
+a { text-decoration: none; } 
+form { display: inline; } 
+img { border: 0px; } 
+
+h4 { 
+	margin: 15px 0px -5px 0px; 
+	text-transform: capitalize; 
+	text-align: center; 
+	width: 600px; 
+} 
+
+form table tr { vertical-align: top; } 
+form table th { text-align: right; font-weight: bold; } 
+form table tfoot .buttons { text-align: center; } 
+
+input.number { width: 3em; } 
+
+#header { 
+	margin: 0px; 
+	color: #E0FFFF; 
+	font-weight: bold; 
+	font-size: 1.2em; 
+	background-color: navy; 
+	padding: 10px 3px 3px 15px; 
+	background-image: url("images/headerbg.gif"); 
+	background-repeat: repeat-x; 
+} 
+
+#help { 
+	display: block; 
+	position: absolute; 
+	top: 3.1em; 
+	left: 800px; 
+	color: blue; 
+	font-weight: bold; 
+	border: solid blue 1px; 
+	background-color: white; 
+	z-index: 2; 
+	padding: 3px 10px 3px 10px; 
+} 
+
+#nav { 
+	background-color: #F0F0FF; 
+	padding: 10px 3px 2px 15px; 
+	border-top: solid black 2px; 
+	border-bottom: solid navy 2px; 
+	background-image: url("images/navbg.png"); 
+} 
+
+#nav a { 
+	padding: 2px 8px 2px 8px; 
+	margin: 0px 3px 0px 3px; 
+	color: navy; 
+	font-weight: bold; 
+	border: solid navy 2px; 
+	border-bottom: 0px; 
+	border-top-color: lightsteelblue; 
+	border-left-color: lightsteelblue; 
+	background-color: #FFFFD0; 
+	background-image: url("images/tab.png"); 
+	background-repeat: repeat-x; 
+	-moz-border-radius-topleft: 8px;
+	-moz-border-radius-topright: 8px; 
+} 
+
+#nav a:hover { 
+	background-color: white; 
+	background-image: url("images/tabover.png"); 
+} 
+
+#content { 
+	margin: 15px;
+} 
+
+#content h2 { 
+	text-transform: capitalize; 
+	margin-bottom: 0px; 
+} 
+
+#home .chart { 
+	padding: 5px; 
+	margin: 5px; 
+	border: solid black 1px; 
+	float: left; 
+} 
+
+#home .chart .title { 
+	margin: 0px; 
+	padding: 2px; 
+	border: solid black 1px; 
+	border-top-color: #960; 
+	border-left-color: #960; 
+	background-color: #FFFFD0; 
+	font-weight: bold; 
+} 
+
+#content .statusmessage { 
+	display: block; 
+	width: 500px; 
+	padding: 3px; 
+	margin: 5px; 
+	border: solid 1px; 
+	text-align: center; 
+	font-weight: bold; 
+	-moz-border-radius: 8px; 
+} 
+
+#content .confirm { 
+	color: green;  
+	border-color: green; 
+	background-color: #F0FFF0; 
+} 
+
+#content .empty { 
+	color: #960; 
+	border-color: #960; 
+	background-color: #FFFFD0; 
+} 
+
+#content .warning { 
+	color: white; 
+	border-color: maroon; 
+	background-color: red; 
+} 
+
+table.list { 
+	margin-top: 10px; 
+	border: solid black 1px; 
+	border-left: 0px; 
+} 
+
+table.list th, 
+table.list td { 
+	padding: 2px 5px 2px 5px; 	
+} 
+
+table.list thead th { 
+	text-align: left; 
+	font-weight: bold; 
+	background-color: #FFFFD0; 
+	border-left: solid black 1px; 
+} 
+
+table.list tbody td,
+table.list tbody th { 
+	font-size: .9em; 
+	vertical-align: middle; 
+	border-top: solid black 1px; 
+	border-left: solid black 1px; 
+} 
+
+table.list tbody tr.appname { 
+	background-color: #F0F0FF; 
+} 
+
+a.icon { 
+	display: inline-block; 
+	vertical-align:middle;  
+	padding: 0px; 
+	border: 0px; 
+	margin: 0px 2px 0px 0px; 
+	height: 20px; 
+	width: 20px; 
+} 
+
+a.iconlink { 
+	display: inline-block; 
+	vertical-align: middle; 
+	height: 26px; 
+	padding-left: 23px; 
+	line-height: 170%; 
+	background-position: left; 
+	background-repeat: no-repeat; 
+} 
+
+a.reset { 
+	background-image: url("images/reset.png"); 
+} 
+
+a.detail { 
+	background-image: url("images/detail.png"); 
+} 
+
+a.configure { 
+	background-image: url("images/configure.png"); 
+} 
+
+a.drop { 
+	background-image: url("images/drop.png"); 
+} 
+
+tr.hits_0 { background-color: #F0F0F0; } 
+
+tr.storage { color: black; background-color: white; font-weight: normal; }
+tr.storage.ready_0, 
+tr.storage.ready_0 a { color: white; background-color: silver; font-weight: bold; } 
+tr.storage.ready_1 a { font-weight: bold; } 
+
+span.frequency { 
+	display: inline-block; 
+	border: solid 1px; 
+	padding: 2px 5px 2px 5px; 
+	-moz-border-radius: 5px; 
+} 
+
+/* constantly requested content (several times per minute) may merrit special handling to limit dog-piling */
+.constant { color: green; border-color: green; background-color: #F0FFF0; } 
+
+/* frequently requested content - several times per hour */
+.high { color: navy; border-color: navy; background-color: #F0F0FF; } 
+
+/* low-frequency - several times per day */
+.low { color: black; border-color: black; background-color: #FFFFD0; } 
+
+/* objects in cache that aren't requested at least a few times per day are wasting resources */
+.waste { color: white; border-color: black; background-color: maroon; } 
+
+div.pages { 
+	margin-top: 5px; 
+	margin-bottom: 5px; 
+} 
+
+div.pages a { 
+	display: inline-block; 
+	background-color: #F0F0FF; 
+	color: navy; 
+	border: solid navy 1px; 
+	width: 1.5em; 
+	text-align: center; 
+	padding: 2px; 
+	margin: 0px 0px 0px 1px; 
+} 
+
+div.pages a.current { 
+	background-color: #FFFFD0; 
+} 
+
+#login { 
+	width: 300px; 
+	margin: 100px 0px 0px 250px; 
+	text-align: center; 	
+} 
+
+#login form { 
+	display: block; 
+	width: 100%; 
+	border: solid navy 2px; 
+	border-top-color: lightsteelblue; 
+	border-left-color: lightsteelblue; 
+	height: 100px; 
+	background-color: #F0F0FF; 
+	-moz-border-radius: 10px; 
+} 
+
+#login div.statusmessage { 
+	width: 100%; 
+} 
+
+#login form div { 
+	margin: 20px 0px 0px 0px; 
+} 
+

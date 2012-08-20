@@ -38,6 +38,7 @@
 		<parameter name="FilterFuseActionAttributes" value="Access,Commands,TimeStamp" />
 		<parameter name="AccessList" value="Public,Internal,Private,Special,Any" />
 		<parameter name="CircuitRootPaths" value="" />
+		<parameter name="EnableCachebox" value="false" />
 	</parameters>
 	
 	<verbs>

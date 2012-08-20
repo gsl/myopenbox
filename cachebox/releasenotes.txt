@@ -1,0 +1,36 @@
+CacheBox version 0.9.6 BETA 
+Release Notes 
+
+- Added password and login form to Management Application 
+	-- note that you need to set the password when you install the framework 
+- More Samples 
+	-- Added SimpleBlog ColdBox sample 
+	-- Modified SimpleBlog to be a stand-alone example of CacheBox in a non-framework application 
+		-- this is important because it shows application portability with the CacheBoxAgent.cfc 
+		-- the stand-alone SimpleBlog can be installed anywhere, it does NOT _require_ a CacheBox installation 
+- Added Cluster tab 
+	-- trust isn't propagating to all servers quite the way I hoped, 
+		so you need to manually check to make sure all your servers 
+		have all the other servers in their list 
+		- example 
+		- servers are a, b and c 
+		- server a - lists b, c 
+		- server b - lists a, c 
+		- server c - lists a, b 
+- Added config settings for memory failure warnings 
+	-- these set the time to failure before optimization and time to failure 
+		before the displayed warning in the management application 
+	-- defaults to 1 hour and 2 hours respectively 
+	-- it might be nice to have the server send an SMS message 
+		when it reaches the warning level, but hasn't been implemented 
+- Simplified the eviction policies 
+	-- this was the result of also adding an expire() method to the agent 
+		to allow content to be flagged as expired without immediately removing it 
+		-- flagged content is not returned from fetch operations, but uses resources until the next reap 
+		-- using expire() instead of delete() may result in faster page loads for users 
+	-- this should make it much easier to write custom eviction policies 
+- Optimization method in defaultconfig.cfc is incomplete 
+	-- I'm sort of guessing at this point about how best to optimize the cache 
+	-- The data is there, but I want better algorithms for applying it 
+- Not tested on Railo, so no knowing if the Cluster storage type works 
+- Considering support for MS Velocity? 

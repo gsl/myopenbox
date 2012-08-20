@@ -28,10 +28,27 @@
 			this.Configuration.ApplicationConfigurationFile=GetDirectoryFromPath(GetCurrentTemplatePath()) & "../cfg.myopenbox.cfm";
 		if(NOT StructKeyExists(this.Configuration, "SetupConfigurationFile"))
 			this.Configuration.SetupConfigurationFile=GetDirectoryFromPath(GetCurrentTemplatePath()) & "config.cfm";
+		this.Cache=StructNew();
+		this.Cache.Agents=StructNew();
+		this.AddCacheAgent("Default");
 		</cfscript>
 		
 		<cfreturn this>
     
+    </cffunction>
+    
+    <cffunction name="AddCacheAgent" access="public" output="false">
+    	<cfargument name="name" default="Default" />
+    	<cfset var cachebox=CreateObject('component', 'cachebox.cacheboxagent').init(AgentName=arguments.Name, Context='application') />
+    	<cfif ArrayLen(arguments) GTE 2>
+    		<cfset cachebox=arguments[2].init(cachebox) />
+    	</cfif>
+    	<cfset this.Cache.Agents[arguments.Name]=cachebox />
+    </cffunction>
+    
+    <cffunction name="GetCacheAgent" access="public" output="false">
+    	<cfargument name="name" default="" />
+    	<cfreturn this.Cache.Agents[arguments.name] />
     </cffunction>
     
     <cffunction name="IsFWReinit" 

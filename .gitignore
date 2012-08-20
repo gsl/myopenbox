@@ -1,4 +1,6 @@
 .*
+cachebox/settings/*.xml.cfm
+cachebox/settings/storage/*
 !.gitignore
 !.gitmodules
 Thumbs.db
