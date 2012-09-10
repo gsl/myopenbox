@@ -72,7 +72,6 @@ if(LocalVars.Attributes.IsCache) {
 		if(NOT StructIsEmpty(LocalVars.Attributes.Cache.Arguments)){
 			GeneratedContent.append(JavaCast("string", ", _CacheArgs"));
 		}
-		GeneratedContent.append(JavaCast("string", ") />" & NewLine));
 	GeneratedContent.append(JavaCast("string", ") />" & NewLine));
 	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfif _CheckCache.Status>" & NewLine));
 	arguments.Level=arguments.Level+1;

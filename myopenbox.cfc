@@ -30,7 +30,6 @@
 			this.Configuration.SetupConfigurationFile=GetDirectoryFromPath(GetCurrentTemplatePath()) & "config.cfm";
 		this.Cache=StructNew();
 		this.Cache.Agents=StructNew();
-		this.AddCacheAgent("Default");
 		</cfscript>
 		
 		<cfreturn this>
@@ -39,11 +38,12 @@
     
     <cffunction name="AddCacheAgent" access="public" output="false">
     	<cfargument name="name" default="Default" />
-    	<cfset var cachebox=CreateObject('component', 'cachebox.cacheboxagent').init(AgentName=arguments.Name, Context='application') />
-    	<cfif ArrayLen(arguments) GTE 2>
-    		<cfset cachebox=arguments[2].init(cachebox) />
-    	</cfif>
-    	<cfset this.Cache.Agents[arguments.Name]=cachebox />
+    	<cfargument name="agent" default="#NewCacheAgent().init(AgentName=arguments.Name, Context='application')#" />
+    	<cfset this.Cache.Agents[arguments.Name]=arguments.agent />
+    </cffunction>
+    
+    <cffunction name="NewCacheAgent" access="public" output="false">
+    	<cfreturn CreateObject('component', 'cachebox.cacheboxagent') />
     </cffunction>
     
     <cffunction name="GetCacheAgent" access="public" output="false">
