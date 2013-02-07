@@ -10,5 +10,5 @@ if(StructKeyExists(arguments.Command.XMLAttributes, "addnewline") AND arguments.
 	LocalVars.Attributes.AddNewLine=0;
 }
 
-GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfoutput>" & LocalVars.Attributes.Output & RepeatString("<br />", LocalVars.Attributes.AddNewLine) & "<" & "/cfoutput>" & NewLine));
+GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & LocalVars.Attributes.Output & RepeatString("<br />", LocalVars.Attributes.AddNewLine) & NewLine));
 </cfscript>
