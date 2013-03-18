@@ -23,9 +23,9 @@ if(StructKeyExists(arguments.Command.XMLAttributes, "optpath")){
 	LocalVars.Attributes.OptPath=arguments.Command.XMLAttributes.optpath;
 } else if(NOT StructIsEmpty(arguments.Circuit) AND StructKeyExists(arguments.Circuit, "OptPath")){
 	LocalVars.Attributes.OptPath=arguments.Circuit.OptPath;
-} else {
 } else if (NOT StructIsEmpty(arguments.Circuit) AND StructKeyExists(application.MyOpenbox.Parameters, "OptPath") AND Len(application.MyOpenbox.Parameters.OptPath) GT 0) {
-	LocalVars.Attributes.OptPath=application.MyOpenbox.Parameters.OptPath;
+	LocalVars.Attributes.OptPath=application.MyOpenbox.Parameters.OptPath; 
+} else {
 	LocalVars.Attributes.OptPath="";
 }
 
