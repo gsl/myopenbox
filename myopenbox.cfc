@@ -24,13 +24,15 @@
 		this.Configuration=arguments.Configuration;
 		this.Logs=StructNew();
 		this.Logs.Actions=QueryNew("timestamp,action,type,time", "date,varchar,varchar,integer");
-		if(NOT StructKeyExists(this.Configuration, "ApplicationConfigurationFile"))
-			this.Configuration.ApplicationConfigurationFile=GetDirectoryFromPath(GetCurrentTemplatePath()) & "../cfg.myopenbox.cfm";
-		if(NOT StructKeyExists(this.Configuration, "SetupConfigurationFile"))
-			this.Configuration.SetupConfigurationFile=GetDirectoryFromPath(GetCurrentTemplatePath()) & "config.cfm";
 		this.Cache=StructNew();
 		this.Cache.Agents=StructNew();
 		</cfscript>
+		
+		<cfparam name="this.Configuration.ApplicationRootPath" default="#GetDirectoryFromPath(GetCurrentTemplatePath())#../" />
+		<cfparam name="this.Configuration.ApplicationConfigurationPath" default="#GetDirectoryFromPath(GetCurrentTemplatePath())#../" />
+		<cfparam name="this.Configuration.ApplicationConfigurationFile" default="#this.Configuration.ApplicationConfigurationPath#cfg.myopenbox.cfm" />
+		<cfparam name="this.Configuration.SetupConfigurationPath" default="#GetDirectoryFromPath(GetCurrentTemplatePath())#" />
+		<cfparam name="this.Configuration.SetupConfigurationFile" default="#this.Configuration.SetupConfigurationPath#config.cfm" />
 		
 		<cfreturn this>
     
@@ -197,7 +199,7 @@
 		// i set Circuits
 		CircuitRootArray=ListToArray(this.Parameters.CircuitRootPaths, ",");
 		for(i=1; i LTE ArrayLen(CircuitRootArray); i=i+1){
-			StructAppend(this.Circuits, ParseCircuits(GetDirectoryFromPath(GetBaseTemplatePath()) & CircuitRootArray[i], CircuitRootArray[i]), true);
+			StructAppend(this.Circuits, ParseCircuits(this.Configuration.ApplicationRootPath & CircuitRootArray[i], CircuitRootArray[i]), true);
 		}
 		
 		//this.Circuits=ParseCircuits();
@@ -210,7 +212,7 @@
 			// i create an empty Settings struct for checking existence
 			this.Settings=StructNew();
 			// i create the file
-			CreateSettingsFile("MyOpenbox", arguments.ApplicationDeclarations.XMLRoot.settings);
+			CreateSettingsFile(type="MyOpenbox", currentNode=arguments.ApplicationDeclarations.XMLRoot.settings, filePath=this.Configuration.ApplicationConfigurationPath);
 		}
 		
 		// i create the Routes file
