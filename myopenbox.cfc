@@ -125,9 +125,11 @@
 					this.ApplicationConfigurationFile.HashKey=HashKey;
 					this.LogAction("MOBX Parsed", "FW");
 					</cfscript>
+<!---
 					<cfif this.Parameters.ProcessingMode EQ "Deployment" AND (this.IsFWReparse() OR this.IsFWReinit())>
 						<cfset CreateAllCircuitAndFuseactionFiles() />
 					</cfif>
+--->
 					
 					</cflock>
 				</cfif>
@@ -805,7 +807,7 @@
 	</cffunction>
 	
 	<cffunction name="CreateAllCircuitAndFuseactionFiles"
-		access="private"
+		access="public"
 		output="false"
 		returnType="void">
 		<cfscript>

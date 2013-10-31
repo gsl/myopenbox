@@ -27,8 +27,8 @@
 		<parameter name="ParseWithComments" value="true" />
 		<parameter name="PrecedenceFormOrURL" value="form" />
 		<parameter name="StoreXML" value="false" />
-		<parameter name="CorePhases" value="Init,PreProcess,PreGlobalFuseAction,PreFuseAction,PostFuseAction,PostGlobalFuseAction,PostProcess,OnError,OnMissing" />
-		<parameter name="ApplicationPhases" value="Init,PreProcess,PreGlobalFuseAction,PostGlobalFuseAction,PostProcess" />
+		<parameter name="CorePhases" value="PreParse,Init,PreProcess,PreGlobalFuseAction,PreFuseAction,PostFuseAction,PostGlobalFuseAction,PostProcess,OnError,OnMissing" />
+		<parameter name="ApplicationPhases" value="PreParse,Init,PreProcess,PreGlobalFuseAction,PostGlobalFuseAction,PostProcess" />
 		<parameter name="CircuitPhases" value="PreFuseAction,PostFuseAction,OnError,OnMissing" />
 		<parameter name="CircuitRelatedPhases" value="PreGlobalFuseAction,PreFuseAction,PostFuseAction,PostGlobalFuseAction,OnError,OnMissing" />
 		<parameter name="ReservedCircuitAttributes" value="Access,ConfigFileName,DateLastModified,DirectoryPath,FuseActions,Name,Parent,Phases,RootPath,Settings,Title,UUId" />

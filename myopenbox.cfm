@@ -28,6 +28,18 @@ application.MyOpenbox.RunMyOpenbox();
 attributes=application.MyOpenbox.SetAttributes(variables, GetBaseTagList());
 </cfscript>
 
+<cfinclude template="act.actionstack.cfm">
+
+<!--- i include the PreParse Phase --->
+<cfif StructKeyExists(application.MyOpenbox.Phases, "PreParse")
+	AND NOT StructKeyExists(application.MyOpenbox.Phases.Init[1], "IsInitialized")>
+	<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/phase.preparse.cfm">
+</cfif>
+
+<cfif application.MyOpenbox.Parameters.ProcessingMode EQ "Deployment" AND (application.MyOpenbox.IsFWReparse() OR application.MyOpenbox.IsFWReinit())>
+	<cfset application.MyOpenbox.CreateAllCircuitAndFuseactionFiles() />
+</cfif>
+
 <!--- i apply application Routes --->
 <cfif StructKeyExists(application.MyOpenbox, "Routes") AND NOT IsDefined("ThisTag")>
 	<cfscript>
@@ -102,7 +114,6 @@ application.MyOpenbox.RunFuseAction(attributes[application.MyOpenbox.Parameters.
 </cfif>
 
 <!--- i include the YourOpenbox request file --->
-<cfinclude template="udf.youropenbox.cfm">
 <cfinclude template="act.youropenbox.cfm" />
 
 <!--- i include the Init Phase --->
