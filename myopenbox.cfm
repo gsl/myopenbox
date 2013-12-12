@@ -46,16 +46,7 @@ attributes=application.MyOpenbox.SetAttributes(variables, GetBaseTagList());
 	variables.items = structnew();
 	
 	// Get path_info
-	if (structKeyExists(cgi,"http_x_rewrite_url") && len(cgi.http_x_rewrite_url)) // iis6 1/ IIRF (Ionics Isapi Rewrite Filter)
-		variables.items["pathInfo"] = listFirst(cgi.http_x_rewrite_url,'?');
-	else if (structKeyExists(cgi,"http_x_original_url") && len(cgi.http_x_original_url)) // iis7 rewrite default
-		variables.items["pathInfo"] = listFirst(cgi.http_x_original_url,"?");
-	else if (structKeyExists(cgi,"request_uri") && len(cgi.request_uri)) // apache default
-		variables.items["pathInfo"] = listFirst(cgi.request_uri,'?');
-	else if (structKeyExists(cgi,"redirect_url") && len(cgi.redirect_url)) // apache fallback
-		variables.items["pathInfo"] = listFirst(cgi.redirect_url,'?');
-	else // fallback to cgi.path_info
-		variables.items["pathInfo"] = cgi.path_info;
+	variables.items["pathInfo"] = cgi.path_info;
 	
 	variables.items["scriptName"] = trim(reReplacenocase(cgi.script_name,"[/\\]index\.cfm",""));
 	
