@@ -52,16 +52,19 @@ attributes=application.MyOpenbox.SetAttributes(variables, GetBaseTagList());
 	
 	// Clean ContextRoots
 	if( len(getContextRoot()) ){
-		variables.items["pathInfo"] = replacenocase(variables.items["pathInfo"],getContextRoot(),"");
+		//variables.items["pathInfo"] = replacenocase(variables.items["pathInfo"],getContextRoot(),"");
 		variables.items["scriptName"] = replacenocase(variables.items["scriptName"],getContextRoot(),"");
 	}	
 	// Clean up the path_info from index.cfm and nested pathing
 	variables.items["pathInfo"] = trim(reReplacenocase(variables.items["pathInfo"],"[/\\]index\.cfm",""));
-	// Clean up empty placeholders
-	variables.items["pathInfo"] = replace(variables.items["pathInfo"],"//","/","all");
-	if( len(variables.items["scriptName"]) ){
-		variables.items["pathInfo"] = replaceNocase(variables.items["pathInfo"],variables.items["scriptName"] & "/",'');
+	
+	// Clean the scriptname from the pathinfo inccase this is a nested application
+	if( len( variables.items["scriptName"] ) ){
+		variables.items["pathInfo"] = replaceNocase(variables.items["pathInfo"], variables.items["scriptName"],'');
 	}
+	
+	// clean 1 or > / in front of route in some cases, scope = one by default
+	variables.items["pathInfo"] = reReplaceNoCase(variables.items["pathInfo"], "^/+", "/");
 	</cfscript>
 	
 	<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/routes.cfm">
