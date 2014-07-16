@@ -56,6 +56,7 @@
 		<verb name="Else" />
 		<verb name="ElseIf" />
 		<verb name="FAV" template="SetVariable" />
+		<verb name="Finally" />
 		<verb name="If" />
 		<verb name="Include" />
 		<verb name="Instantiate" />
