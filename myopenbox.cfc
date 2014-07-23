@@ -1221,7 +1221,7 @@
 					// i insert the Settings include (if necessary)
 					if(StructKeyExists(this.Circuits[arguments.Phase[i]["CircuitName"]], "Settings")){
 						GeneratedContent.append(JavaCast("string", "<!--- i apply the Phase's Circuit Settings --->" & NewLine));
-						GeneratedContent.append(JavaCast("string", "<" & "cfinclude template=""settings." & lcase(arguments.phase[i]["circuitname"]) & ".cfm"">" & NewLine));
+						GeneratedContent.append(JavaCast("string", "<" & "cfinclude template=""" & this.Parameters.CacheFilePrefix & "settings." & lcase(arguments.phase[i]["circuitname"]) & ".cfm"">" & NewLine));
 						GeneratedContent.append(JavaCast("string", NewLine));
 					}
 					
@@ -1457,7 +1457,7 @@
 		// i insert the Settings file if Settings exists
 		if(StructKeyExists(arguments.Circuit, "Settings")){
 			GeneratedContent.append(JavaCast("string", "<!--- i include this Circuit's Settings file --->" & NewLine));
-			GeneratedContent.append(JavaCast("string", "<" & "cfinclude template=""settings." & LCase(arguments.Circuit.Name) & ".cfm"">" & NewLine));
+			GeneratedContent.append(JavaCast("string", "<" & "cfinclude template=""" & this.Parameters.CacheFilePrefix & "settings." & LCase(arguments.Circuit.Name) & ".cfm"">" & NewLine));
 			GeneratedContent.append(JavaCast("string", NewLine));
 		}
 		
@@ -1499,10 +1499,10 @@
 		
 		GeneratedContent.append(JavaCast("string", "<!--- PHASE:PreFuseAction/PreGlobalFuseAction --->" & NewLine));
 		if(StructKeyExists(this.Phases, "PreGlobalFuseAction")){
-			GeneratedContent.append(JavaCast("string", "<" & "cfinclude template=""phase.preglobalfuseaction.cfm"">" & NewLine));
+			GeneratedContent.append(JavaCast("string", "<" & "cfinclude template=""" & this.Parameters.CacheFilePrefix & "phase.preglobalfuseaction.cfm"">" & NewLine));
 		}
 		if(StructKeyExists(arguments.Circuit, "Phases") AND StructKeyExists(arguments.Circuit.Phases, "PreFuseAction")){
-			GeneratedContent.append(JavaCast("string", "<" & "cfinclude template=""phase.prefuseaction." & lcase(arguments.circuit.name) & ".cfm"">" & NewLine));
+			GeneratedContent.append(JavaCast("string", "<" & "cfinclude template=""" & this.Parameters.CacheFilePrefix & "phase.prefuseaction." & lcase(arguments.circuit.name) & ".cfm"">" & NewLine));
 		}
 		GeneratedContent.append(JavaCast("string", "<!--- End PHASE:PreFuseAction/PreGlobalFuseAction --->" & NewLine));
 		GeneratedContent.append(JavaCast("string", NewLine));
@@ -1524,7 +1524,7 @@
 		GeneratedContent.append(JavaCast("string", "<" & "cfcatch type=""Any"">" & NewLine));
 		if(StructKeyExists(arguments.Circuit, "Phases") AND StructKeyExists(arguments.Circuit.Phases, "OnError")) {
 			GeneratedContent.append(JavaCast("string", Indent() & "<" & "cftry>" & NewLine));
-			GeneratedContent.append(JavaCast("string", Indent(2) & "<" & "cfinclude template=""phase.onerror." & lcase(arguments.circuit.name) & ".cfm"">" & NewLine));
+			GeneratedContent.append(JavaCast("string", Indent(2) & "<" & "cfinclude template=""" & this.Parameters.CacheFilePrefix & "phase.onerror." & lcase(arguments.circuit.name) & ".cfm"">" & NewLine));
 			GeneratedContent.append(JavaCast("string", Indent(2) & "<" & "cfcatch type=""Any"">" & NewLine));
 			GeneratedContent.append(JavaCast("string", Indent(2) & "<" & "cfset _YourOpenbox.cfcatch=cfcatch />" & NewLine));
 			GeneratedContent.append(JavaCast("string", Indent(2) & "<" & "/cfcatch>" & NewLine));
@@ -1542,10 +1542,10 @@
 		
 		GeneratedContent.append(JavaCast("string", "<!--- PHASE:PostFuseAction/PostGlobalFuseAction --->" & NewLine));
 		if(StructKeyExists(arguments.Circuit, "Phases") AND StructKeyExists(arguments.Circuit.Phases, "PostFuseAction")){
-			GeneratedContent.append(JavaCast("string", "<" & "cfinclude template=""phase.postfuseaction." & lcase(arguments.circuit.name) & ".cfm"">" & NewLine));
+			GeneratedContent.append(JavaCast("string", "<" & "cfinclude template=""" & this.Parameters.CacheFilePrefix & "phase.postfuseaction." & lcase(arguments.circuit.name) & ".cfm"">" & NewLine));
 		}
 		if(StructKeyExists(this.Phases, "PostGlobalFuseAction")){
-			GeneratedContent.append(JavaCast("string", "<" & "cfinclude template=""phase.postglobalfuseaction.cfm"">" & NewLine));
+			GeneratedContent.append(JavaCast("string", "<" & "cfinclude template=""" & this.Parameters.CacheFilePrefix & "phase.postglobalfuseaction.cfm"">" & NewLine));
 		}
 		GeneratedContent.append(JavaCast("string", "<!--- End PHASE:PostFuseAction/PostGlobalFuseAction --->" & NewLine));
 		GeneratedContent.append(JavaCast("string", NewLine));
@@ -1957,10 +1957,16 @@
 		<cfargument name="FileName" type="string">
 		<cfargument name="Content" type="string">
 		
+		<cfset var file=this.Parameters.Cache.Path />
+		<cfif StructKeyExists(this.Parameters, "CacheFilePrefix") AND Len(this.Parameters.CacheFilePrefix) GT 0>
+			<cfset file = file & this.Parameters.CacheFilePrefix />
+		</cfif>
+		<cfset file = file & LCase(arguments.FileName) & ".cfm" />
+		
 		<cfset this.LogAction("Write File", FileName) />
 		
 		<cffile action="write" 
-			file="#ExpandPath(this.Parameters.Cache.Path & LCase(arguments.FileName) & ".cfm")#" 
+			file="#ExpandPath(file)#" 
 			output="#arguments.Content#" 
 			charset="#this.Parameters.CharacterEncoding#" 
 			addnewline="no">

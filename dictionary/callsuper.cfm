@@ -36,13 +36,13 @@
 		
 		if(StructKeyExists(this.Circuits[arguments.Circuit.ParentName], "Settings")){
 			GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "!--- i apply the Parent Circuit Settings --->" & NewLine));
-			GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfinclude template=""settings." & lcase(arguments.circuit.parentname) & ".cfm"">" & NewLine));
+			GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfinclude template=""" & this.Parameters.CacheFilePrefix & "settings." & lcase(arguments.circuit.parentname) & ".cfm"">" & NewLine));
 			GeneratedContent.append(JavaCast("string", NewLine));
 		}
 		
 		// i insert the include for the phase file
 		GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "!--- i include the Super Phase file --->" & NewLine));
-		GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfinclude template=""phase." & lcase(arguments.phasename) & "." & LCase(arguments.Circuit.ParentName) & ".cfm"">" & NewLine));
+		GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfinclude template=""" & this.Parameters.CacheFilePrefix & "phase." & lcase(arguments.phasename) & "." & LCase(arguments.Circuit.ParentName) & ".cfm"">" & NewLine));
 		GeneratedContent.append(JavaCast("string", NewLine));
 		
 		// i insert the PopActionStack function

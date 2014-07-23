@@ -6,7 +6,7 @@ YourOpenbox["TargetFuseAction"]=application.MyOpenbox.GetFuseAction(attributes[a
 
 <!--- i apply TargetCircuit Settings --->
 <cfif StructKeyExists(YourOpenbox.TargetCircuit, "Settings")>
-	<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/settings.#LCase(YourOpenbox.TargetCircuit.Name)#.cfm">
+	<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/#application.MyOpenbox.Parameters.CacheFilePrefix#settings.#LCase(YourOpenbox.TargetCircuit.Name)#.cfm">
 </cfif>
 
 <cfset YourOpenbox["Settings"]=Duplicate(application.MyOpenbox.Settings)>

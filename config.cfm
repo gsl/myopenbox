@@ -21,6 +21,7 @@
 		<parameter name="CacheFolder" value="cache" />
 		<parameter name="CachePath" value="[myopenbox]/cache/" />
 		<parameter name="CacheRootPath" value="../../" />
+		<parameter name="CacheFilePrefix" value="" />
 		<parameter name="DictionaryFolder" value="dictionary" />
 		<parameter name="DictionaryPath" value="[myopenbox]/dictionary/" />
 		<parameter name="DictionaryRootPath" value="../../" />

@@ -25,7 +25,7 @@ GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfif
 	
 	// i insert the phase include
 	GeneratedContent.append(JavaCast("string", Indent(arguments.Level+1) & "<" & "!--- i include the called Phase file --->" & NewLine));
-	GeneratedContent.append(JavaCast("string", Indent(arguments.Level+1) & "<" & "cfinclude template=""phase.##LCase(""" & arguments.command.xmlattributes.phase & """)##.cfm"">" & NewLine));
+	GeneratedContent.append(JavaCast("string", Indent(arguments.Level+1) & "<" & "cfinclude template=""" & this.Parameters.CacheFilePrefix & "phase.##LCase(""" & arguments.command.xmlattributes.phase & """)##.cfm"">" & NewLine));
 GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "/cfif>" & NewLine));
 GeneratedContent.append(JavaCast("string", NewLine));
 
@@ -40,7 +40,7 @@ if(ArrayLen(arguments.Command.XMLChildren) GT 0) {
 // 	}
 // 	// i insert the phase include
 // 	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "!--- i include the called Phase file --->" & NewLine));
-// 	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfinclude template=""phase." & lcase(arguments.command.xmlattributes.phase) & ".cfm"">" & NewLine));
+// 	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfinclude template=""" & this.Parameters.CacheFilePrefix & "phase." & lcase(arguments.command.xmlattributes.phase) & ".cfm"">" & NewLine));
 // 	GeneratedContent.append(JavaCast("string", NewLine));
 // }
 

@@ -33,7 +33,7 @@ attributes=application.MyOpenbox.SetAttributes(variables, GetBaseTagList());
 <!--- i include the PreParse Phase --->
 <cfif StructKeyExists(application.MyOpenbox.Phases, "PreParse")
 	AND NOT StructKeyExists(application.MyOpenbox.Phases.Init[1], "IsInitialized")>
-	<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/phase.preparse.cfm">
+	<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/#application.MyOpenbox.Parameters.CacheFilePrefix#phase.preparse.cfm">
 </cfif>
 
 <cfif application.MyOpenbox.Parameters.ProcessingMode EQ "Deployment" AND (application.MyOpenbox.IsFWReparse() OR application.MyOpenbox.IsFWReinit())>
@@ -67,7 +67,7 @@ attributes=application.MyOpenbox.SetAttributes(variables, GetBaseTagList());
 	variables.items["pathInfo"] = reReplaceNoCase(variables.items["pathInfo"], "^/+", "/");
 	</cfscript>
 	
-	<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/routes.cfm">
+	<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/#application.MyOpenbox.Parameters.CacheFilePrefix#routes.cfm">
 	<cfset variables._FoundRoute=application.MyOpenbox.Routes.findRoute(items["pathInfo"]) />
 	<cfset StructAppend(attributes, variables._FoundRoute, false) />
 	<cfif StructKeyExists(variables._FoundRoute, "Vars")>
@@ -113,7 +113,7 @@ application.MyOpenbox.RunFuseAction(attributes[application.MyOpenbox.Parameters.
 
 <!--- i apply application Settings --->
 <cfif StructKeyExists(application.MyOpenbox, "Settings")>
-	<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/settings.cfm">
+	<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/#application.MyOpenbox.Parameters.CacheFilePrefix#settings.cfm">
 	<cfset YourOpenbox["Settings"]=Duplicate(application.MyOpenbox.Settings)>
 </cfif>
 
@@ -123,13 +123,13 @@ application.MyOpenbox.RunFuseAction(attributes[application.MyOpenbox.Parameters.
 <!--- i include the Init Phase --->
 <cfif StructKeyExists(application.MyOpenbox.Phases, "Init") 
 	AND NOT StructKeyExists(application.MyOpenbox.Phases.Init[1], "IsInitialized")>
-	<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/phase.init.cfm">
+	<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/#application.MyOpenbox.Parameters.CacheFilePrefix#phase.init.cfm">
 	<cfset application.MyOpenbox.Phases.Init[1]["IsInitialized"]=True>
 </cfif>
 
 <!--- i include the PreProcess Phase --->
 <cfif StructKeyExists(application.MyOpenbox.Phases, "PreProcess")>
-	<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/phase.preprocess.cfm">
+	<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/#application.MyOpenbox.Parameters.CacheFilePrefix#phase.preprocess.cfm">
 </cfif>
 
 <!--- i include the TargetFuseAction file --->
@@ -137,12 +137,12 @@ application.MyOpenbox.RunFuseAction(attributes[application.MyOpenbox.Parameters.
 	StructKeyExists(application.Myopenbox.Circuits, ListFirst(attributes[application.MyOpenbox.Parameters.FuseActionVariable], "."))
 	AND StructKeyExists(application.Myopenbox.Circuits[ListFirst(attributes[application.MyOpenbox.Parameters.FuseActionVariable], ".")].Fuseactions, ListLast(attributes[application.MyOpenbox.Parameters.FuseActionVariable], "."))
 >
-	<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/fuseaction.#LCase(attributes[application.MyOpenbox.Parameters.FuseActionVariable])#.cfm">
+	<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/#application.MyOpenbox.Parameters.CacheFilePrefix#fuseaction.#LCase(attributes[application.MyOpenbox.Parameters.FuseActionVariable])#.cfm">
 </cfif>
 
 <!--- i include the PostProcess Phase --->
 <cfif StructKeyExists(application.MyOpenbox.Phases, "PostProcess")>
-	<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/phase.postprocess.cfm">
+	<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/#application.MyOpenbox.Parameters.CacheFilePrefix#phase.postprocess.cfm">
 </cfif>
 
 <cfsetting enablecfoutputonly="no">
