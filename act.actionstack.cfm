@@ -181,7 +181,8 @@ _YourOpenbox.ContentStack=ArrayNew(1);
 			// i loop through the ContentStack and check for identical ContentVariables
 			for(j=i - 2; j GTE 1; j=j - 1){
 				// if i find an identical ContentVariable
-				if(_YourOpenbox.ContentStack[j]["ContentVariable"]["Name"] EQ YourOpenbox.ThisContentVariable.Name){
+				if(_YourOpenbox.ContentStack[j]["ContentVariable"]["Name"] EQ YourOpenbox.ThisContentVariable.Name
+					AND ListFindNoCase("FAVs", ListFirst(YourOpenbox.ThisContentVariable.Name, ".")) EQ 0){
 					// ...i set a flag to the dimension below the last reference so that this ContentVariable's output will be inherited by the matching ContentVariable
 					_YourOpenbox.ContentStack[i]["PushToDimension"]=j + 1;
 					break;
