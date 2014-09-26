@@ -75,7 +75,7 @@ if(LocalVars.Attributes.IsCache) {
 			GeneratedContent.append(JavaCast("string", ", _CacheArgs"));
 		}
 	GeneratedContent.append(JavaCast("string", ") />" & NewLine));
-	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfif _CheckCache.Status>" & NewLine));
+	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfif StructKeyExists(url, 'no-cache') OR _CheckCache.Status>" & NewLine));
 	arguments.Level=arguments.Level+1;
 }
 
