@@ -67,7 +67,7 @@ if(LocalVars.Attributes.IsCache) {
 	if(NOT StructIsEmpty(LocalVars.Attributes.Cache.Arguments)){
 		GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfset _CacheArgs=StructNew() />" & NewLine));
 		for(LocalVars.i IN LocalVars.Attributes.Cache.Arguments){
-			GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfset _CacheArgs[""" & LocalVars.i & """]=" & LocalVars.Attributes.Cache.Arguments[LocalVars.i] & " />" & NewLine));
+			GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfset _CacheArgs[""" & LocalVars.i & """]=""" & LocalVars.Attributes.Cache.Arguments[LocalVars.i] & """ />" & NewLine));
 		}
 	}
 	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfset _CheckCache=application.MyOpenbox.GetCacheAgent(""" & LocalVars.Attributes.Cache.Agent & """).fetch(""" & LocalVars.Attributes.Cache.Name & """"));
