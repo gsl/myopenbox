@@ -347,6 +347,7 @@ hint="I am the management application for manually viewing or modifying cache co
 		<cfargument name="startrow" type="string" required="false" default="1" />
 		<cfargument name="drop" type="string" required="false" default="" />
 		<cfargument name="miss" type="string" required="false" default="" />
+		<cfargument name="search" type="string" required="false" default="%" />
 		<cfset var mgr = getAgentManager() />
 		<cfset var config = mgr.getAgentConfig(arguments.agentid) />
 		<cfset var currentTime = getHistory().getMinutes() />
@@ -354,7 +355,6 @@ hint="I am the management application for manually viewing or modifying cache co
 		<cfset var missCount = 0 />
 		<cfset var pages = "" />
 		<cfset var qry = 0 />
-		
 		<cfset arguments.miss = val(arguments.miss) />
 		
 		<cfif not isNumeric(arguments.startrow)>
@@ -368,7 +368,7 @@ hint="I am the management application for manually viewing or modifying cache co
 		<cfif not arguments.miss>
 			<cfquery name="qry" dbtype="query">
 				select count(cachename) as missCount from cache 
-				where cachename like <cfqueryparam value="#arguments.agentid#|%" cfsqltype="cf_sql_varchar" />
+				where cachename like <cfqueryparam value="#arguments.agentid#|#arguments.search#" cfsqltype="cf_sql_varchar" />
 				and expired is not null and expired = 0 and timestored is null 
 			</cfquery>
 			<cfset missCount = val(qry.missCount) />
@@ -376,7 +376,7 @@ hint="I am the management application for manually viewing or modifying cache co
 		
 		<cfquery name="qry" dbtype="query">
 			select * from cache 
-			where cachename like <cfqueryparam value="#arguments.agentid#|%" cfsqltype="cf_sql_varchar" />
+			where cachename like <cfqueryparam value="#arguments.agentid#|#arguments.search#" cfsqltype="cf_sql_varchar" />
 			and expired is not null and expired = 0 
 			<cfif not arguments.miss>
 				and timestored is not null and timestored <> 0 
@@ -388,11 +388,22 @@ hint="I am the management application for manually viewing or modifying cache co
 			<h3 id="BreadCrumbs">
 				<a href="?event=agent_list">Agent List</a> 
 				<a href="?event=agent_detail&amp;agentid=#urlencodedformat(arguments.agentid)#">#formatAgentName(config.agent)#</a>
-				<a>Content</a>
+				<cfif arguments.Search NEQ "%">
+					<a href="?event=agent_browse&amp;agentid=#urlencodedformat(arguments.agentid)#">Content</a>
+					<a>Search (#HTMLEditFormat(arguments.Search)#)</a>
+				<cfelse>
+					<a>Content</a>
+				</cfif>
 			</h3>
 			
+			<div style="margin-top:10px;">
+				<form method="post" action="?event=agent_browse&amp;agentid=#urlencodedformat(arguments.agentid)#">
+					<input type="text" name="search" value="#arguments.Search#" /><input type="submit" value="search" />
+				</form>
+			</div>
+			
 			<cfif qry.recordcount>
-				<cfset pages = getPages(qry.recordcount,arguments.startrow,"?event=agent_browse&amp;miss=#arguments.miss#&amp;agentid=" & urlencodedformat(arguments.agentid)) />
+				<cfset pages = getPages(qry.recordcount,arguments.startrow,"?event=agent_browse&amp;miss=#arguments.miss#&amp;agentid=" & urlencodedformat(arguments.agentid) & "&amp;search=" & arguments.search) />
 				#pages#
 				
 				<div style="margin-top:10px;">
@@ -431,7 +442,7 @@ hint="I am the management application for manually viewing or modifying cache co
 							<tr class="hits_#int(qry.hitCount)#">
 								<td>
 									#numberformat(currentrow,000)# <cfif qry.hitCount>
-										<a href="?event=contentdrop&amp;cachename=#urlencodedformat(qry.cachename)#&amp;startrow=#arguments.startrow#" class="icon drop" title="Remove From Cache"></a>
+										<a href="?event=contentdrop&amp;cachename=#urlencodedformat(qry.cachename)#&amp;startrow=#arguments.startrow#&amp;search=#urlencodedformat(arguments.search)#" class="icon drop" title="Remove From Cache"></a>
 									</cfif>
 								</td>
 								<td>
@@ -464,6 +475,7 @@ hint="I am the management application for manually viewing or modifying cache co
 	<cffunction name="contentdrop" access="public" output="true" hint="removes a specific item from cache">
 		<cfargument name="cachename" type="string" required="true" />
 		<cfargument name="startrow" type="string" required="false" default="1" />
+		<cfargument name="search" type="string" required="false" default="" />
 		<cfset var mgr = getAgentManager() />
 		<cfset var agent = mgr.getAgent(rereplace(cachename,"\|[^|]*?$","")) />
 		
@@ -473,7 +485,7 @@ hint="I am the management application for manually viewing or modifying cache co
 			<cfset arguments.startrow = 1 />
 		</cfif>
 		
-		<cflocation url="?event=agent_browse&agentid=#urlencodedformat(agent.getAgentID())#&startrow=#arguments.startrow#&drop=#urlencodedformat(listlast(cachename,'|'))#" addtoken="false" />
+		<cflocation url="?event=agent_browse&agentid=#urlencodedformat(agent.getAgentID())#&startrow=#arguments.startrow#&drop=#urlencodedformat(listlast(cachename,'|'))#&search=#urlencodedformat(arguments.search)#" addtoken="false" />
 	</cffunction>
 	
 	<cffunction name="contentview" access="public" output="true" hint="displays an individual content record">

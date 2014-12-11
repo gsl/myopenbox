@@ -75,7 +75,7 @@
 				
 				<cfcatch>
 					<!--- if there's not a logger installed, don't continue to test for one --->
-					<cfrethrow />
+					<!--- <cfrethrow /> --->
 					<cfset instance.logger = "" />
 				</cfcatch>
 			</cftry>
