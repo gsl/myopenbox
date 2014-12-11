@@ -205,6 +205,11 @@ hint="I manage the agents that register with the cachebox service">
 		<cfreturn result />
 	</cffunction>
 	
+	<cffunction name="listPermanentSettingsForAgent" access="public" output="false" returntype="string">
+		<cfargument name="agentid" type="string" required="true" />
+		<cfreturn structKeyList(getAgentSettingsXML(agentid)) />
+	</cffunction>
+	
 	<cffunction name="setAgentConfig" access="public" output="false" 
 	hint="I set the storage type and eviction policy for a specific agent">
 		<cfargument name="agentid" type="string" required="true" />
@@ -217,6 +222,7 @@ hint="I manage the agents that register with the cachebox service">
 		<cfset var config = getAgentConfig(arguments.agentid) />
 		<cfset var xml = getAgentSettingsXML(arguments.agentid) />
 		<cfset var perm = getStruct( storage = listfindnocase(permanent,"storage"), evict = listfindnocase(permanent,"evict") ) />
+		<cfset var mymax = 0 />
 		
 		<cflock name="#getLock()#" type="exclusive" timeout="10">
 			<cfif len(trim(arguments.storagetype))>
@@ -225,23 +231,35 @@ hint="I manage the agents that register with the cachebox service">
 					<cfset xml["storagetype"] = arguments.storagetype />
 				</cfif>
 			<cfelseif perm.storage>
-				<cfset StructDelete(xml,"storagetype") />
+				<cfset StructDelete(xml, "storagetype") />
 			</cfif>
 			
 			<cfif len(trim(arguments.evictpolicy))>
-				<cfset config.evictpolicy = arguments.evictpolicy />
-				<cfset config.evictafter = max(1,val(arguments.evictafter)) />
-				<cfif perm.evict>
-					<cfset xml["evictpolicy"] = config.evictpolicy />
-					<cfset xml["evictafter"] = config.evictafter />
+				<cfset arguments.evictpolicy = rereplacenocase(arguments.evictpolicy, "^auto$", "") />
+				
+				<cfif len(trim(arguments.evictpolicy))>
+					<cfset config.evictpolicy = arguments.evictpolicy />
+					<cfset config.evictafter = max(1, val(arguments.evictafter)) />
+					<cfif perm.evict>
+						<cfset xml["evictpolicy"] = config.evictpolicy />
+						<cfset xml["evictafter"] = config.evictafter />
+					</cfif>
+					
+					<cfif not getPolicyManager().getPolicy(config.evictPolicy).hasThreshold()>
+						<cfset config.evictafter = 0 />
+					</cfif>
+				<cfelse>
+					<cfset config.evictpolicy = "none" />
+					<cfset structDelete(config, "evictafter") />
+					<cfif perm.evict>
+						<cfset StructDelete(xml, "evictpolicy") />
+						<cfset StructDelete(xml, "evictafter") />
+					</cfif>
 				</cfif>
-			<cfelseif perm.evict>
-				<cfset StructDelete(xml,"evictpolicy") />
-				<cfset StructDelete(xml,"evictafter") />
 			</cfif>
 			
 			<cfif len(trim(arguments.permanent))>
-				<cfset saveSettings(XmlTransform(settings,getAddXSL(),xml)) />
+				<cfset saveSettings(XmlTransform(settings, getAddXSL(), xml)) />
 			</cfif>
 		</cflock>
 	</cffunction>

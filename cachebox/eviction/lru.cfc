@@ -13,11 +13,12 @@ hint="evicts after the agent exceeds n records in cache, least recently used fir
 		
 		<cfif num gt 0>
 			<!--- 
-				content exceeds the fifo limit, expire the overage 
+				content exceeds the limit, expire the overage 
 				-- remove the oldest n records to reduce the agent to a maximum of [evictLimit] active records 
 			--->
 			<cfquery name="result" dbtype="query" maxrows="#num#" debug="false">
 				select index from cache 
+				where timeHit is not null 
 				order by timeHit asc <!--- oldest records first --->
 			</cfquery>
 			

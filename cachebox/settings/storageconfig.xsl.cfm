@@ -23,11 +23,13 @@
 			
 			<table border="0" cellpadding="2" cellspacing="0">
 				<xsl:if test="./head">
-					<tr>
-						<td colspan="2" style="padding-bottom: 15px;">
-							<xsl:copy-of select="./head/node()" />
-						</td>
-					</tr>
+					<thead>
+						<tr>
+							<td colspan="2" style="padding-bottom: 15px;">
+								<xsl:copy-of select="./head/node()" />
+							</td>
+						</tr>
+					</thead>
 				</xsl:if>
 				<tbody>
 					<!-- loop over the input elements in the form -->

@@ -9,7 +9,7 @@ hint="evicts after content reaches a specified age">
 		<cfargument name="evictLimit" type="string" required="true" />
 		<cfargument name="currentTime" type="numeric" required="true" />
 		<cfargument name="cache" type="query" required="true" />
-		<cfset var lim = evictLimit />
+		<cfset var lim = val(evictLimit) />
 		<cfset var result = 0 />
 		
 		<!--- allow age to be specified in common intervals without having to calculate them --->
@@ -20,7 +20,8 @@ hint="evicts after content reaches a specified age">
 		
 		<cfquery name="result" dbtype="query" debug="false">
 			select index from cache 
-			where timeStored <= <cfqueryparam value="#currentTime-lim#" cfsqltype="cf_sql_integer" />
+			where timeStored is null or 
+			timeStored <= <cfqueryparam value="#currentTime-lim#" cfsqltype="cf_sql_integer" />
 		</cfquery>
 		
 		<cfreturn listToArray(ValueList(result.index)) />

@@ -5,7 +5,10 @@ hint="I store the content in the cluster scope introduced by Railo">
 	<cfset variables.cache = structNew() />
 	<cfset this.description = "In-memory storage using the cluster scope (Railo)" />
 	
-	<cffunction name="configure" access="public" output="false">
+	<cffunction name="init" access="public" output="false">
+		<cfargument name="config" type="any" required="true" />
+		<cfset super.init( argumentcollection = arguments ) />
+		
 		<!--- it's not possible to cflock across the cluster scope in Railo, 
 		so this unusual bit of code is used as a workaround to ensure that only 
 		one cachebox object is created in the cluster scope. This doesn't work 
@@ -17,12 +20,15 @@ hint="I store the content in the cluster scope introduced by Railo">
 			
 			<cfif cluster.cachebox.id eq instance.myself>
 				<cfset cluster.cachebox.storage = this />
+				<cfreturn this />
 			<cfelse>
 				<cfloop condition="not isDefined('cluster.cachebox.storage')">
 					<cfset CreateObject("java","java.lang.Thread").sleep(100) />
 				</cfloop>
 				<cfreturn cluster.cachebox.storage />
 			</cfif>
+		<cfelse>
+			<cfreturn this />
 		</cfif>
 	</cffunction>
 	

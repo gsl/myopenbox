@@ -2,7 +2,7 @@
 hint="I provide a seamless interface to the CacheBox features by interfacing with many thin agents">
 	<cfset instance.fingerprint = getCurrentTemplatePath() />
 	<cfset instance.serverid = "" />
-	<cfset instance.version = "0.9.12" />
+	<cfset instance.version = "1.1.0 RC2" />
 	
 	<cffunction name="init" access="public" output="false">
 		<cfset var here = instance.fingerprint />
@@ -44,9 +44,10 @@ hint="I provide a seamless interface to the CacheBox features by interfacing wit
 	</cffunction>
 	
 	<cffunction name="getConfigObject" access="private" output="false">
+		<cfargument name="testInstance" type="struct" required="false" default="#StructNew()#" />
 		<cfset var here = getDirectoryFromPath(instance.fingerPrint) />
 		<cfset var path = iif(fileExists(here & "/config.cfc"),de("config"),de("defaultconfig")) />
-		<cfreturn CreateObject("component",path).init(this) />
+		<cfreturn CreateObject("component",path).init(this, testInstance) />
 	</cffunction>
 	
 	<cffunction name="getFingerPrint" access="public" output="false">
@@ -155,10 +156,10 @@ hint="I provide a seamless interface to the CacheBox features by interfacing wit
 		<cfargument name="agent" type="any" required="true" />
 		
 		<cfif isSimpleValue(agent)>
-			<cfset agent = getAgentManager().getAgent(agent) />
+			<cfset arguments.agent = getAgentManager().getAgent(arguments.agent) />
 		</cfif>
 		
-		<cfset getStorage().delete(formatCacheName(agent,"%")) />
+		<cfset getStorage().delete(formatCacheName(arguments.agent,"%")) />
 	</cffunction>
 	
 	<cffunction name="getAgentSize" access="public" output="false">

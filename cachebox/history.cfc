@@ -1,11 +1,11 @@
-﻿<cfcomponent displayname="CacheBox.Snapshot" output="false" extends="util" 
+﻿<cfcomponent displayname="CacheBox.History" output="false" extends="util" 
 hint="I record statistical information about the cache for the lifespan of the server">
 	<cfset setLog(QueryNew("time,interval,occupancy,freeMemory,cachedelta,memdelta","timestamp,integer,integer,integer,integer,integer")) />
 	
 	<cffunction name="init" access="public" output="false">
 		<cfargument name="config" type="any" required="true" />
 		<cfset structAppend(instance,arguments,true) />
-		<cfset instance.Snapshot = logSnapshot(getDefaultSnapshot()) />
+		<cfset instance.Snapshot = appendSnapshot(getDefaultSnapshot()) />
 		<cfreturn this />
 	</cffunction>
 	
@@ -74,7 +74,7 @@ hint="I record statistical information about the cache for the lifespan of the s
 		<cfset result.memdelta = result.freeMemory - last.freeMemory />
 		
 		<!--- save this data in addition to the log as the most recent set --->
-		<cfset instance.snapshot = logSnapshot(result) />
+		<cfset instance.snapshot = appendSnapshot(result) />
 		
 		<!--- remove any extra history records --->
 		<cfset trimHistory() />
@@ -82,7 +82,7 @@ hint="I record statistical information about the cache for the lifespan of the s
 		<cfreturn result />
 	</cffunction>
 	
-	<cffunction name="logSnapshot" access="private" output="false" hint="adds a snapshot to the history query">
+	<cffunction name="appendSnapshot" access="private" output="false" hint="adds a snapshot to the history query">
 		<cfargument name="snapshot" type="struct" required="true" />
 		<cfset var history = getLog() />
 		<cfset var x = 0 />
@@ -97,6 +97,11 @@ hint="I record statistical information about the cache for the lifespan of the s
 			<cfset history.cachedelta[x] = snapshot.cachedelta />
 			<cfset history.memdelta[x] = snapshot.memdelta />
 		</cflock>
+		
+		<cfset arguments.lastLogTime = getLastLogTime() />
+		<cfif getConfig().logEvent( "history" , arguments )>
+			<cfset setLastLogTime() />
+		</cfif>
 		
 		<cfreturn snapshot />
 	</cffunction>
@@ -197,6 +202,14 @@ hint="I record statistical information about the cache for the lifespan of the s
 	hint="I convert a stored minute value into a date">
 		<cfargument name="minutes" type="numeric" required="true" />
 		<cfreturn DateAdd("n",arguments.minutes,"1/1/1970") />
+	</cffunction>
+	
+	<cffunction name="setLastLogTime" access="private" output="false">
+		<cfset instance.lastlogtime = now() />
+	</cffunction>
+	
+	<cffunction name="getLastLogTime" access="public" output="false" returntype="string">
+		<cfreturn iif( structKeyExists( instance , "lastLogTime" ) , "instance.lastLogTime" , de("") ) />
 	</cffunction>
 	
 </cfcomponent>

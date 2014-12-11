@@ -1,5 +1,6 @@
 ﻿<cfcomponent output="false" hint="I provide utility functions">
 	<cfinclude template="instance.cfm" />
+	<cfinclude template="getstruct.cfm" />
 	
 	<cffunction name="init" access="public" output="false">
 		<cfargument name="config" type="any" required="true" />
@@ -43,9 +44,23 @@
 		<cfreturn instance.config.getAgentManager() />
 	</cffunction>
 	
-	<cffunction name="getStruct" access="private" output="false" returntype="struct" 
-	hint="this function was added to improve support for ColdFusion 7">
-		<cfreturn arguments />
+	<cffunction name="queryToArray" access="private" output="false">
+		<cfargument name="query" type="query" required="true" />
+		<cfset var a = ArrayNew(1) />
+		<cfset var st = 0 />
+		<cfset var x = 0 />
+		
+		<cfloop query="query">
+			<cfset st = StructNew() />
+			
+			<cfloop index="x" list="#query.columnlist#">
+				<cfset st[x] = query[x][currentrow] />
+			</cfloop>
+			
+			<cfset ArrayAppend(a, st) />
+		</cfloop>
+		
+		<cfreturn a />
 	</cffunction>
 	
 </cfcomponent>

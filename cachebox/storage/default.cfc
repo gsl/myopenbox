@@ -42,18 +42,18 @@ hint="I am the default storage medium - I represent internally cached content in
 		<cfargument name="content" type="any" required="true" />
 	</cffunction>
 	
-	<cffunction name="configure" access="public" output="false">
+	<cffunction name="configure" access="public" output="false" hint="provides a place to perform additional configuration after the init method, without involving the init arguments">
 	</cffunction>
 	
 	<cffunction name="getConfig" access="private" output="false">
 		<cfreturn instance.config />
 	</cffunction>
 	
-	<cffunction name="getConfigPath" access="private" output="false">
+	<cffunction name="getConfigPath" access="private" output="false" hint="returns the fully-qualified file path to the file that stores settings for this storage type">
 		<cfreturn instance.configDir & instance.settings />
 	</cffunction>
 	
-	<cffunction name="readXmlValues" access="private" output="false">
+	<cffunction name="readXmlValues" access="private" output="false" returntype="struct" hint="reads values from the XML config file into a structure">
 		<cfargument name="xml" type="xml" required="true" />
 		<cfset var config = xml.xmlChildren />
 		<cfset var result = StructNew() />
@@ -66,13 +66,12 @@ hint="I am the default storage medium - I represent internally cached content in
 		<cfreturn result />
 	</cffunction>
 	
-	<cffunction name="readConfig" access="private" output="false"
-	hint="I read any required configuration from an XML config file">
+	<cffunction name="readConfig" access="private" output="false" hint="reads any required configuration from an XML config file into the instance variables">
 		<cfset var config = getConfigPath() />
 		<cfset var i = 0 />
 		
 		<cfif fileExists(config)>
-			<cfset structAppend(instance,readXmlValues(XmlParse(config).config),true) />
+			<cfset structAppend(instance, readXmlValues(XmlParse(config).config), true) />
 		</cfif>
 	</cffunction>
 	

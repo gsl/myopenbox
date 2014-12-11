@@ -1,11 +1,12 @@
 ﻿<cfset rc = duplicate(url) />
 <cfset structAppend(rc,form,true) />
-<cfparam name="rc.event" type="string" default="home" />
+<cfparam name="rc.event" type="string" default="" />
+<cfset rc.event = rereplace(trim(rc.event), "^$", "home") />
 
 <cfsetting enablecfoutputonly="false" />
 
 <cfprocessingdirective suppresswhitespace="false">
-	<cf_layout event="#rc.event#">
+	<cfsavecontent variable="pageContent">
 		<cftry>
 			<cfsavecontent variable="temp">
 				<cfinvoke component="#request.frontController#" 
@@ -18,5 +19,7 @@
 				<cfset request.frontController.AgentNotRegistered(cfcatch.detail) />
 			</cfcatch>
 		</cftry>
-	</cf_layout>
+	</cfsavecontent>
+	
+	<cfset request.frontController.showLayout(rc.event, pageContent, request.pageEvents) />
 </cfprocessingdirective>

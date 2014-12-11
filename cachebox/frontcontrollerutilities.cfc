@@ -76,34 +76,49 @@ hint="I am the management application for manually viewing or modifying cache co
 		<cfreturn result />
 	</cffunction>
 	
-	<cffunction name="getAgentStats" access="private" output="false">
+	<cffunction name="getAgentStats" access="private" output="false" hint="returns aggregate data for the agent list page">
 		<cfset var agent = getAgentManager().getQuery() />
 		<cfset var cache = getCacheQuery() />
+		<cfset var group = "agent.agentid, agent.context, agent.appname, agent.agentname" />
+		<cfset var qHit = 0 />
+		<cfset var qry = 0 />
 		
 		<cfloop query="agent">
-			<cfset agent.agentid = removechars(agent.agentid,len(agent.agentid)-1,1) />
+			<!--- the agentid has a % symbol at the end for convenience when fetching analysis data - 
+			- we strip that off here so that it's not present when returned to the frontcontroller for display to the admin --->
+			<cfset agent.agentid = removechars(agent.agentid,len(agent.agentid),1) />
 		</cfloop>
 		
+		<!--- first we need to get all the data into hit and miss queries --->
 		<cfquery name="qry" dbtype="query" debug="false">
-			select agent.agentid, agent.context, agent.appname, agent.agentname, 
-				count(cache.index) as occupancy, 
-				min(cache.timestored) as oldest, 
-				max(cache.timehit) as lasthit 
-			from agent, cache 
-			where cache.timeStored is not null and cache.timeStored <> 0
-				and cache.cachename like agent.agentid + '%'
-			group by agent.context, agent.appname, agent.agentname, agentid 
+			select #group#, cache.index, cache.hitcount, cache.misscount, 
+				cache.timehit, cast(cache.timestored as integer) as timestored 
+			from agent, cache where cache.cachename like agent.agentid + '%' and cache.expired = 0 
 		</cfquery>
 		
+		<!--- get counts for stored cache --->
+		<cfquery name="qHit" dbtype="query" debug="false">
+			select agentid, count(index) as occupancy, min(timestored) as oldest, 
+				sum(hitcount) as numhits, max(timehit) as lasthit 
+			from qry where timestored is not null group by agentid 
+		</cfquery>
+		
+		<!--- add in the miss counts --->
 		<cfquery name="qry" dbtype="query" debug="false">
-			select agentid, context, appname, agentname, occupancy, oldest, lasthit 
-			from qry 
-			
-			union 
-			
-			select agentid, context, appname, agentname, 0 as occupancy, 0 as oldest, 0 as lasthit 
-			from agent 
-			where agentid not in (<cfqueryparam value="#valuelist(qry.agentid)#" cfsqltype="cf_sql_varchar" list="true" />)
+			select agentid, 0 as oldest, 0 as occupancy, 0 as numhits, 0 as lasthit, sum(misscount) as nummiss 
+			from qry group by agentid 
+			union all 
+			select agentid, oldest, occupancy, numhits, lasthit, 0 from qHit 
+			union all 
+			<!--- some agents may not exist in qry or qHit, so we add them back in here with zeroes for all their aggregate data --->
+			select agentid, 0, 0, 0, 0, 0 from agent 
+		</cfquery>
+		
+		<!--- consolidate the results into a single entry for each agent --->
+		<cfquery name="qry" dbtype="query" debug="false">
+			select #group#, max(qry.oldest) as oldest, max(qry.occupancy) as occupancy, 
+				max(qry.lasthit) as lasthit, max(qry.numhits) as numhits, max(qry.nummiss) as nummiss 
+			from agent, qry where qry.agentid = agent.agentid group by #group# order by #group#
 		</cfquery>
 		
 		<cfreturn qry />
@@ -157,7 +172,7 @@ hint="I am the management application for manually viewing or modifying cache co
 			from cache 
 			where timeStored is not null and timeStored <> 0 <!--- don't include miss counts --->
 			and expired is not null and expired = 0 <!--- don't include expired content --->
-			and cachename like <cfqueryparam value="#arguments.agentid#|%" cfsqltype="cf_sql_varchar" />
+			and cachename like <cfqueryparam value="#listChangeDelims(arguments.agentid,'|','|')#|%" cfsqltype="cf_sql_varchar" />
 		</cfquery>
 		
 		<cfreturn val(result.num) />
@@ -300,9 +315,9 @@ hint="I am the management application for manually viewing or modifying cache co
 	<cffunction name="selectEvictPolicy" access="private" output="true">
 		<cfargument name="name" type="string" required="false" default="evictpolicy" />
 		<cfargument name="selected" type="string" required="false" default="none" />
-		<cfargument name="limit" type="numeric" required="false" default="0" />
+		<cfargument name="limit" type="string" required="false" default="" />
 		<cfargument name="limitname" type="string" required="false" default="evictafter" />
-		<cfset var input = " <input type=""text"" name=""#arguments.limitname#"" class=""number"" value=""#max(1,arguments.limit)#"" /> " />
+		<cfset var input = " <input type=""text"" name=""#arguments.limitname#"" class=""number"" value=""#max(1,val(arguments.limit))#"" /> " />
 		<cfset var mgr = getPolicyManager() />
 		<cfset var pol = mgr.getAvailablePolicies() />
 		<cfset var policy = 0 />
@@ -347,9 +362,33 @@ hint="I am the management application for manually viewing or modifying cache co
 		<cfreturn "<a href=""?event=#event#"" id=""nav#listfirst(event,'_')#"">#label#</a>" />
 	</cffunction>
 	
-	<cffunction name="showHeader" access="public" output="true">
+	<cffunction name="getMenuArray" access="private" output="false" returntype="array">
+		<cfset var st = getStruct />
+		<cfreturn getArray( 
+			st( label = "Home" ), 
+			st( label = "Applications", event = "applist" ), 
+			st( label = "Agents", event = "agent_list" ), 
+			st( label = "Cluster" ), 
+			st( label = "Options" ) 
+			) />
+	</cffunction>
+	
+	<cffunction name="getMenu" access="private" output="false" returntype="string">
+		<cfset var menu = getMenuArray() />
+		<cfset var x = 0 />
+		
+		<cfloop index="x" from="1" to="#ArrayLen(menu)#">
+			<cfset menu[x] = navLink(argumentCollection = menu[x]) />
+		</cfloop>
+		
+		<cfreturn ArrayToList(menu, chr(13) & chr(10)) />
+	</cffunction>
+	
+	<cffunction name="showLayout" access="public" output="true">
 		<cfargument name="event" type="string" required="true" />
-		<cfargument name="onload" type="string" required="false" default="window.focus();" />
+		<cfargument name="content" type="string" required="true" />
+		<cfargument name="events" type="struct" required="false" default="#StructNew()#" />
+		<cfset var x = 0 />
 		
 		<cfoutput>
 			<html>
@@ -365,42 +404,56 @@ hint="I am the management application for manually viewing or modifying cache co
 					} 
 				</style>
 				
-				<script language="javascript" type="text/javascript">//<![CDATA[ 
-					function popup(lnk) { 
-						window.cbx_detail = window.open(lnk.href + "&layout=0","cbx_detail","height=400,width=600,status=0,toolbar=0,location=0,menubar=0,directories=0,scrollbars=1,resizable=1"); 
-						<!--- this is a workaround for a bug in FireFox that prevents a popup window from displaying above the opening window if it's already open --->
-						setTimeout("window.cbx_detail.focus();",100); 
-						return false; 
-					} 
-				//]]></script>
+				<script src="cachebox.js" language="javascript" type="text/javascript"></script>
 			</head>
-			<body>
-				<h1 id="header"><img src="images/cachebox.png" alt="CacheBox" /></h1>
-				<a id="help" href="docs/CacheBox.pdf" target="_blank">Help</a>
-				<div id="nav">
+			<body<cfloop item="x" collection="#events#"> #lcase(x)#="#htmleditformat(events[x])#"</cfloop>>
+				<div id="CBHead">
+					<h1 id="header"><img src="images/cachebox.png" alt="CacheBox" /></h1>
+					
+					<div id="HelpAndLogOut">
+						<cfif session.authenticated><a id="logout" href="?event=logout">Log Out</a></cfif>
+						
+						<a id="help" href="docs/CacheBox.pdf" target="_blank">Help</a>
+					</div>
+					
+					<div id="nav">
 					<cfswitch expression="#arguments.event#">
-						<cfcase value="login">
-							<a id="navlogin">Login</a>
-						</cfcase>
-						<cfdefaultcase>
-							#navLink("Home")# 
-							#navLink("Applications","applist")# 
-							#navLink("Agents","agent_list")# 
-							#navLink("Cluster")#
-							#navLink("Options")#
-						</cfdefaultcase>
-					</cfswitch>
+							<cfcase value="login">
+								<a id="navlogin">Login</a>
+							</cfcase>
+							
+						<cfdefaultcase>#getMenu()#</cfdefaultcase>
+						</cfswitch>
+					</div>
 				</div>
-				<div id="content">
-		</cfoutput>
-	</cffunction>
-	
-	<cffunction name="showFooter" access="public" output="true">
-		<cfoutput>
-				</div>
+				<div id="content">#arguments.content#</div>
 			</body>
 			</html>
 		</cfoutput>
+	</cffunction>
+	
+	<cffunction name="getConfig" access="public" output="false">
+		<cfreturn request.service.getConfig() />
+	</cffunction>
+	
+	<cffunction name="getService" access="public" output="false">
+		<cfreturn request.service />
+	</cffunction>
+	
+	<cffunction name="recommendationsToStruct" access="private" output="false">
+		<cfargument name="rec" type="array" required="true" />
+		<cfset var st = StructNew() />
+		<cfset var id = 0 />
+		<cfset var x = 0 />
+		
+		<cfloop index="x" from="1" to="#ArrayLen(rec)#">
+			<cfset id = rec[x].agentid & "|%" />
+			<cfset rec[x].index = x />
+			<cfset st[id] = iif(structKeyExists(st, id), "st[id]", "ArrayNew(1)") />
+			<cfset ArrayAppend(st[id], rec[x]) />
+		</cfloop>
+		
+		<cfreturn st />
 	</cffunction>
 	
 </cfcomponent>

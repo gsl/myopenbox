@@ -122,6 +122,7 @@
 		<cftry>
 			<cfset mgr = instance.config.getAgentManager() />
 			<cfset mgr.setAgentConfig(argumentCollection=arguments.settings) />
+			<cfset instance.config.logEvent( "syncAgent" , arguments ) />
 			<cfreturn true />
 			
 			<cfcatch>

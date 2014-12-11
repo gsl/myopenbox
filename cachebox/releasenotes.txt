@@ -1,5 +1,44 @@
-CacheBox version 0.9.6 BETA 
-Release Notes 
+==============
+-- CacheBox --
+==============
+
+Version 1.1.0 RC2 
+- The "Optimize Now" link added in the Management Application's Options tab 
+	in the previous version has been expanded to provide a page of selectable 
+	recommendations instead of blindly applying any recommendations returned 
+	by the config object 
+- Evict Policy recommendations are now provided by a separate intelligence.cfc
+	which you can customize by placing in the /settings directory (or better yet 
+	by placing an intelligence.cfc in the settings directory that extends it). 
+	-- If you want more or better recommendations for your cache agents, it may not 
+		be necessary to customize the intelligence.cfc as you can do this by adding 
+		custom brain objects in the /settings/intelligence directory that extend the 
+		abstract.cfc found in that directory 
+- Logging and Email alerts are not enabled by default. 
+	-- You can enable email alerts by copying the email.cfc to the /settings 
+		directory and editing the CFMAIL tag as needed. 
+	-- Logging can be enabled by copying log.cfc to the same directory and 
+		modifying it as needed, or by placing a log.cfc that extends "cachebox.log" 
+		in that directory. 
+
+Version 1.0.0 RC1 
+
+- Added two optimization features in the Management Application 
+	-- Options Tab - an "Optimize Now" link at the top sets the eviction policies of 
+		all auto, fresh and perf agents based on current recommendations 
+		-- agent settings are not permanent and will revert to default if the server is restarted 
+	-- Agent Detail page includes a current recommendation if available 
+		-- the button sets the form fields, but does not submit the form 
+- Added Log Out link at top right of page next to "Help" 
+- General style changes in Management Application - tabs are now fixed at top of page 
+- testservice.cfc is experimental - USE AT YOUR OWN RISK 
+	-- the testservice.cfc is engaged automatically if you have "cbxtestsite" 
+		anywhere in your URL when loading the Management Application 
+	-- Currently there is a bug that causes it to replace the live service 
+		if the test service is instantiated before the default service 
+		- you should never see this bug if you don't deliberately load the test service 
+
+Version 0.9.6 BETA 
 
 - Added password and login form to Management Application 
 	-- note that you need to set the password when you install the framework 

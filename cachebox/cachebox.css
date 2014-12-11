@@ -8,6 +8,7 @@ body, div, p, td {
 body { 
 	font-size: .85em; 
 	margin: 0px; 
+	padding-top: 5em; 
 } 
 
 a { text-decoration: none; } 
@@ -38,17 +39,45 @@ input.number { width: 3em; }
 	background-repeat: repeat-x; 
 } 
 
-#help { 
+#CBHead { 
+	position: fixed; 
+	top: 0px; 
+	left: 0px; 
+	width: 100%; 
+	background-color: #FFFFFF; 
+	padding: 0px 0px 5px 0px; 
+} 
+#HelpAndLogOut { 
 	display: block; 
 	position: absolute; 
-	top: 3.1em; 
-	left: 800px; 
-	color: blue; 
-	font-weight: bold; 
-	border: solid blue 1px; 
-	background-color: white; 
+	top: -8px; 
+	left: 600px; 
 	z-index: 2; 
-	padding: 3px 10px 3px 10px; 
+} 
+#HelpAndLogOut a { 
+	display: block; 
+	float: left; 
+	font-weight: normal; 
+	border: solid blue 1px; 
+	padding: 10px 10px 3px 10px; 
+	margin: 0px 8px 0px 0px; 
+	font-size:0.9em; 
+	border-radius: 3px; 
+	color: #FFFFFF; 
+	background: #0000D0; 
+} 
+#HelpAndLogOut a:hover,
+#HelpAndLogOut a:focus { 
+	color: #0000D0; 
+	background: #F0FFFF; 
+} 
+
+#BreadCrumbs > a:before { 
+	content: "\25B7"; 
+	color: black; 
+	font-size: 0.9em; 
+	margin: 0px 0.5em 0px 0.7em; 
+	font-weight: normal; 
 } 
 
 #nav { 
@@ -71,8 +100,8 @@ input.number { width: 3em; }
 	background-color: #FFFFD0; 
 	background-image: url("images/tab.png"); 
 	background-repeat: repeat-x; 
-	-moz-border-radius-topleft: 8px;
-	-moz-border-radius-topright: 8px; 
+	border-top-right-radius: 8px; 
+	border-top-left-radius: 8px; 
 } 
 
 #nav a:hover { 
@@ -88,6 +117,8 @@ input.number { width: 3em; }
 	text-transform: capitalize; 
 	margin-bottom: 0px; 
 } 
+
+#home { overflow: auto; } 
 
 #home .chart { 
 	padding: 5px; 
@@ -139,6 +170,8 @@ table.list {
 	margin-top: 10px; 
 	border: solid black 1px; 
 	border-left: 0px; 
+	empty-cells: show; 
+	min-width: 600px;
 } 
 
 table.list th, 
@@ -159,13 +192,37 @@ table.list tbody th {
 	vertical-align: middle; 
 	border-top: solid black 1px; 
 	border-left: solid black 1px; 
+	max-width: 20em; 
+	overflow: hidden; 
+	vertical-align: top; 
+} 
+table.list tbody td.numeric { text-align: right; } 
+
+table.list tbody tr.appname th { 
+	background-color: #F0F0FF; 
+	text-align: left; 
+	text-transform: capitalize; 
+} 
+/* this allows anchor links to work correctly with the tabs being fixed at the top */
+table.list tbody tr.appname div { position: relative; } 
+table.list tbody tr.appname div > a { 
+	position: absolute; 
+	display: block; 
+	color: transparent; 
+	background-color: transparent; 
+	left: -20px; 
+	top: -8em; 
+	z-index: -1; 
 } 
 
-table.list tbody tr.appname { 
-	background-color: #F0F0FF; 
-} 
+/* put recommendations for agent evict policies one per line */
+table.list tbody label { display: block; } 
+
+/* gray the recommendations label for agents that have no content */
+table.list tbody td.NoContent { color: silver; } 
 
 a.icon { 
+	background-repeat: no-repeat; 
 	display: inline-block; 
 	vertical-align:middle;  
 	padding: 0px; 
@@ -185,21 +242,11 @@ a.iconlink {
 	background-repeat: no-repeat; 
 } 
 
-a.reset { 
-	background-image: url("images/reset.png"); 
-} 
-
-a.detail { 
-	background-image: url("images/detail.png"); 
-} 
-
-a.configure { 
-	background-image: url("images/configure.png"); 
-} 
-
-a.drop { 
-	background-image: url("images/drop.png"); 
-} 
+a.drop { background-image: url("images/drop.png"); } 
+a.reset { background-image: url("images/reset.png"); } 
+a.detail { background-image: url("images/detail.png"); } 
+a.configure { background-image: url("images/configure.png"); } 
+tr.ready_0 a.configure { background-image: url("images/configure_alt.png"); } 
 
 tr.hits_0 { background-color: #F0F0F0; } 
 
@@ -250,7 +297,7 @@ div.pages a.current {
 #login { 
 	width: 300px; 
 	margin: 100px 0px 0px 250px; 
-	text-align: center; 	
+	text-align: center; 
 } 
 
 #login form { 
@@ -261,8 +308,10 @@ div.pages a.current {
 	border-left-color: lightsteelblue; 
 	height: 100px; 
 	background-color: #F0F0FF; 
-	-moz-border-radius: 10px; 
 } 
+#login form, #login input, #login button { border-radius: 0.5em; } 
+#login input { padding: 2px 0.3em; } 
+#login button { padding: 2px 1em; } 
 
 #login div.statusmessage { 
 	width: 100%; 
@@ -272,3 +321,6 @@ div.pages a.current {
 	margin: 20px 0px 0px 0px; 
 } 
 
+#OptionsMenu a { 
+	margin-right: 25px; 
+} 

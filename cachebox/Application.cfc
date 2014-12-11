@@ -1,6 +1,6 @@
 ﻿<cfcomponent output="false">
-	<cfset request.service = CreateObject("component","cacheboxservice").init() />
-	<cfset structAppend(this,request.service.getConfig().getApplicationSettings()) />
+	<cfset request.service = CreateObject("component","cacheboxservice").init().getConfig().getAdminService() />
+	<cfset structAppend(this, request.service.getConfig().getApplicationSettings()) />
 	
 	<cffunction name="onApplicationStart" access="public">
 		<cfset application.config = request.service.getConfig() />
@@ -14,7 +14,6 @@
 	
 	<cffunction name="onRequestStart" access="public">
 		<cfargument name="targetPage" type="string" required="true" />
-		
 		<cfset application.config.onRequestStart(targetPage) />
 	</cffunction>
 	

@@ -8,7 +8,7 @@
 		<cfset arguments.lockname = "cachebox.#config.getService().getFingerPrint()#.storage" />
 		<cfset arguments.typeManager = config.getStorageManager() />
 		<cfset arguments.history = config.getHistory() />
-		<cfset structAppend(instance,arguments,true) />
+		<cfset structAppend(instance, arguments, true) />
 		<cfreturn this />
 	</cffunction>
 	
@@ -139,21 +139,6 @@
 			<cfloop index="c" list="#result.columnlist#">
 				<cfset result[c][1] = cache[c][i] />
 			</cfloop>
-		<!--- 
-			**************************************************************************************** 
-			*** removing the Query of Query fetch for performance reasons                        *** 
-			*** the map is now being updated during a store operation, it shouldn't be necessary *** 
-			*** and the extra QoQ on a fetch for an item not in cache slows down the fetch       *** 
-			**************************************************************************************** 
-			<cfelse>
-			<cfquery name="result" dbtype="query" debug="false">
-				select #allColumns()# from cache 
-				where cachename is not null 
-				and cachename = <cfqueryparam value="#arguments.cachename#" cfsqltype="cf_sql_varchar" />
-			</cfquery>
-			<cfif result.recordcount and val(result.timeStored) neq 0>
-				<cfset instance.map[cachename] = result.index />
-			</cfif> --->
 		</cfif>
 		
 		<cfreturn result />
@@ -284,14 +269,10 @@
 				<!--- previous misses have already been recorded for this cache --->
 				<cfset qry.missCount[index] = qry.missCount[index] + 1 />
 				<cfset qry.timeHit[index] = getMinutes() />
-				<!--- if an alternate storage type such as memcached indicated that the content is no longer cached during a fetch, 
-					we need to indicate that this record is not in cache by resetting the storage time to zero --->
-				<cfset qry.timeStored[index] = 0 />
 				<cfset qry.expired[index] = 0 />
 			<cfelse>
 				<cfset x = growCache(qry,cachename) />
 				<cfset qry.missCount[x] = 1 />
-				<cfset qry.timeStored[x] = 0 />
 				<cfset qry.timeHit[x] = getMinutes() />
 			</cfif>
 		</cflock>
@@ -302,7 +283,7 @@
 		<cfset var result = structNew() />
 		<cfset result.context = listfirst(cachename,"|") />
 		<cfset result.appName = iif(result.context is "app","listgetat(cachename,2,'|')",de("")) />
-		<cfset result.agentName = listgetat(cachename,iif(result.context is "app",3,2),"|") />
+		<cfset result.agentName = listgetat(cachename,iif(result.context is "clu",2,3),"|") />
 		<cfreturn result />
 	</cffunction>
 	
@@ -409,7 +390,7 @@
 			select #allColumns()# from cache 
 			where cachename like <cfqueryparam value="#arguments.cachename#" cfsqltype="cf_sql_varchar" />
 		</cfquery>
-		
+				
 		<cfset reap(old) />
 	</cffunction>
 	
@@ -483,7 +464,7 @@
 		<cfset var my = structNew() />
 		<cfset var temp = "" />
 		
-		<cfquery name="temp" dbtype="query">
+		<cfquery name="temp" dbtype="query" debug="false">
 			select #allColumns()# from deleted 
 			where hitcount is not null and hitcount > 0 
 			order by context, appName, agentName 
@@ -506,7 +487,7 @@
 	
 	<cffunction name="select" access="public" output="false" returntype="query" hint="returns a sub-selection of the cache query for reporting and analysis">
 		<cfargument name="cachename" type="string" required="true" hint="a cache name string ending with a wild card (%) character" />
-		<cfargument name="stored" type="boolean" required="false" default="true" hint="includes placeholders for miss-counts if this argument is false" />
+		<cfargument name="stored" type="boolean" required="false" default="true" hint="includes expired content and placeholders for miss-counts if this argument is false" />
 		<cfset var cache = getCacheData() />
 		<cfset var result = 0 />
 		
@@ -516,7 +497,7 @@
 			<cfif arguments.stored>
 				and expired = 0 
 				and timeStored is not null 
-				and timeStored <> 0 
+				and timeStored > 0 
 			</cfif>
 		</cfquery>
 		

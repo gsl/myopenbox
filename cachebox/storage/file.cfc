@@ -38,7 +38,7 @@ hint="I cache content to a physical file -- I can only be used for agents that s
 				variable="result.content" file="#getFilePath(arguments.cachename)#" />
 			<cfcatch>
 				<!--- unable to fetch the content --->
-				<cfset result.status = 1 />
+				<cfset result.status = 3 />
 			</cfcatch>
 		</cftry>
 		
@@ -48,10 +48,8 @@ hint="I cache content to a physical file -- I can only be used for agents that s
 	<cffunction name="delete" access="public" output="false" hint="removes the cache file from the storage directory">
 		<cfargument name="cachename" type="string" required="true" />
 		<cfargument name="content" type="any" required="true" />
-		<cftry>
-			<cffile action="delete" file="#getFilePath(arguments.cachename)#" />
-			<cfcatch><!--- errors are thrown if the file doesn't exist -- we can ignore them ---></cfcatch>
-		</cftry>
+		<cfset var path = getFilePath(arguments.cachename) />
+		<cfif fileExists(path)><cfset fileDelete(path) /></cfif>
 	</cffunction>
 	
 	<cffunction name="getConfigForm" access="public" output="false" returntype="string">

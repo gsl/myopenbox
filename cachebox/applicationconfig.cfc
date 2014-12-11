@@ -11,6 +11,7 @@
 
 <cfcomponent output="false" hint="I provide the default Application.cfc settings for a CacheBox Management Application">
 	<cfinclude template="instance.cfm" />
+	<cfinclude template="getstruct.cfm" />
 	<cfset instance.passwordfile = instance.configdir & "password.cfm" />
 	
 	<cffunction name="getApplicationSettings" access="public" output="false" 
@@ -45,6 +46,7 @@
 			--->
 			<cfset setFrontController() />
 			<cfset applyRequestSecurity(targetPage) />
+			<cfset request.pageEvents = getStruct( onload = "window.focus();" ) />
 		</cfif>
 	</cffunction>
 	
@@ -109,6 +111,7 @@
 	<cffunction name="showLogin" access="private" output="true">
 		<cfargument name="targetPage" type="string" required="true" />
 		<cfset var controller = request.frontController />
+		<cfset var loginform = "" />
 		<cfset var rc = 0 />
 		<cfset var x = 0 />
 		
@@ -124,38 +127,35 @@
 			<cfreturn />
 		</cfif>
 		
-		<cfoutput>
-			#Controller.showHeader("login","document.forms.frmLogin.password.focus();")#
-			
-			<div id="login">
-				<cfset Controller.warn("Invalid Password.",len(trim(rc.password))) />
-				<cfset Controller.confirm("Choose a password for the CacheBox Management Application.",not isPasswordSet()) />
-				
-				<form name="frmLogin" action="#cgi.script_name#?#cgi.query_string#" method="post">
-					<div>Password: <input type="password" name="password" tabindex="1" /></div>
-					<div><button type="submit">Log In</button></div>
+		<cfsavecontent variable="loginform">
+			<cfoutput>
+				<div id="login">
+					<cfset Controller.warn("Invalid Password.",len(trim(rc.password))) />
+					<cfset Controller.confirm("Choose a password for the CacheBox Management Application.",not isPasswordSet()) />
 					
-					<!--- allow form variables to pass through to the following page --->
-					<cfloop item="x" collection="#form#">
-						<cfif x is not "password">
-							<input type="hidden" name="#x#" value="#htmleditformat(form[x])#" />
-						</cfif>
-					</cfloop>
-				</form>
-			</div>
-			#Controller.showFooter()#
-		</cfoutput>
+					<form name="frmLogin" action="#cgi.script_name#?#cgi.query_string#" method="post">
+						<div>Password: <input type="password" name="password" tabindex="1" /></div>
+						<div><button type="submit">Log In</button></div>
+						
+						<!--- allow form variables to pass through to the following page --->
+						<cfloop item="x" collection="#form#">
+							<cfif x is not "password">
+								<input type="hidden" name="#x#" value="#htmleditformat(form[x])#" />
+							</cfif>
+						</cfloop>
+					</form>
+				</div>
+			</cfoutput>
+		</cfsavecontent>
+		
+		<cfset Controller.showLayout("login", loginForm, getStruct( onload = "document.forms.frmLogin.password.focus();" )) />
+		
 		<cfabort />
 	</cffunction>
 	
 	<cffunction name="setFrontController" access="private" output="false" hint="I create the front-controller for the reporting and management application">
 		<cfset request.frontController = CreateObject("component","frontcontroller").init(this) />
 	</cffunction>
-	
-	<cffunction name="getStruct" access="private" output="false" returntype="struct" 
-	hint="this function was added to improve support for ColdFusion 7">
-		<cfreturn arguments />
-	</cffunction>
-	
+		
 </cfcomponent>
 

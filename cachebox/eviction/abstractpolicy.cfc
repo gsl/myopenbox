@@ -1,5 +1,5 @@
 ﻿<cfcomponent displayname="CacheBox.eviction.AbstractPolicy" output="false" 
-hint="content with this eviction policy is never removed from cache">
+hint="Eviction policies should extend tihs abstract policy (although it's not strictly required)">
 	<cfinclude template="../instance.cfm" />
 	<cfset this.description = "Description not available." />
 	<cfset this.limitlabel = "Max Objects" />
@@ -8,6 +8,10 @@ hint="content with this eviction policy is never removed from cache">
 		<cfargument name="config" type="any" required="true" />
 		<cfset structAppend(instance,arguments,true) />
 		<cfreturn this />
+	</cffunction>
+	
+	<cffunction name="hasThreshold" access="public" output="false" returntype="boolean">
+		<cfreturn iif(len(trim(this.limitlabel)), true, false) />
 	</cffunction>
 	
 	<cffunction name="getExpiredContent" access="public" output="false" returntype="array" 

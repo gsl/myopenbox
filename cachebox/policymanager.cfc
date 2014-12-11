@@ -27,7 +27,7 @@ hint="I manage eviction policies for expiring cached content">
 	<cffunction name="getAvailablePolicies" access="public" output="false" returntype="array" 
 	hint="returns a list of the names of available eviction policies">
 		<cfset var qry = 0 />
-		<cfset var result = [] />
+		<cfset var result = ArrayNew(1) />
 		<cfset var list = "" />
 		<cfset var i = 0 />
 		
