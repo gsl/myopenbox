@@ -28,6 +28,8 @@
 		this.Cache.Agents=StructNew();
 		</cfscript>
 		
+		<cfset this.LogAction("CFC Init()", "FW") />
+		
 		<cfparam name="this.Configuration.ApplicationRootPath" default="#GetDirectoryFromPath(GetCurrentTemplatePath())#../" />
 		<cfparam name="this.Configuration.ApplicationConfigurationPath" default="#GetDirectoryFromPath(GetCurrentTemplatePath())#../" />
 		<cfparam name="this.Configuration.ApplicationConfigurationFile" default="#this.Configuration.ApplicationConfigurationPath#cfg.myopenbox.cfm" />
@@ -120,8 +122,8 @@
 					// i parse the XML MyOpenbox configuration file(s)
 					ParseApplicationConfigurationFiles(XMLParse(RawXML));
 					// i create a Hash reference in this for checks against the MyOpenbox configuration file
-					this.LogAction("MOBX Parsed", "FW");
 					this.ApplicationConfigurationFileHashKey=variables.HashKey;
+					this.LogAction(action="MOBX Parsed", type="FW", info=variables.HashKey);
 					</cfscript>
 <!---
 					<cfif this.Parameters.ProcessingMode EQ "Deployment" AND (this.IsFWReparse() OR this.IsFWReinit())>
