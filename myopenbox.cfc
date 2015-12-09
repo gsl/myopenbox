@@ -87,16 +87,15 @@
 		
 		<cfscript>
 		// i initialize the local vars
-		var RawXML=Read(arguments.ApplicationConfigurationFile);
-		var HashKey=Hash(RawXML);
+		var variables.RawXML=Read(arguments.ApplicationConfigurationFile);
+		var variables.HashKey=Hash(variables.RawXML);
 		</cfscript>
 		
 		<!--- i determine if i should parse the MyOpenbox --->
 		<cfif NOT StructKeyExists(this, "Parameters") 
 			OR this.Parameters.ProcessingMode EQ "Development" 
-			OR NOT StructKeyExists(this, "ApplicationConfigurationFile")
-			OR NOT StructKeyExists(this.ApplicationConfigurationFile, "HashKey")
-			OR this.ApplicationConfigurationFile.HashKey NEQ HashKey 
+			OR NOT StructKeyExists(this, "ApplicationConfigurationFileHashKey")
+			OR this.ApplicationConfigurationFileHashKey NEQ variables.HashKey 
 			OR (
 				StructKeyExists(url, "FWReparse") 
 				AND url.FWReparse EQ this.Parameters.FWReparse
@@ -106,9 +105,8 @@
 				<!--- i (re)determine if i should parse the MyOpenbox --->
 				<cfif NOT StructKeyExists(this, "Parameters") 
 					OR this.Parameters.ProcessingMode EQ "Development" 
-					OR NOT StructKeyExists(this, "ApplicationConfigurationFile")
-					OR NOT StructKeyExists(this.ApplicationConfigurationFile, "HashKey")
-					OR this.ApplicationConfigurationFile.HashKey NEQ HashKey 
+					OR NOT StructKeyExists(this, "ApplicationConfigurationFileHashKey")
+					OR this.ApplicationConfigurationFileHashKey NEQ variables.HashKey 
 					OR (
 						StructKeyExists(url, "FWReparse") 
 						AND url.FWReparse EQ this.Parameters.FWReparse
@@ -122,8 +120,8 @@
 					// i parse the XML MyOpenbox configuration file(s)
 					ParseApplicationConfigurationFiles(XMLParse(RawXML));
 					// i create a Hash reference in this for checks against the MyOpenbox configuration file
-					this.ApplicationConfigurationFile.HashKey=HashKey;
 					this.LogAction("MOBX Parsed", "FW");
+					this.ApplicationConfigurationFileHashKey=variables.HashKey;
 					</cfscript>
 <!---
 					<cfif this.Parameters.ProcessingMode EQ "Deployment" AND (this.IsFWReparse() OR this.IsFWReinit())>
