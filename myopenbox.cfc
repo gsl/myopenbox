@@ -23,7 +23,7 @@
 		this.Version.BuildDate="2014.12.11";
 		this.Configuration=arguments.Configuration;
 		this.Logs=StructNew();
-		this.Logs.Actions=QueryNew("timestamp,action,type,time", "date,varchar,varchar,integer");
+		this.Logs.Actions=QueryNew("timestamp,action,type,time,info", "timestamp,varchar,varchar,integer,varchar");
 		this.Cache=StructNew();
 		this.Cache.Agents=StructNew();
 		</cfscript>
@@ -1809,13 +1809,15 @@
     	<cfargument name="Action" />
     	<cfargument name="Type" default="" />
     	<cfargument name="Time" default="" />
+		<cfargument name="Info" default="" />
     	
-    	<cfif this.Parameters.EnableLogs>
+    	<cfif NOT IsDefined("this.Parameters.EnableLogs") OR this.Parameters.EnableLogs>
 	    	<cfset QueryAddRow(this.Logs.Actions) />
 	    	<cfset QuerySetCell(this.Logs.Actions, "TimeStamp", Now()) />
 	    	<cfset QuerySetCell(this.Logs.Actions, "Action", arguments.Action) />
 	    	<cfset QuerySetCell(this.Logs.Actions, "Type", arguments.Type) />
 	    	<cfset QuerySetCell(this.Logs.Actions, "Time", arguments.Time) />
+				<cfset QuerySetCell(this.Logs.Actions, "Info", arguments.Info) />
 	    </cfif>
     </cffunction>
 	
