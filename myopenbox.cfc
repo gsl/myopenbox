@@ -311,6 +311,9 @@
 				case "CachePath" :
 					ParameterName="Cache.Path";
 					break;
+				case "CachePathExpandPath" :
+					ParameterName="Cache.PathExpandPath";
+					break;
 				case "CacheRootPath" :
 					ParameterName="Cache.RootPath";
 					break;
@@ -1958,6 +1961,9 @@
 		<cfargument name="Content" type="string">
 		
 		<cfset var file=this.Parameters.Cache.Path />
+		<cfif this.Parameters.Cache.PathExpandPath>
+			<cfset file=ExpandPath(file) />
+		</cfif>
 		<cfif StructKeyExists(this.Parameters, "CacheFilePrefix") AND Len(this.Parameters.CacheFilePrefix) GT 0>
 			<cfset file = file & this.Parameters.CacheFilePrefix />
 		</cfif>
@@ -1966,11 +1972,11 @@
 		<cfset this.LogAction("Write File", FileName) />
 		
 		<cffile action="write" 
-			file="#ExpandPath(file)#" 
+			file="#file#" 
 			output="#arguments.Content#" 
 			charset="#this.Parameters.CharacterEncoding#" 
 			addnewline="no">
     
     </cffunction>
 
-</cfcomponent>
+</cfcomponent>#
