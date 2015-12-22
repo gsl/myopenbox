@@ -1,3 +1,5 @@
+<cfsavecontent variable="request.Content">
+
 <cfset variables.udfs = CreateObject("component", "udfs") />
 <cfif StructKeyExists(application, "MyOpenbox")>
 <cfinclude template="auth.cfm" />
@@ -16,6 +18,9 @@
 	<cfcase value="circuits">
 		<cfinclude template="circuits.cfm" />
 	</cfcase>
+	<cfcase value="logs">
+		<cfinclude template="logs.cfm" />
+	</cfcase>
 	<cfdefaultcase>
 		<cfinclude template="default.cfm" />
 	</cfdefaultcase>
@@ -28,3 +33,7 @@
 <cfelse>
 	<h1>MyOpenbox not initialized</h1>
 </cfif>
+
+</cfsavecontent>
+
+<cfinclude template="layout.cfm" />

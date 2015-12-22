@@ -23,7 +23,7 @@
 	<cfif StructKeyExists(url, "file") AND FileExists(path & url.file)>
 		<h1>#url.file#</h1>
 		<cffile action="read" file="#path##url.file#" variable="cachefile" />
-		<code><pre>#udfs.h(cachefile)#</pre></code>
+		<code><pre class="brush:coldfusion">#udfs.h(cachefile)#</pre></code>
 	</cfif>
 </td>
 </tr>
