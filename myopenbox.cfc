@@ -63,7 +63,7 @@
 		<cfparam name="form" default="#StructNew()#">
 		<cfparam name="url"	 default="#StructNew()#">
 		
-		<cfreturn (StructKeyExists(url, "FWReinit") AND IsDefined("application.Myopenbox.Parameters.FWReinit") AND url.FWReinit EQ application.Myopenbox.Parameters.FWReinit) OR (StructKeyExists(form, "FWReinit") AND IsDefined("application.Myopenbox.Parameters.FWReinit") AND form.FWReinit EQ application.Myopenbox.Parameters.FWReinit) />
+		<cfreturn NOT IsDefined("application.Myopenbox.Parameters.FWReinit") OR (StructKeyExists(url, "FWReinit") AND IsDefined("application.Myopenbox.Parameters.FWReinit") AND url.FWReinit EQ application.Myopenbox.Parameters.FWReinit) OR (StructKeyExists(form, "FWReinit") AND IsDefined("application.Myopenbox.Parameters.FWReinit") AND form.FWReinit EQ application.Myopenbox.Parameters.FWReinit) />
 	</cffunction>
 	
 	<cffunction name="IsFWReparse" 
