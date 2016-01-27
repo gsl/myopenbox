@@ -1963,7 +1963,7 @@
 		<cfargument name="Content" type="string">
 		
 		<cfset var file=this.Parameters.Cache.Path />
-		<cfif this.Parameters.Cache.PathExpandPath>
+		<cfif NOT StructKeyExists(this.Parameters.Cache, "PathExpandPath") OR this.Parameters.Cache.PathExpandPath>
 			<cfset file=ExpandPath(file) />
 		</cfif>
 		<cfif StructKeyExists(this.Parameters, "CacheFilePrefix") AND Len(this.Parameters.CacheFilePrefix) GT 0>
