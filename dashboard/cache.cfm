@@ -1,8 +1,8 @@
 <cfoutput>
 
 <cfset path=application.MyOpenbox.Parameters.Cache.Path />
-<cfif application.MyOpenbox.Parameters.Cache.PathExpandPath>
-	<cfset path=ExpandPath(path) />
+<cfif NOT IsDefined("application.MyOpenbox.Parameters.Cache.PathExpandPath") OR application.MyOpenbox.Parameters.Cache.PathExpandPath>
+	<cfset path=ExpandPath("../" & application.MyOpenbox.Parameters.Self.RootPath & path) />
 </cfif>
 
 <table width="100%" style="max-width: 1000px;" border="1" cellpadding="10" cellspacing="10">
