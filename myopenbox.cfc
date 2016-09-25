@@ -1440,7 +1440,7 @@
 	</cffunction>
 	
 	<cffunction name="CreateFuseActionFile" 
-    	access="private" 
+    	access="public" 
     	hint="." 
     	output="false" 
     	returntype="void">
