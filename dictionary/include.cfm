@@ -80,11 +80,11 @@ if(LocalVars.Attributes.IsCache) {
 }
 
 if(Len(LocalVars.Attributes.OptPath) GT 0){
-	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfif FileExists(ExpandPath(""" & LocalVars.Attributes.OptPath & this.AppendDefaultFileExtension(LocalVars.Attributes.Template) & """))>" & NewLine));
+	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfif application.MyOpenbox.FileExists(""" & LocalVars.Attributes.OptPath & this.AppendDefaultFileExtension(LocalVars.Attributes.Template) & """)>" & NewLine));
 	// i include the template
 	GeneratedContent.append(JavaCast("string", Indent(arguments.Level+1) & "<" & "cfoutput><cfinclude template=""" & this.Parameters.Cache.RootPath & LocalVars.Attributes.OptPath & this.AppendDefaultFileExtension(LocalVars.Attributes.Template) & """></cfoutput>" & NewLine));
 	if(Len(LocalVars.Attributes.Fallback) GT 0){
-		GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfelseif FileExists(ExpandPath(""" & LocalVars.Attributes.OptPath & this.AppendDefaultFileExtension(LocalVars.Attributes.Fallback) & """))>" & NewLine));
+		GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfelseif application.MyOpenbox.FileExists(""" & LocalVars.Attributes.OptPath & this.AppendDefaultFileExtension(LocalVars.Attributes.Fallback) & """)>" & NewLine));
 	// i include the template
 	GeneratedContent.append(JavaCast("string", Indent(arguments.Level+1) & "<" & "cfoutput><cfinclude template=""" & this.Parameters.Cache.RootPath & LocalVars.Attributes.OptPath & this.AppendDefaultFileExtension(LocalVars.Attributes.Fallback) & """></cfoutput>" & NewLine));
 	
@@ -95,7 +95,7 @@ if(Len(LocalVars.Attributes.OptPath) GT 0){
 
 // i check if the file exists before including the file if Required is False (w/out Cache.RootPath because ExpandPath is calculating from the base template)
 if(NOT LocalVars.Attributes.Required OR Len(LocalVars.Attributes.Fallback) GT 0){
-	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfif FileExists(ExpandPath(""" & LocalVars.Attributes.Path & this.AppendDefaultFileExtension(LocalVars.Attributes.Template) & """))>" & NewLine));
+	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfif application.MyOpenbox.FileExists(""" & LocalVars.Attributes.Path & this.AppendDefaultFileExtension(LocalVars.Attributes.Template) & """)>" & NewLine));
 	arguments.Level=arguments.Level+1;
 }
 
@@ -108,7 +108,7 @@ if(Len(LocalVars.Attributes.Fallback) GT 0){
 	arguments.Level=arguments.Level+1;
 	
 	if(NOT LocalVars.Attributes.Required){
-		GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfif FileExists(ExpandPath(""" & LocalVars.Attributes.Path & this.AppendDefaultFileExtension(LocalVars.Attributes.Fallback) & """))>" & NewLine));
+		GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfif application.MyOpenbox.FileExists(""" & LocalVars.Attributes.Path & this.AppendDefaultFileExtension(LocalVars.Attributes.Fallback) & """)>" & NewLine));
 		arguments.Level=arguments.Level+1;
 	}
 	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfoutput><cfinclude template=""" & this.Parameters.Cache.RootPath & LocalVars.Attributes.Path & this.AppendDefaultFileExtension(LocalVars.Attributes.Fallback) & """></cfoutput>" & NewLine));

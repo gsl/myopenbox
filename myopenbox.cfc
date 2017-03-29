@@ -19,13 +19,15 @@
     	<cfscript>
 		// i set the Version information
 		this.Version.Number="0";
-		this.Version.BuildNumber="056";
-		this.Version.BuildDate="2015.12.09";
+		this.Version.BuildNumber="057";
+		this.Version.BuildDate="2017.03.29";
 		this.Configuration=arguments.Configuration;
 		this.Logs=StructNew();
 		this.Logs.Actions=QueryNew("timestamp,action,type,time,info", "timestamp,varchar,varchar,integer,varchar");
 		this.Cache=StructNew();
 		this.Cache.Agents=StructNew();
+
+		this.FileExistsCache=StructNew();
 		</cfscript>
 		
 		<cfset this.LogAction("CFC Init()", "FW") />
@@ -75,6 +77,17 @@
 		<cfparam name="url"	 default="#StructNew()#">
 		
 		<cfreturn (StructKeyExists(url, "FWReparse") AND IsDefined("application.Myopenbox.Parameters.FWReparse") AND url.FWReparse EQ application.Myopenbox.Parameters.FWReparse) OR (StructKeyExists(form, "FWReparse") AND IsDefined("application.Myopenbox.Parameters.FWReparse") AND form.FWReparse EQ application.Myopenbox.Parameters.FWReparse) />
+	</cffunction>
+	
+	<cffunction name="IsFWAction" 
+		access="public"
+		output="false" 
+		returntype="boolean">
+		
+		<cfparam name="form" default="#StructNew()#">
+		<cfparam name="url"	 default="#StructNew()#">
+		
+		<cfreturn (StructKeyExists(url, "FWAction") AND IsDefined("application.Myopenbox.Parameters.FWReparse") AND url.FWAction EQ application.Myopenbox.Parameters.FWReparse) OR (StructKeyExists(form, "FWAction") AND IsDefined("application.Myopenbox.Parameters.FWReparse") AND form.FWAction EQ application.Myopenbox.Parameters.FWReparse) />
 	</cffunction>
 	
 	<!--- cffunction name="RUNMYOPENBOX METHODS" --->
@@ -1981,4 +1994,24 @@
     
     </cffunction>
 
-</cfcomponent>#
+	<cffunction name="FileExists" access="public" output="false" returntype="boolean">
+		<cfargument name="Path" type="string" />
+
+		<cfif this.Parameters.EnableFileExistsCache>
+			<cfif StructKeyExists(this.FileExistsCache, Path)>
+				<cfreturn this.FileExistsCache[Path] />
+			<cfelse>
+				<cfset local.Check=FileExists(ExpandPath(Path)) />
+				<cfset this.FileExistsCache[Path]=local.Check />
+				<cfreturn local.Check />
+			</cfif>
+		<cfelse>
+			<cfreturn FileExists(ExpandPath(Path)) />
+		</cfif>
+	</cffunction>
+
+	<cffunction name="GetFileExistsCache" access="public" output="false" returntype="struct">
+		<cfreturn this.FileExistsCache />
+	</cffunction>
+
+</cfcomponent>

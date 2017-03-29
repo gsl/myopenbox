@@ -20,6 +20,18 @@
 	</cflock>
 </cfif>
 
+<cfif StructKeyExists(application, "MyOpenbox")
+	AND StructKeyExists(application.MyOpenbox, "IsFWAction")
+	AND application.MyOpenbox.IsFWAction()>
+	<cfif StructKeyExists(url, "FWActionName")>
+		<<cfswitch expression="#url.FWActionName#">
+			<cfcase value="ClearFileExistsCache">
+				<cfset application.MyOpenbox.FileExistsCache=StructNew() />
+			</cfcase>
+		</cfswitch>
+	</cfif>
+</cfif>
+
 <cfscript>
 // i run|configure MyOpenbox
 application.MyOpenbox.RunMyOpenbox();

@@ -42,6 +42,7 @@
 		<parameter name="CircuitRootPaths" value="" />
 		<parameter name="OptPath" value="" />
 		<parameter name="EnableCachebox" value="false" />
+		<parameter name="EnableFileExistsCache" value="false" />
 	</parameters>
 	
 	<verbs>
