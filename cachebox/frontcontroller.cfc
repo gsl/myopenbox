@@ -400,6 +400,7 @@ hint="I am the management application for manually viewing or modifying cache co
 				<form method="post" action="?event=agent_browse&amp;agentid=#urlencodedformat(arguments.agentid)#">
 					<input type="text" name="search" value="#arguments.Search#" /><input type="submit" value="search" />
 				</form>
+				<p><a href="?event=contentdrop&amp;cachename=#arguments.agentid#|#urlencodedformat(arguments.Search)#&amp;startrow=#arguments.startrow#&amp;search=#urlencodedformat(arguments.search)#">Clear #HTMLEditFormat(arguments.Search)#</a></p>
 			</div>
 			
 			<cfif qry.recordcount>
