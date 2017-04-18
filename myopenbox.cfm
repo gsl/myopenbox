@@ -24,7 +24,7 @@
 	AND StructKeyExists(application.MyOpenbox, "IsFWAction")
 	AND application.MyOpenbox.IsFWAction()>
 	<cfif StructKeyExists(url, "FWActionName")>
-		<<cfswitch expression="#url.FWActionName#">
+		<cfswitch expression="#url.FWActionName#">
 			<cfcase value="ClearFileExistsCache">
 				<cfset application.MyOpenbox.FileExistsCache=StructNew() />
 			</cfcase>
