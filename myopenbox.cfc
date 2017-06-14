@@ -209,6 +209,7 @@
 		} else {
 			this.Phases=StructNew();
 		}
+		this.CustomPhases=ArrayNew(1);
 		
 		this.Circuits=StructNew();
 		// i set Circuits
@@ -809,6 +810,7 @@
 				if(NOT StructKeyExists(this.Phases, PhaseName) OR NOT IsArray(this.Phases[PhaseName])){
 					// ...i create the empty array
 					this.Phases[PhaseName]=ArrayNew(1);
+					ArrayAppend(this.CustomPhases, PhaseName);
 				}
 				// i set the CircuitName
 				this.Phases[PhaseName][ArrayLen(this.Phases[PhaseName]) + 1]["CircuitName"]=arguments.CircuitName;
@@ -837,6 +839,7 @@
 				<cfset CreateFuseActionFile(this.Circuits[CircuitValue], this.Circuits[CircuitValue]["Fuseactions"][FuseValue]) />
 			</cfloop>
 		</cfloop>
+		<cfset CreatePhaseFiles(ArrayToList(this.CustomPhases, ",")) />
 	</cffunction>
 	
 	<cffunction name="CreateCircuitFiles" 
