@@ -2001,15 +2001,16 @@
 		<cfargument name="Path" type="string" />
 
 		<cfif this.Parameters.EnableFileExistsCache>
-			<cfif StructKeyExists(this.FileExistsCache, Path)>
-				<cfreturn this.FileExistsCache[Path] />
+			<cfset local.ExpandedPath=ExpandPath(Path) />
+			<cfif StructKeyExists(this.FileExistsCache, local.ExpandedPath)>
+				<cfreturn this.FileExistsCache[local.ExpandedPath] />
 			<cfelse>
-				<cfset local.Check=FileExists(ExpandPath(Path)) />
-				<cfset this.FileExistsCache[Path]=local.Check />
+				<cfset local.Check=FileExists(local.ExpandedPath) />
+				<cfset this.FileExistsCache[local.ExpandedPath]=local.Check />
 				<cfreturn local.Check />
 			</cfif>
 		<cfelse>
-			<cfreturn FileExists(ExpandPath(Path)) />
+			<cfreturn FileExists(local.ExpandedPath) />
 		</cfif>
 	</cffunction>
 
