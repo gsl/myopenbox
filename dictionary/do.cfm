@@ -44,7 +44,7 @@ if(ArrayLen(arguments.Command.XMLChildren)){
 			LocalVars.Attributes.Value=LocalVars.CurrentNode.XMLText;
 		} else {
 			// THROW ERROR - Value not defined
-			// LocalVars.Attributes.Value="";
+			LocalVars.Attributes.Value="";
 		}
 		
 		// i create and insert the tag(s)
