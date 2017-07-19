@@ -2000,8 +2000,8 @@
 	<cffunction name="FileExists" access="public" output="false" returntype="boolean">
 		<cfargument name="Path" type="string" />
 
+		<cfset local.ExpandedPath=ExpandPath(Path) />
 		<cfif this.Parameters.EnableFileExistsCache>
-			<cfset local.ExpandedPath=ExpandPath(Path) />
 			<cfif StructKeyExists(this.FileExistsCache, local.ExpandedPath)>
 				<cfreturn this.FileExistsCache[local.ExpandedPath] />
 			<cfelse>
