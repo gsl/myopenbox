@@ -437,6 +437,10 @@ hint="I am the management application for manually viewing or modifying cache co
 						<th>Hits</th>
 						<th>Misses</th>
 						<th>Frequency</th>
+						<th>Store Time</th>
+						<th>Fetch Time</th>
+						<th>Cluster Time</th>
+						<th>Storage Type</th>
 					</thead>
 					<tbody>
 						<cfloop query="qry" startrow="#arguments.startrow#" endrow="#min(qry.recordcount,arguments.startrow+19)#">
@@ -461,6 +465,10 @@ hint="I am the management application for manually viewing or modifying cache co
 								<td>#int(qry.hitCount)#</td>
 								<td>#int(qry.missCount)#</td>
 								<td>#formatFrequency(currentTime-val(qry.timeStored),qry.hitCount)#</td>
+								<td>#int(qry.storeTime)#ms</td>
+								<td>#int(qry.fetchTime)#ms</td>
+								<td>#int(qry.clusterTime)#ms</td>
+								<td>#qry.storageType#</td>
 							</tr>
 						</cfloop>
 					</tbody>
@@ -518,6 +526,10 @@ hint="I am the management application for manually viewing or modifying cache co
 				<tr>
 					<td>Content:</td>
 					<td>#listlast(arguments.cachename,"|")#</td>
+				</tr>
+				<tr>
+					<td>Cache Name:</td>
+					<td>#arguments.cachename#</td>
 				</tr>
 			</table>
 			

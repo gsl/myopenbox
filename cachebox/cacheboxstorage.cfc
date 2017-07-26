@@ -1,6 +1,6 @@
 <cfcomponent displayname="CacheBoxStorage" output="false" extends="util">
-	<cfset instance.cache = QueryNew("index,context,appName,agentName,cacheName,hitCount,missCount,timeStored,timeHit,storageType,expired,content"
-												,"integer,varchar,varchar,varchar,varchar,integer,integer,integer,integer,varchar,bit,object") />
+	<cfset instance.cache = QueryNew("index,context,appName,agentName,cacheName,hitCount,missCount,timeStored,timeHit,storeTime,fetchTime,clusterTime,storageType,expired,content"
+												,"integer,varchar,varchar,varchar,varchar,integer,integer,integer,integer,integer,integer,integer,varchar,bit,object") />
 	<cfset instance.map = structNew() /><!--- the map allows us to speed up fetch operations, while still having the speed and flexibility of the query for statistics --->
 	
 	<cffunction name="init" access="public" output="false">
@@ -39,6 +39,9 @@
 					cast(missCount as integer) as misscount, 
 					cast(timeStored as integer) as timeStored, 
 					cast(timeHit as integer) as timeHit, 
+					cast(storeTime as integer) as storeTime, 
+					cast(fetchTime as integer) as fetchTime, 
+					cast(clusterTime as integer) as clusterTime, 
 					storageType, expired, content" />
 	</cffunction>
 	
@@ -154,14 +157,19 @@
 		<cfargument name="storagetype" type="string" required="true" />
 		<cfset var x = 0 />
 		<cfset var qry = 0 />
+		<cfset var tick = 0 />
+		<cfset var timer = 0 />
 		<cfset var result = structNew() />
+
 		<cfset result.status = 1 />
 		<cfset result.content = "" />
 		
 		<cfif left(cachename,3) is "clu">
 			<!--- we didn't find the content in local storage, 
 			but it's stored for the cluster, so we'll go look for it before we declare a miss --->
+			<cfset tick = GetTickCount() />
 			<cfset result = getStorageType(arguments.storageType).fetch(arguments.cachename,"") />
+			<cfset timer = GetTickCount()-tick />
 			
 			<cfif not result.status>
 				<!--- we found content in the cluster storage, lets record stats locally --->
@@ -182,6 +190,7 @@
 					</cfif>
 					<cfset qry.timeHit[x] = getMinutes() />
 					<cfset qry.hitcount[x] = qry.hitcount[x] + 1 />
+					<cfset qry.clusterTime[x] = qry.clusterTime[x] + timer />
 				</cflock>
 			</cfif>
 		</cfif>
@@ -195,6 +204,8 @@
 		<cfset var qry = 0 />
 		<cfset var result = 0 />
 		<cfset var x = 0 />
+		<cfset var tick = 0 />
+		<cfset var timer = 0 />
 		
 		<cflock name="#getLock()#" type="readonly" timeout="10">
 			<cfset qry = selectRecord(arguments.cachename) />
@@ -204,25 +215,29 @@
 			<!--- content found -- 
 			alternative storage types may need to customize the content column for their own purposes, 
 			so we need to now go back to the custom storage type to fetch the actual content --->
+			<cfset tick=GetTickCount() />
 			<cfset result = getStorageType(qry.storageType).fetch(qry.cachename,qry.content) />
+			<cfset timer=GetTickCount()-tick />
 			<cfif result.status neq 0>
 				<!--- status 1 indicates the content is not cached 
 				- this may be a result of either failure or programatic expiration of the content as indicated by the individual storage type --->
-				<cfset recordMiss(cacheName,qry.index) />
+				<cfset recordMiss(cacheName,qry.index,timer) />
 			<cfelse>
 				<!--- the stored record is valid content --->
-				<cfset recordHit(cacheName,qry.index) />
+				<cfset recordHit(cacheName,qry.index,timer) />
 			</cfif>
 		<cfelse>
 			<!--- if this content belongs to the cluster, it may already be there, check first --->
+			<cfset tick=GetTickCount() />
 			<cfset result = fetchFromCluster(arguments.cachename,arguments.storagetype) />
+			<cfset timer=GetTickCount()-tick />
 			<cfif not result.status>
 				<!--- we found content on the cluster, so we don't need to record the miss --->
 				<cfreturn result />
 			</cfif>
 			
 			<!--- either the record is not stored or the stored record is a placeholder for miss-counts --->
-			<cfset recordMiss(arguments.cacheName,val(qry.index)) />
+			<cfset recordMiss(arguments.cacheName,val(qry.index),timer) />
 			<!--- return the expected structure with a status of 1 indicating that the content is not cached --->
 			<cfset result = structNew() />
 			<cfset result.status = 1 />
@@ -235,6 +250,7 @@
 	<cffunction name="recordHit" access="private" output="false" hint="updates the hit count for a specified entry">
 		<cfargument name="cachename" type="string" required="true" />
 		<cfargument name="index" type="numeric" required="true" />
+		<cfargument name="timer" type="numeric" default="0" />
 		<cfset var qry = 0 />
 		
 		<!--- 
@@ -247,6 +263,7 @@
 			<cfif qry.cachename[index] is arguments.cachename>
 				<cfset qry.hitCount[index] = qry.hitCount[index] + 1 />
 				<cfset qry.timeHit[index] = getMinutes() />
+				<cfset qry.fetchTime[index] = qry.fetchTime[index] + timer />
 			</cfif>
 		</cflock>
 	</cffunction>
@@ -254,6 +271,7 @@
 	<cffunction name="recordMiss" access="private" output="false" hint="updates the miss count for a specified entry">
 		<cfargument name="cachename" type="string" required="true" />
 		<cfargument name="index" type="numeric" required="true" />
+		<cfargument name="timer" type="numeric" default="0" />
 		<cfset var qry = 0 />
 		<cfset var cxt = 0 />
 		<cfset var x = 0 />
@@ -270,10 +288,12 @@
 				<cfset qry.missCount[index] = qry.missCount[index] + 1 />
 				<cfset qry.timeHit[index] = getMinutes() />
 				<cfset qry.expired[index] = 0 />
+				<cfset qry.fetchTime[index] = qry.fetchTime[index] + timer />
 			<cfelse>
 				<cfset x = growCache(qry,cachename) />
 				<cfset qry.missCount[x] = 1 />
 				<cfset qry.timeHit[x] = getMinutes() />
+				<cfset qry.fetchTime[x] = timer />
 			</cfif>
 		</cflock>
 	</cffunction>
@@ -301,6 +321,9 @@
 		<cfset qry.index[x] = x />
 		<cfset qry.hitCount[x] = 0 />
 		<cfset qry.missCount[x] = 0 />
+		<cfset qry.storeTime[x] = 0 />
+		<cfset qry.fetchTime[x] = 0 />
+		<cfset qry.clusterTime[x] = 0 />
 		<cfset qry.timeHit[x] = getMinutes() />
 		<cfset qry.expired[x] = 0 />
 		
@@ -322,6 +345,8 @@
 		<cfset var qry = 0 />
 		<cfset var x = 0 />
 		<cfset var cxt = 0 />
+		<cfset var tick = 0 />
+		<cfset var timer = 0 />
 		
 		<cflock name="#getLock()#" type="exclusive" timeout="10">
 			<cfset qry = getCacheData() />
@@ -334,10 +359,12 @@
 				--->
 				
 				<!--- use the specified storage type to determine if the content is indeed retained and valid --->
+				<cfset tick = GetTickCount() />
 				<cfset result = getStorageType(record.storageType).fetch(record.cachename,record.content) />
+				<cfset timer = GetTickCount()-tick />
 				<cfif result.status eq 0 and isObject(result.content)>
 					<!--- we hit the dogpile! (race condition) multiple simultaneous requests created and attempted to cache the content for this record --->
-					<cfset recordHit(cachename,record.index) />
+					<cfset recordHit(cachename,record.index,timer) />
 					
 					<!--- status 2 indicates the dogpile condition in which case the storing code may need to reassign the result content --->
 					<cfset result.status = 2 />
@@ -367,7 +394,10 @@
 			</cfif>
 			
 			<!--- allow the custom storage type to modify the content column for its own purposes --->
+			<cfset tick = GetTickCount() />
 			<cfset qry.content[x] = getStorageType(arguments.storageType).store(arguments.cachename,arguments.content) />
+			<cfset timer = GetTickCount()-tick />
+			<cfset qry.storeTime[x] = qry.storeTime[x] + timer />
 			
 			<!--- okay, we're done adding the content, now we need to return it just like we did for the dogpile --->
 			<cfset recordHit(cachename,x) />
