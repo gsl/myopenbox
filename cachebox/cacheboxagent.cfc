@@ -39,7 +39,7 @@ hint="I provide a means of caching arbitrary objects and data via a facade to a 
 	<cfset instance.agentName = CreateUUID() />
 	<cfset instance.reapListener = 0 />
 	<cfset instance.lockName = "" />
-	<cfset instance.agentid = "" />
+	<cfset this.agentid = "" />
 	<cfset instance.version = "1.4" />
 	
 	<cffunction name="init" access="public" output="false">
@@ -124,11 +124,11 @@ hint="I provide a means of caching arbitrary objects and data via a facade to a 
 	
 	<cffunction name="setAgentID" access="private" output="false">
 		<cfargument name="agentID" type="string" required="true" />
-		<cfset instance.agentID = arguments.agentID />
+		<cfset this.agentID = arguments.agentID />
 	</cffunction>
 	
 	<cffunction name="getAgentID" access="public" output="false" returntype="string">
-		<cfreturn instance.agentID />
+		<cfreturn this.agentID />
 	</cffunction>
 	
 	<cffunction name="isRegistered" access="public" output="false">
