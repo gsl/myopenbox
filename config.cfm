@@ -48,6 +48,7 @@
 	<verbs>
 		<verb name="Abort" />
 		<verb name="Attribute" template="SetVariable" />
+		<verb name="Cache" />
 		<verb name="CallSuper" />
 		<verb name="Call" />
 		<verb name="Case" />
