@@ -9,6 +9,7 @@ YourOpenbox["IsSuperCall"]=False;
 _YourOpenbox.ActionStack=ArrayNew(1);
 _YourOpenbox.Circuits=StructNew();
 _YourOpenbox.ContentStack=ArrayNew(1);
+_YourOpenbox.VerbStack=CreateObject("java", "java.util.Stack").init();
 </cfscript>
 
 <cffunction name="_PushToActionStack" 
@@ -320,6 +321,47 @@ _YourOpenbox.ContentStack=ArrayNew(1);
 	
 	// i remove the instance from the ActionStack
 	ArrayDeleteAt(_YourOpenbox.ActionStack, i);
+	</cfscript>
+	
+</cffunction>
+
+<cffunction name="_PushToVerbStack" 
+	hint="." 
+	output="no" 
+	returntype="void">
+	
+	<cfscript>
+	local.Item=StructNew();
+	
+	// i process the YourOpenbox, Circuit, and FuseAction variables
+	if(StructKeyExists(YourOpenbox, "ThisVerb")){
+		local.item["ThisVerb"]=YourOpenbox.ThisVerb;
+	}
+	
+	_YourOpenbox.VerbStack.push(local.item);
+	</cfscript>
+	
+</cffunction>
+
+<cffunction name="_PopVerbStack" 
+	hint="." 
+	output="no" 
+	returntype="void">
+	
+	<cfscript>
+	if(NOT _YourOpenbox.VerbStack.empty()) {
+		// i pop the item off the stack
+		local.item=_YourOpenbox.VerbStack.pop();
+		
+		// i reinstate ThisVerb's values from the VerbStack
+		if(StructKeyExists(local.item, "ThisVerb")){
+			YourOpenbox.ThisVerb=local.item["ThisVerb"];
+		} else {
+			YourOpenbox.ThisVerb=StructNew();
+		}
+	} else {
+		YourOpenbox.ThisVerb=StructNew();
+	}
 	</cfscript>
 	
 </cffunction>
