@@ -8,11 +8,22 @@ if(application.MyOpenbox.Parameters.EnableCachebox AND StructKeyExists(arguments
 	} else {
 		LocalVars.Attributes.Cache.Agent="Default";
 	}
+
+	LocalVars.Type.IsSingleVariable=true;
 	if(StructKeyExists(arguments.Command.XMLAttributes, "cache.variable")){
 		LocalVars.Attributes.Cache.Variable=arguments.Command.XMLAttributes["cache.variable"];
 	} else {
 		LocalVars.Attributes.Cache.Variable="";
 	}
+	if(ListLen(LocalVars.Attributes.Cache.Variable) GT 1) {
+		LocalVars.Type.IsSingleVariable=false;
+		LocalVars.Attributes.Cache.VariableStruct="";
+		for(LocalVars.Item in ListToArray(LocalVars.Attributes.Cache.Variable)){
+			LocalVars.Attributes.Cache.VariableStruct=LocalVars.Attributes.Cache.VariableStruct & "," & LocalVars.Item & "=" & LocalVars.Item;
+		}
+		LocalVars.Attributes.Cache.VariableStruct="{" & Right(LocalVars.Attributes.Cache.VariableStruct, Len(LocalVars.Attributes.Cache.VariableStruct)-1) & "}";
+	}
+
 	LocalVars.Attributes.Cache.Arguments=StructNew();
 	for(LocalVars.i IN arguments.Command.XMLAttributes){
 		LocalVars.SearchFor="cache.arguments.";
@@ -54,8 +65,9 @@ if(LocalVars.Attributes.IsCache) {
 			GeneratedContent.append(JavaCast("string", ", YourOpenbox.ThisVerb.CacheArgs"));
 		}
 	GeneratedContent.append(JavaCast("string", ") />" & NewLine));
-	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfset YourOpenbox.ThisVerb.CacheTimer=GetTickCount()-YourOpenbox.ThisVerb.CacheTimer />" & NewLine));
-
+	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfif NOT StructKeyExists(url, 'no-cache')>" & NewLine));
+	GeneratedContent.append(JavaCast("string", Indent(arguments.Level+1) & "<" & "cfset YourOpenbox.ThisVerb.CacheTimer=GetTickCount()-YourOpenbox.ThisVerb.CacheTimer />" & NewLine));
+	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "/cfif>" & NewLine));
 	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfif StructKeyExists(url, 'no-cache') OR YourOpenbox.ThisVerb.CheckCache.Status>" & NewLine));
 	arguments.Level=arguments.Level+1;
 	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cftrace text=""Cache miss " & LocalVars.Attributes.Cache.Agent & ":" & LocalVars.Attributes.Cache.Name & " in ##NumberFormat(YourOpenbox.ThisVerb.CacheTimer, ""9,999"")##ms"" />" & NewLine));
@@ -78,7 +90,12 @@ GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfse
 
 
 if(LocalVars.Attributes.IsCache) {
-	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfset application.MyOpenbox.GetCacheAgent(""" & LocalVars.Attributes.Cache.Agent & """).store(""" & LocalVars.Attributes.Cache.Name & """, " & LocalVars.Attributes.Cache.Variable));
+	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfset application.MyOpenbox.GetCacheAgent(""" & LocalVars.Attributes.Cache.Agent & """).store(""" & LocalVars.Attributes.Cache.Name & """, "));
+	if(LocalVars.Type.IsSingleVariable) {
+		GeneratedContent.append(JavaCast("string", LocalVars.Attributes.Cache.Variable));
+	} else {
+		GeneratedContent.append(JavaCast("string", LocalVars.Attributes.Cache.VariableStruct));
+	}
 	if(NOT StructIsEmpty(LocalVars.Attributes.Cache.Arguments)){
 		GeneratedContent.append(JavaCast("string", ", YourOpenbox.ThisVerb.CacheArgs"));
 	}
@@ -88,7 +105,13 @@ if(LocalVars.Attributes.IsCache) {
 	arguments.Level=arguments.Level+1;
 	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cftrace text=""Cache hit " & LocalVars.Attributes.Cache.Agent & ":" & LocalVars.Attributes.Cache.Name & " in ##NumberFormat(YourOpenbox.ThisVerb.CacheTimer, ""9,999"")##ms"" />" & NewLine));
 	if(Len(LocalVars.Attributes.Cache.Variable) GT 0) {
-		GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfset " & LocalVars.Attributes.Cache.Variable & "=YourOpenbox.ThisVerb.CheckCache.Content" & "/>" & NewLine));
+		if(LocalVars.Type.IsSingleVariable) {
+			GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfset " & LocalVars.Attributes.Cache.Variable & "=YourOpenbox.ThisVerb.CheckCache.Content" & "/>" & NewLine));
+		} else {
+			for(LocalVars.Item in ListToArray(LocalVars.Attributes.Cache.Variable)){
+				GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfset " & LocalVars.Item & "=YourOpenbox.ThisVerb.CheckCache.Content." & LocalVars.Item & " />" & NewLine));
+			}
+		}
 	} else {
 		GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfoutput>" & "#YourOpenbox.ThisVerb.CheckCache.Content#" & "<" & "/cfoutput>" & NewLine));
 	}
