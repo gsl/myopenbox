@@ -1,5 +1,6 @@
 .*
 cachebox/settings/*.xml.cfm
+cachebox/settings/password.cfm
 cachebox/settings/storage/*
 !.gitignore
 !.gitmodules
