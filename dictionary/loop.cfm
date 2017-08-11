@@ -36,12 +36,21 @@
 	</cfscript>
 
 <!--- Array loop --->
-<cfelseif StructKeyExists(arguments.Command.XMLAttributes, "index") 
-	AND StructKeyExists(arguments.Command.XMLAttributes, "array")>
+<cfelseif StructKeyExists(arguments.Command.XMLAttributes, "array") AND (
+	StructKeyExists(arguments.Command.XMLAttributes, "index")
+	OR StructKeyExists(arguments.Command.XMLAttributes, "item")
+)>
 	
 	<cfscript>
 	// i insert the cfloop tag with the Item and Collection attributes
-	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfloop index=""" & arguments.Command.XMLAttributes.index & """ array=""" & arguments.Command.XMLAttributes.array & """>" & NewLine));
+	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfloop array=""" & arguments.Command.XMLAttributes.array & """"));
+	if(StructKeyExists(arguments.Command.XMLAttributes, "index")) {
+		GeneratedContent.append(JavaCast("string", " index=""" & arguments.Command.XMLAttributes.index & """"));
+	}
+	if(StructKeyExists(arguments.Command.XMLAttributes, "item")){
+		GeneratedContent.append(JavaCast("string", " item=""" & arguments.Command.XMLAttributes.item & """"));
+	}
+	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & ">" & NewLine));
 	</cfscript>
 	
 <!--- Structure loop --->
