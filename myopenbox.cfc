@@ -19,7 +19,7 @@
     	<cfscript>
 		// i set the Version information
 		this.Version.Number="0";
-		this.Version.BuildNumber="063";
+		this.Version.BuildNumber="064";
 		this.Version.BuildDate="2017.08.12";
 		this.Configuration=arguments.Configuration;
 		this.Logs=StructNew();
