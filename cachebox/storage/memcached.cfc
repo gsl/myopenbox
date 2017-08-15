@@ -48,7 +48,9 @@ hint="I store the content via an externally configured memcached server using cf
 	<cffunction name="store" access="public" output="false" returntype="any">
 		<cfargument name="cachename" type="string" required="true" />
 		<cfargument name="content" type="any" required="true" />
+		<cftimer label="Store Memcached: #arguments.cachename#">
 		<cfset instance.memcached.set(arguments.cachename,arguments.content) />
+		</cftimer>
 		<cfreturn "" />
 	</cffunction>
 	
@@ -57,7 +59,9 @@ hint="I store the content via an externally configured memcached server using cf
 		<cfargument name="content" type="any" required="true" />
 		<cfset var result = getStruct( status = 0 ) />
 		
+		<cftimer label="Fetch Memcached: #arguments.cachename#">
 		<cfset result.content = instance.memcached.get(arguments.cachename) />
+		</cftimer>
 		<!--- memcached returns an empty string on a miss result(?) --->
 		<cfif not isDefined("result.content") or (isSimpleValue(result.content) and not len(trim(result.content)))>
 			<cfset result.status = 1 />
@@ -70,7 +74,9 @@ hint="I store the content via an externally configured memcached server using cf
 	<cffunction name="delete" access="public" output="false" returntype="any">
 		<cfargument name="cachename" type="string" required="true" />
 		<cfargument name="content" type="any" required="true" />
+		<cftimer label="Delete Memcached: #arguments.cachename#">
 		<cfset instance.memcached.delete(arguments.cachename) />
+		</cftimer>
 	</cffunction>
 	
 	<cffunction name="getConfigForm" access="public" output="false" returntype="string">
