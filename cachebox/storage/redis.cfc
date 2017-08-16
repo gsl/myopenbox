@@ -36,7 +36,7 @@ hint="I store the content via an externally configured redis server using cfredi
 				<cfset instance.isReady = true />
 				<cfreturn />
 				
-				<cfcatch><cfdump var="#cfcatch#" /><cfabort /></cfcatch>
+				<cfcatch></cfcatch>
 			</cftry>
 		</cfif>
 		
