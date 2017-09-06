@@ -405,7 +405,7 @@ hint="I am the management application for manually viewing or modifying cache co
 			</div>
 			
 			<cfif qry.recordcount>
-				<cfset pages = getPages(qry.recordcount,arguments.startrow,"?event=agent_browse&amp;miss=#arguments.miss#&amp;agentid=" & urlencodedformat(arguments.agentid) & "&amp;search=" & arguments.search) />
+				<cfset pages = getPages(qry.recordcount,arguments.startrow,"?event=agent_browse&amp;miss=#arguments.miss#&amp;agentid=" & urlencodedformat(arguments.agentid) & "&amp;search=" & urlencodedformat(arguments.search)) />
 				#pages#
 				
 				<div style="margin-top:10px;">
