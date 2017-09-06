@@ -356,6 +356,7 @@ hint="I am the management application for manually viewing or modifying cache co
 		<cfset var pages = "" />
 		<cfset var qry = 0 />
 		<cfset arguments.miss = val(arguments.miss) />
+		<cfset arguments.search = LCase(arguments.search) />
 		
 		<cfif not isNumeric(arguments.startrow)>
 			<cfset arguments.startrow = 1 />
