@@ -961,6 +961,23 @@ hint="I am the management application for manually viewing or modifying cache co
 		<cfset session.authenticated = false />
 		<cflocation url="?" addtoken="false" />
 	</cffunction>
+
+	<cffunction name="develop" access="public" output="true">
+		<cfargument name="task" type="string" default="" />
+
+		<cfswitch expression="#arguments.task#">
+			<cfcase value="dumpserver"><cfdump var="#server.cachebox#" /></cfcase>
+			<cfcase value="deleteservice">
+				Delete Service: #getService().getFingerPrint()#
+				<cfdump var="#server.cachebox#" />
+
+				<cfset StructDelete(server.cachebox, getService().getFingerPrint(), true) />
+				
+				<cflocation url="?event=develop" addtoken="false" />
+			</cfcase>
+			<cfdefaultcase>Development</cfdefaultcase>
+		</cfswitch>
+	</cffunction>
 	
 </cfcomponent>
 
