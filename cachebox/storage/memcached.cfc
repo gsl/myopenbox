@@ -8,6 +8,7 @@ hint="I store the content via an externally configured memcached server using cf
 	<cfset instance.serverList = "127.0.0.1:11211" />
 	<cfset instance.defaultTimeout = 61 />
 	<cfset instance.defaultUnit = "SECONDS" />
+	<cfset instance.defaultExpiry = 0 />
 	<cfset instance.memcached = 0 />
 	
 	<cffunction name="readConfig" access="private" output="false">
@@ -49,7 +50,7 @@ hint="I store the content via an externally configured memcached server using cf
 		<cfargument name="cachename" type="string" required="true" />
 		<cfargument name="content" type="any" required="true" />
 		<cftimer label="Store Memcached: #arguments.cachename#">
-		<cfset instance.memcached.set(arguments.cachename,arguments.content) />
+		<cfset instance.memcached.set(arguments.cachename,arguments.content,instance.defaultExpiry) />
 		</cftimer>
 		<cfreturn "" />
 	</cffunction>
@@ -90,6 +91,7 @@ hint="I store the content via an externally configured memcached server using cf
 						This storage type requires an installed copy of <a href="http://cfmemcached.riaforge.org" target="_blank">cfmemcached</a>. 
 					</head>
 					<textarea name="serverlist" label="Servers" size="3">#rereplacenocase(instance.serverlist,"\s+",chr(13) & chr(10),"ALL")#</textarea>
+					<input type="text" name="defaultExpiry" label="Default Expiry (seconds)" value="#instance.defaultExpiry#" />
 					<input type="text" name="defaulttimeout" label="Default Timeout" value="#instance.defaulttimeout#" />
 					<select type="text" name="defaultunit" label="Timeout Unit">
 						<cfloop index="x" list="MILLISECONDS,NANOSECONDS,MICROSECONDS,SECONDS">
