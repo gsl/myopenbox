@@ -120,14 +120,34 @@
 		</cfif>
 	</cffunction>
 	
+	<cffunction name="getIndex" access="private" output="false" returntype="numeric">
+		<cfargument name="cachename" type="string" required="true" />
+		<cfset var i = 0 />
+		
+		<cfif structKeyExists(instance.map,cachename)>
+			<!--- 
+				this allows us to speed up fetch operations as the query grows - 
+				with a large query, manually copying the data for the row 
+				(identified by the map) into a manually created new query will 
+				be faster than executing a query-of-query selection of the row 
+				because the server only needs to index the arrays in the query 
+				by number, instead of performing more expensive string-comparisons 
+				on each row of the query 
+			 --->
+			<cfset i = instance.map[cachename] />
+		</cfif>
+		
+		<cfreturn i />
+	</cffunction>
+	
 	<cffunction name="selectRecord" access="private" output="false" returntype="query">
 		<cfargument name="cachename" type="string" required="true" />
 		<cfset var cache = getCacheData() />
 		<cfset var result = QueryNew(cache.columnlist) />
 		<cfset var c = 0 />
-		<cfset var i = 0 />
+		<cfset var i = getIndex(cachename) />
 		
-		<cfif structKeyExists(instance.map,cachename)>
+		<cfif i GT 0>
 			<!--- 
 				this allows us to speed up fetch operations as the query grows - 
 				with a large query, manually copying the data for the row 
@@ -429,19 +449,29 @@
 		<cfargument name="cachename" type="string" required="true" />
 		<cfset var cache = getCacheData() />
 		<cfset var old = 0 />
+		<cfset var i = 0 />
 		
-		<cflock name="#getLock()#" type="exclusive" timeout="10">
-			<!--- find the records to expire --->
-			<cfquery name="old" dbtype="query" debug="false">
-				select index from cache 
-				where cachename like <cfqueryparam value="#arguments.cachename#" cfsqltype="cf_sql_varchar" />
-			</cfquery>
-			
-			<!--- this is probably faster and definitely easier than a union query and replacement --->
-			<cfloop query="old">
-				<cfset cache.expired[old.index] = 1 />
-			</cfloop>
-		</cflock>
+		<cfif not find("%",cachename)>
+			<cflock name="#getLock()#" type="exclusive" timeout="10">
+				<cfset i=getIndex(cachename) />
+				<cfif i GT 0>
+					<cfset cache.expired[i] = 1 />
+				</cfif>
+			</cflock>
+		<cfelse>
+			<cflock name="#getLock()#" type="exclusive" timeout="10">
+				<!--- find the records to expire --->
+				<cfquery name="old" dbtype="query" debug="false">
+					select index from cache 
+					where cachename like <cfqueryparam value="#arguments.cachename#" cfsqltype="cf_sql_varchar" />
+				</cfquery>
+				
+				<!--- this is probably faster and definitely easier than a union query and replacement --->
+				<cfloop query="old">
+					<cfset cache.expired[old.index] = 1 />
+				</cfloop>
+			</cflock>
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="reap" access="public" output="false" 
