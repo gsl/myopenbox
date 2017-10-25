@@ -387,7 +387,7 @@
 			<cfset qry.storageType[x] = lcase(storageType) />
 			
 			<!--- don't update the storage time for overwrites because we need to know hit frequency by dividing hit count by time --->
-			<cfset expired[x] = 0 />
+			<cfset qry.expired[x] = 0 />
 			<cfif val(qry.timeStored[x]) eq 0>
 				<!--- we're overwriting a miss-counter, so we set the storage time here --->
 				<cfset qry.timeStored[x] = getMinutes() />
