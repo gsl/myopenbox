@@ -343,6 +343,7 @@ hint="I provide a means of caching arbitrary objects and data via a facade to a 
 	hint="Marks one or more items in the cache as expired without immediately removing them">
 		<cfargument name="cachename" type="string" required="false" default="%" />
 		<cfset var svc = getService() />
+		<cfset cachename = lcase(cachename) />
 		
 		<cfif isObject(svc)>
 			<cfset svc.expire(this,cachename) />
