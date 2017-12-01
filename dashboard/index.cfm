@@ -18,8 +18,14 @@
 	<cfcase value="circuits">
 		<cfinclude template="circuits.cfm" />
 	</cfcase>
+	<cfcase value="phases">
+		<cfinclude template="phases.cfm" />
+	</cfcase>
 	<cfcase value="logs">
 		<cfinclude template="logs.cfm" />
+	</cfcase>
+	<cfcase value="dump">
+		<cfinclude template="dump.cfm" />
 	</cfcase>
 	<cfdefaultcase>
 		<cfinclude template="default.cfm" />

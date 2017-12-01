@@ -368,6 +368,9 @@
 						ThrowError=True;
 					}
 					break;
+				case "DashboardEnable" :
+					ParameterName="Dashboard.Enable";
+					break;
 				
 				default :
 					ParameterName=arguments.CurrentNode.Parameter[i]["XMLAttributes"]["name"];

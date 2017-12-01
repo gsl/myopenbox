@@ -23,6 +23,7 @@
 		<parameter name="CachePathExpandPath" value="true" />
 		<parameter name="CacheRootPath" value="../../" />
 		<parameter name="CacheFilePrefix" value="" />
+		<parameter name="Dashboard.Enable" value="false" />
 		<parameter name="DictionaryFolder" value="dictionary" />
 		<parameter name="DictionaryPath" value="[myopenbox]/dictionary/" />
 		<parameter name="DictionaryRootPath" value="../../" />
