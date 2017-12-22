@@ -41,16 +41,16 @@ if(Len(LocalVars.Attributes.OptPath) GT 0){
 	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfif application.MyOpenbox.FileExists(""" & LocalVars.Attributes.OptPath & this.AppendDefaultFileExtension(LocalVars.Attributes.Template) & """)>" & NewLine));
 
 	// i include the template
-	GeneratedContent.append(JavaCast("string", Indent(arguments.Level+1) & "<" & "cftimer label=""VERB:Include:" & this.Parameters.Cache.RootPath & LocalVars.Attributes.OptPath & this.AppendDefaultFileExtension(LocalVars.Attributes.Template) &  """>" & NewLine));
+	// GeneratedContent.append(JavaCast("string", Indent(arguments.Level+1) & "<" & "cftimer label=""VERB:Include:" & this.Parameters.Cache.RootPath & LocalVars.Attributes.OptPath & this.AppendDefaultFileExtension(LocalVars.Attributes.Template) &  """>" & NewLine));
 	GeneratedContent.append(JavaCast("string", Indent(arguments.Level+1) & "<" & "cfoutput><cfinclude template=""" & this.Parameters.Cache.RootPath & LocalVars.Attributes.OptPath & this.AppendDefaultFileExtension(LocalVars.Attributes.Template) & """ /></cfoutput>" & NewLine));
-	GeneratedContent.append(JavaCast("string", Indent(arguments.Level+1) & "<" & "/cftimer>" & NewLine));
+	// GeneratedContent.append(JavaCast("string", Indent(arguments.Level+1) & "<" & "/cftimer>" & NewLine));
 
 	if(Len(LocalVars.Attributes.Fallback) GT 0){
 		GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfelseif application.MyOpenbox.FileExists(""" & LocalVars.Attributes.OptPath & this.AppendDefaultFileExtension(LocalVars.Attributes.Fallback) & """)>" & NewLine));
 	// i include the template
-	GeneratedContent.append(JavaCast("string", Indent(arguments.Level+1) & "<" & "cftimer label=""VERB:Include:" & this.Parameters.Cache.RootPath & LocalVars.Attributes.OptPath & this.AppendDefaultFileExtension(LocalVars.Attributes.Fallback) &  """>" & NewLine));
+	// GeneratedContent.append(JavaCast("string", Indent(arguments.Level+1) & "<" & "cftimer label=""VERB:Include:" & this.Parameters.Cache.RootPath & LocalVars.Attributes.OptPath & this.AppendDefaultFileExtension(LocalVars.Attributes.Fallback) &  """>" & NewLine));
 	GeneratedContent.append(JavaCast("string", Indent(arguments.Level+1) & "<" & "cfoutput><cfinclude template=""" & this.Parameters.Cache.RootPath & LocalVars.Attributes.OptPath & this.AppendDefaultFileExtension(LocalVars.Attributes.Fallback) & """ /></cfoutput>" & NewLine));
-	GeneratedContent.append(JavaCast("string", Indent(arguments.Level+1) & "<" & "/cftimer>" & NewLine));
+	// GeneratedContent.append(JavaCast("string", Indent(arguments.Level+1) & "<" & "/cftimer>" & NewLine));
 	
 	}
 	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfelse>" & NewLine));
@@ -64,9 +64,9 @@ if(NOT LocalVars.Attributes.Required OR Len(LocalVars.Attributes.Fallback) GT 0)
 }
 
 // i include the template
-GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cftimer label=""VERB:Include:" & this.Parameters.Cache.RootPath & LocalVars.Attributes.Path & this.AppendDefaultFileExtension(LocalVars.Attributes.Template) &  """>" & NewLine));
+// GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cftimer label=""VERB:Include:" & this.Parameters.Cache.RootPath & LocalVars.Attributes.Path & this.AppendDefaultFileExtension(LocalVars.Attributes.Template) &  """>" & NewLine));
 GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfoutput><cfinclude template=""" & this.Parameters.Cache.RootPath & LocalVars.Attributes.Path & this.AppendDefaultFileExtension(LocalVars.Attributes.Template) & """ /></cfoutput>" & NewLine));
-GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "/cftimer>" & NewLine));
+// GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "/cftimer>" & NewLine));
 
 if(Len(LocalVars.Attributes.Fallback) GT 0){
 	arguments.Level=arguments.Level-1;
@@ -77,9 +77,9 @@ if(Len(LocalVars.Attributes.Fallback) GT 0){
 		GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfif application.MyOpenbox.FileExists(""" & LocalVars.Attributes.Path & this.AppendDefaultFileExtension(LocalVars.Attributes.Fallback) & """)>" & NewLine));
 		arguments.Level=arguments.Level+1;
 	}
-	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cftimer label=""VERB:Include:" & this.Parameters.Cache.RootPath & LocalVars.Attributes.Path & this.AppendDefaultFileExtension(LocalVars.Attributes.Fallback) &  """>" & NewLine));
+	// GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cftimer label=""VERB:Include:" & this.Parameters.Cache.RootPath & LocalVars.Attributes.Path & this.AppendDefaultFileExtension(LocalVars.Attributes.Fallback) &  """>" & NewLine));
 	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "cfoutput><cfinclude template=""" & this.Parameters.Cache.RootPath & LocalVars.Attributes.Path & this.AppendDefaultFileExtension(LocalVars.Attributes.Fallback) & """ /></cfoutput>" & NewLine));
-	GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "/cftimer>" & NewLine));
+	// GeneratedContent.append(JavaCast("string", Indent(arguments.Level) & "<" & "/cftimer>" & NewLine));
 	
 	if(NOT LocalVars.Attributes.Required){
 		arguments.Level=arguments.Level-1;

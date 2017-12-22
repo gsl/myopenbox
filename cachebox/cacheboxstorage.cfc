@@ -185,6 +185,7 @@
 		<cfset result.content = "" />
 		
 		<cfif left(cachename,3) is "clu">
+			<!--- <cftrace text="Cachebox: Check cluster: #cachename#" /> --->
 			<!--- we didn't find the content in local storage, 
 			but it's stored for the cluster, so we'll go look for it before we declare a miss --->
 			<cfset tick = GetTickCount() />
@@ -278,6 +279,8 @@
 			and if that happens during an attempt to record a hit then we might either 
 			get bad hit data or we might throw errors trying to set values for a record that no longer exists 
 		--->
+		
+		<!--- <cftrace text="Cachebox: Record hit: #cachename#" /> --->
 		<cflock name="#getLock()#" type="exclusive" timeout="10">
 			<cfset qry = getCacheData() />
 			<cfif qry.cachename[index] is arguments.cachename>
@@ -301,6 +304,7 @@
 			and if that happens during an attempt to record a miss then we might either 
 			get bad miss data or we might throw errors trying to set values for a record that no longer exists 
 		--->
+		<!--- <cftrace text="Cachebox: Record miss: #cachename#" /> --->
 		<cflock name="#getLock()#" type="exclusive" timeout="10">
 			<cfset qry = getCacheData() />
 			<cfif index gt 0 and qry.cachename[index] is arguments.cachename>

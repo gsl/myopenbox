@@ -46,9 +46,11 @@ hint="I store the content via an externally configured redis server using cfredi
 	<cffunction name="store" access="public" output="false" returntype="any">
 		<cfargument name="cachename" type="string" required="true" />
 		<cfargument name="content" type="any" required="true" />
+		<!--- <cftimer label="Store Redis: #arguments.cachename#"> --->
 		<cfscript>
 		instance.redis.set(arguments.cachename, ToBase64(ObjectSave(arguments.content)));
 		</cfscript>
+		<!--- </cftimer> --->
 		<cfreturn "" />
 	</cffunction>
 	
@@ -57,12 +59,16 @@ hint="I store the content via an externally configured redis server using cfredi
 		<cfargument name="content" type="any" required="true" />
 		<cfset var result = getStruct( status = 0 ) />
 		
+		<!--- <cftimer label="Fetch Redis: #arguments.cachename#"> --->
 		<cfset result.content = instance.redis.get(arguments.cachename) />
+		<!--- </cftimer> --->
 		<!--- redis returns an empty string on a miss result(?) --->
 		<cfif IsNull(result.content)>
+			<!--- <cftrace text="Fetch Redis: Miss: #arguments.cachename#" /> --->
 			<cfset result.status = 1 />
 			<cfset result.content = "" />
 		<cfelse>
+			<!--- <cftrace text="Fetch Redis: Hit: #arguments.cachename#" /> --->
 			<cfset result.content = ObjectLoad(ToBinary(result.content)) />
 		</cfif>
 		
@@ -72,7 +78,9 @@ hint="I store the content via an externally configured redis server using cfredi
 	<cffunction name="delete" access="public" output="false" returntype="any">
 		<cfargument name="cachename" type="string" required="true" />
 		<cfargument name="content" type="any" required="true" />
+		<!--- <cftimer label="Delete Redis: #arguments.cachename#"> --->
 		<cfset instance.redis.del(arguments.cachename) />
+		<!--- </cftimer> --->
 	</cffunction>
 	
 	<cffunction name="getConfigForm" access="public" output="false" returntype="string">
