@@ -173,7 +173,7 @@ hint="I manage the agents that register with the cachebox service">
 		<cfset structAppend(result,getAgentSettingsXML(result.agentID),true) />
 		
 		<!--- if the storage type for the specified context isn't available, then we revert to default storage --->
-		<cfif not typeMan.getStorageType(result.storageType).isReady()>
+		<!--- <cfif not typeMan.getStorageType(result.storageType).isReady()>
 			<cfset result.storageType = "default" />
 			<cfset result.context = iif(result.context is "application",de("application"),de("server")) />
 			
@@ -182,7 +182,7 @@ hint="I manage the agents that register with the cachebox service">
 			
 			<!--- if we changed the context, then we might have new config settings for the new context --->
 			<cfset structAppend(result,getAgentSettingsXML(result.agentID),true) />
-		</cfif>
+		</cfif> --->
 		
 		<cfreturn result />
 	</cffunction>
