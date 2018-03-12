@@ -15,7 +15,7 @@
 			OR NOT StructKeyExists(application.MyOpenbox, "IsFWReinit")
 			OR application.MyOpenbox.IsFWReinit()>
 			<cfset StructDelete(application, "MyOpenbox")>
-			<cfset application.MyOpenbox=CreateObject("component", "myopenbox").Init()>
+			<cfset application.MyOpenbox=CreateObject("component", "myopenbox").Init() />
 		</cfif>
 	</cflock>
 </cfif>
@@ -144,12 +144,16 @@ application.MyOpenbox.RunFuseAction(attributes[application.MyOpenbox.Parameters.
 	<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/#application.MyOpenbox.Parameters.CacheFilePrefix#phase.preprocess.cfm">
 </cfif>
 
-<!--- i include the TargetFuseAction file --->
-<cfif
-	StructKeyExists(application.Myopenbox.Circuits, ListFirst(attributes[application.MyOpenbox.Parameters.FuseActionVariable], "."))
-	AND StructKeyExists(application.Myopenbox.Circuits[ListFirst(attributes[application.MyOpenbox.Parameters.FuseActionVariable], ".")].Fuseactions, ListLast(attributes[application.MyOpenbox.Parameters.FuseActionVariable], "."))
->
-	<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/#application.MyOpenbox.Parameters.CacheFilePrefix#fuseaction.#LCase(attributes[application.MyOpenbox.Parameters.FuseActionVariable])#.cfm">
+<cfif application.MyOpenbox.IsFWReinit()>
+	<cfoutput>Framework Reinitialized</cfoutput>
+<cfelse>
+	<!--- i include the TargetFuseAction file --->
+	<cfif
+		StructKeyExists(application.Myopenbox.Circuits, ListFirst(attributes[application.MyOpenbox.Parameters.FuseActionVariable], "."))
+		AND StructKeyExists(application.Myopenbox.Circuits[ListFirst(attributes[application.MyOpenbox.Parameters.FuseActionVariable], ".")].Fuseactions, ListLast(attributes[application.MyOpenbox.Parameters.FuseActionVariable], "."))
+	>
+		<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/#application.MyOpenbox.Parameters.CacheFilePrefix#fuseaction.#LCase(attributes[application.MyOpenbox.Parameters.FuseActionVariable])#.cfm">
+	</cfif>
 </cfif>
 
 <!--- i include the PostProcess Phase --->
