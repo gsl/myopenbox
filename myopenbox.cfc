@@ -102,15 +102,15 @@
 		
 		<cfscript>
 		// i initialize the local vars
-		var variables.RawXML=Read(arguments.ApplicationConfigurationFile);
-		var variables.HashKey=Hash(variables.RawXML);
+		local.RawXML=Read(arguments.ApplicationConfigurationFile);
+		local.HashKey=Hash(local.RawXML);
 		</cfscript>
 		
 		<!--- i determine if i should parse the MyOpenbox --->
 		<cfif NOT StructKeyExists(this, "Parameters") 
 			OR this.Parameters.ProcessingMode EQ "Development" 
 			OR NOT StructKeyExists(this, "ApplicationConfigurationFileHashKey")
-			OR this.ApplicationConfigurationFileHashKey NEQ variables.HashKey 
+			OR this.ApplicationConfigurationFileHashKey NEQ local.HashKey 
 			OR (
 				StructKeyExists(url, "FWReparse") 
 				AND url.FWReparse EQ this.Parameters.FWReparse
@@ -121,7 +121,7 @@
 				<cfif NOT StructKeyExists(this, "Parameters") 
 					OR this.Parameters.ProcessingMode EQ "Development" 
 					OR NOT StructKeyExists(this, "ApplicationConfigurationFileHashKey")
-					OR this.ApplicationConfigurationFileHashKey NEQ variables.HashKey 
+					OR this.ApplicationConfigurationFileHashKey NEQ local.HashKey 
 					OR (
 						StructKeyExists(url, "FWReparse") 
 						AND url.FWReparse EQ this.Parameters.FWReparse
@@ -135,8 +135,8 @@
 					// i parse the XML MyOpenbox configuration file(s)
 					ParseApplicationConfigurationFiles(XMLParse(RawXML));
 					// i create a Hash reference in this for checks against the MyOpenbox configuration file
-					this.ApplicationConfigurationFileHashKey=variables.HashKey;
-					this.LogAction(action="MOBX Parsed", type="FW", info=variables.HashKey);
+					this.ApplicationConfigurationFileHashKey=local.HashKey;
+					this.LogAction(action="MOBX Parsed", type="FW", info=local.HashKey);
 					</cfscript>
 <!---
 					<cfif this.Parameters.ProcessingMode EQ "Deployment" AND (this.IsFWReparse() OR this.IsFWReinit())>
