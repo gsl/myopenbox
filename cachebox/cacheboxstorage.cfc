@@ -280,7 +280,7 @@
 			get bad hit data or we might throw errors trying to set values for a record that no longer exists 
 		--->
 		
-		<!--- <cftrace text="Cachebox: Record hit: #cachename#" /> --->
+		<cftrace category="cachebox" text="Cachebox: Record hit #cachename#" type="information" />
 		<cflock name="#getLock()#" type="exclusive" timeout="10">
 			<cfset qry = getCacheData() />
 			<cfif qry.cachename[index] is arguments.cachename>
@@ -304,7 +304,7 @@
 			and if that happens during an attempt to record a miss then we might either 
 			get bad miss data or we might throw errors trying to set values for a record that no longer exists 
 		--->
-		<!--- <cftrace text="Cachebox: Record miss: #cachename#" /> --->
+		<cftrace category="cachebox" text="Cachebox: Record miss #cachename#" type="warning" />
 		<cflock name="#getLock()#" type="exclusive" timeout="10">
 			<cfset qry = getCacheData() />
 			<cfif index gt 0 and qry.cachename[index] is arguments.cachename>
