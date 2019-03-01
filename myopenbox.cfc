@@ -111,10 +111,7 @@
 			OR this.Parameters.ProcessingMode EQ "Development" 
 			OR NOT StructKeyExists(this, "ApplicationConfigurationFileHashKey")
 			OR this.ApplicationConfigurationFileHashKey NEQ local.HashKey 
-			OR (
-				StructKeyExists(url, "FWReparse") 
-				AND url.FWReparse EQ this.Parameters.FWReparse
-			)>
+			OR this.IsFWReparse()>
 			<!--- i lock the parsing of the MyOpenbox --->
 			<cflock name="#Hash(GetCurrentTemplatePath() & "_RunMyOpenbox")#" timeout="10">
 				<!--- i (re)determine if i should parse the MyOpenbox --->
@@ -122,11 +119,7 @@
 					OR this.Parameters.ProcessingMode EQ "Development" 
 					OR NOT StructKeyExists(this, "ApplicationConfigurationFileHashKey")
 					OR this.ApplicationConfigurationFileHashKey NEQ local.HashKey 
-					OR (
-						StructKeyExists(url, "FWReparse") 
-						AND url.FWReparse EQ this.Parameters.FWReparse
-					)>
-					<cflock name="#Hash(GetCurrentTemplatePath() & "_RunMyOpenbox_inner")#" timeout="10">
+					OR this.IsFWReparse()>
 					
 					<cfscript>
 					// i create a TimeStamp
@@ -144,7 +137,6 @@
 					</cfif>
 --->
 					
-					</cflock>
 				</cfif>
 			</cflock>
 		</cfif>
