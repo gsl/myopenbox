@@ -27,6 +27,9 @@
 		this.Cache=StructNew();
 		this.Cache.Agents=StructNew();
 
+		this.System=CreateObject( "java", "java.lang.System" );
+		this.Environment=this.System.GetEnv()
+
 		this.FileExistsCache=StructNew();
 		</cfscript>
 		
@@ -891,6 +894,11 @@
 		} else {
 			ThrowError=True;
 		}
+
+		if(StructKeyExists(arguments.CurrentNode["XMLAttributes"], "env")){
+			Setting.Env=arguments.CurrentNode["XMLAttributes"]["env"];
+		}
+
 		// ERROR: i throw an error if necessary
 		if(ThrowError){
 			Throw("MyOpenbox", "Error while processing Settings.", "Please make sure all required attributes are included and valid in each Setting definition in the MyOpenbox configuration file.");
@@ -954,17 +962,11 @@
 									if(Len(Include.Raw)){
 										Include.Parsed = XMLParse(Include.Raw);
 										for(ii=1; ii LTE ArrayLen(Include.Parsed.XmlRoot.XMLChildren); ii=ii + 1){
-											// i parse out the name and value
-											Setting=ParseSettingValue(Include.Parsed.XmlRoot.XMLChildren[ii]);
-											// i add the Setting definition to GeneratedContent
-											GeneratedContent.append(JavaCast("string", Indent(3) & "SetVariable(""" & ContainerVariable & ".Settings." & Setting.Name & """, """ & Setting.Value & """);" & NewLine));
+											GeneratedContent.append(JavaCast("string", CreateSetting(ContainerVariable, Include.Parsed.XmlRoot.XMLChildren[ii], 3)));
 										}										
 									}
 								} else {
-									// i parse out the name and value
-									Setting=ParseSettingValue(arguments.CurrentNode.XMLChildren[i]);
-									// i add the Setting definition to GeneratedContent
-									GeneratedContent.append(JavaCast("string", Indent(3) & "SetVariable(""" & ContainerVariable & ".Settings." & Setting.Name & """, """ & Setting.Value & """);" & NewLine));
+									GeneratedContent.append(JavaCast("string", CreateSetting(ContainerVariable, arguments.CurrentNode.XMLChildren[i], 3)));
 								}
 							} else {
 								// ERROR: i throw an error if necessary
@@ -999,6 +1001,30 @@
 		
 		</cfif>
 		
+	</cffunction>
+
+	<cffunction name="CreateSetting" 
+		access="private" 
+		hint="." 
+		output="false" 
+		returntype="string">
+		
+		<cfargument name="ContainerVariable" type="string" />
+		<cfargument name="SettingNode" type="any" />
+		<cfargument name="IndentLevel" type="numeric" default="0" />
+		
+		<cfscript>
+		var NewLine=this.Parameters.Delimiters.NewLine;
+
+		var Setting=ParseSettingValue(arguments.SettingNode);
+		var Content="";
+		if (StructKeyExists(Setting, "env")) {
+			Content = Content & Indent(arguments.IndentLevel) & "SetVariable(""" & arguments.ContainerVariable & ".Settings." & Setting.Name & """, application.MyOpenbox.GetEnv(""" & Setting.Env & """, """ & Setting.Value & """));" & NewLine;
+		} else {
+			Content = Content & Indent(arguments.IndentLevel) & "SetVariable(""" & arguments.ContainerVariable & ".Settings." & Setting.Name & """, """ & Setting.Value & """);" & NewLine;
+		}
+		</cfscript>
+		<cfreturn Content />
 	</cffunction>
 	
 	<cffunction name="CreateRoutesFile" 
@@ -2011,6 +2037,16 @@
 
 	<cffunction name="GetFileExistsCache" access="public" output="false" returntype="struct">
 		<cfreturn this.FileExistsCache />
+	</cffunction>
+
+	<cffunction name="GetEnv" access="public" output="false" returntype="any">
+		<cfargument name="Name" type="string" />
+		<cfargument name="DefaultValue" type="string" default="" />
+		<cfif StructKeyExists(this.Environment, arguments.Name)>
+			<cfreturn this.Environment[arguments.Name] />
+		<cfelse>
+			<cfreturn arguments.DefaultValue />
+		</cfif>
 	</cffunction>
 
 </cfcomponent>
