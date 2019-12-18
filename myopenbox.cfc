@@ -1988,7 +1988,15 @@
 			detail="#arguments.Detail#" 
 			extendedinfo="#arguments.ExtendedInfo#">
     	
-    </cffunction>
+	</cffunction>
+	
+	<cffunction name="Include"
+		access="public"
+		output="false"
+		returntype="void">
+		<cfargument name="FileName" type="string">
+		<cfinclude template="#this.Parameters.Cache.Folder#/#this.Parameters.CacheFilePrefix##AppendDefaultFileExtension(arguments.Filename)#" />
+	</cffunction>
 	
 	<cffunction name="Write" 
     	access="private" 
