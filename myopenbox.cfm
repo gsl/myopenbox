@@ -42,6 +42,11 @@ attributes=application.MyOpenbox.SetAttributes(variables, GetBaseTagList());
 
 <cfinclude template="act.actionstack.cfm">
 
+<!--- i include the Bootstrap Phase --->
+<cfif StructKeyExists(application.MyOpenbox.Phases, "Bootstrap")>
+	<cfinclude template="#application.MyOpenbox.Parameters.Cache.Folder#/#application.MyOpenbox.Parameters.CacheFilePrefix#phase.bootstrap.cfm">
+</cfif>
+
 <!--- i include the PreParse Phase --->
 <cfif StructKeyExists(application.MyOpenbox.Phases, "PreParse")
 	AND NOT StructKeyExists(application.MyOpenbox.Phases.Init[1], "IsInitialized")>
