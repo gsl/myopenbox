@@ -83,9 +83,10 @@ Modified for MyOpenbox framework 1/11/2010
 		// Init the regexpattern
 		thisRoute.regexPattern = "";
 		thisRoute.patternParams = arrayNew(1);
+		thisRoute.partCount = listLen(thisRoute.pattern,"/");
 		
 		// Process the route as a regex pattern
-		for(x=1; x lte listLen(thisRoute.pattern,"/");x=x+1){
+		for(x=1; x lte thisRoute.partCount;x=x+1){
 			
 			// Pattern and Pattern Param
 			thisPattern = listGetAt(thisRoute.pattern,x,"/");
@@ -107,7 +108,11 @@ Modified for MyOpenbox framework 1/11/2010
 							arrayAppend(thisRoute.patternParams,replace(listFirst(thisPattern,"{"),":",""));
 						}
 						else{
-							thisRegex = thisRegex & "+)";
+							thisRegex = thisRegex & "+";
+							if (thisRoute.partCount LT x) {
+								thisRegex = thisRegex & "?";
+							}
+							thisRegex = thisRegex & ")";
 							arrayAppend(thisRoute.patternParams,thisPatternParam);
 						}
 					}
@@ -125,7 +130,11 @@ Modified for MyOpenbox framework 1/11/2010
 						thisRegex = listFirst(thisRegex,"{") & "{#listLast(thisPattern,"{")#)";
 					}
 					else{
-						thisRegex = thisRegex & "+)";
+						thisRegex = thisRegex & "+";
+						if (thisRoute.partCount LT x) {
+							thisRegex = thisRegex & "?";
+						}
+						thisRegex = thisRegex & ")";
 					}
 					// Add Route Param
 					arrayAppend(thisRoute.patternParams,thisPatternParam);
@@ -140,7 +149,11 @@ Modified for MyOpenbox framework 1/11/2010
 						thisRegex = listFirst(thisRegex,"{") & "{#listLast(thisPattern,"{")#)";
 					}
 					else{
-						thisRegex = thisRegex & "+)";
+						thisRegex = thisRegex & "+";
+						if (thisRoute.partCount LT x) {
+							thisRegex = thisRegex & "?";
+						}
+						thisRegex = thisRegex & ")";
 					}
 					// Add Route Param
 					arrayAppend(thisRoute.patternParams,thisPatternParam);
