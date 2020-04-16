@@ -28,7 +28,7 @@
 		this.Cache.Agents=StructNew();
 
 		this.System=CreateObject( "java", "java.lang.System" );
-		this.Environment=this.System.GetEnv()
+		this.Environment=this.System.GetEnv();
 
 		this.FileExistsCache=StructNew();
 		</cfscript>
