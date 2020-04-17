@@ -205,6 +205,11 @@
 			this.Phases=StructNew();
 		}
 		this.CustomPhases=ArrayNew(1);
+		for(i in this.Phases) {
+			if(NOT ListFindNoCase(this.Parameters.ApplicationPhases, i)){
+				ArrayAppend(this.CustomPhases, i);
+			}
+		}
 		
 		this.Circuits=StructNew();
 		// i set Circuits
