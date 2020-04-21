@@ -541,6 +541,8 @@
 		
 		<cfdirectory name="GetDirectorys" 
 			action="list" 
+			sort="name ASC"
+			type="dir"
 			directory="#arguments.TargetDirectory#">
 		
 		<cfloop query="GetDirectorys">
