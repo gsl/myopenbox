@@ -10,3 +10,5 @@ YourOpenbox["TargetFuseAction"]=application.MyOpenbox.GetFuseAction(attributes[a
 </cfif>
 
 <cfset YourOpenbox["Settings"]=Duplicate(application.MyOpenbox.Settings)>
+
+<cfset YourOpenbox["Request"]=getHTTPRequestData(false) />

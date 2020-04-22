@@ -68,6 +68,7 @@
 		<verb name="Invoke" />
 		<verb name="Lock" />
 		<verb name="Loop" />
+		<verb name="Method" />
 		<verb name="PrimaryCall" template="Stage" />
 		<verb name="Relocate" />
 		<verb name="SecondaryCall" template="Stage" />
