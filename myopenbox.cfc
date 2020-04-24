@@ -964,7 +964,19 @@
 							if(arguments.CurrentNode.XMLChildren[i]["XMLName"] EQ "setting"){
 								if(StructKeyExists(arguments.CurrentNode.XMLChildren[i]["XMLAttributes"], "include")){
 									// i read and parse the settings file
-									Include.FileName = arguments.FilePath & arguments.CurrentNode.XMLChildren[i]["XMLAttributes"]["include"] & ".cfm";
+									Include.Prefix = "";
+									Include.Suffix = "";
+									Include.FileName = arguments.CurrentNode.XMLChildren[i]["XMLAttributes"]["include"];
+									if (StructKeyExists(arguments.CurrentNode.XMLChildren[i]["XMLAttributes"], "env")) {
+										Include.FileName = this.GetEnv(arguments.CurrentNode.XMLChildren[i]["XMLAttributes"]['env'], Include.FileName);
+									}
+									if (StructKeyExists(arguments.CurrentNode.XMLChildren[i]["XMLAttributes"], "prefix") AND Len(arguments.CurrentNode.XMLChildren[i]["XMLAttributes"]["prefix"]) GT 0) {
+										Include.Prefix = arguments.CurrentNode.XMLChildren[i]["XMLAttributes"]["prefix"];
+									}
+									if (StructKeyExists(arguments.CurrentNode.XMLChildren[i]["XMLAttributes"], "suffix") AND Len(arguments.CurrentNode.XMLChildren[i]["XMLAttributes"]["suffix"]) GT 0) {
+										Include.Suffix = arguments.CurrentNode.XMLChildren[i]["XMLAttributes"]["suffix"];
+									}
+									Include.FileName = arguments.FilePath & Include.Prefix & Include.FileName & Include.Suffix & ".cfm";
 									Include.Raw = Read(Include.FileName);
 									if(Len(Include.Raw)){
 										Include.Parsed = XMLParse(Include.Raw);
