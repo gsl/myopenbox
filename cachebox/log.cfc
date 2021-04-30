@@ -140,7 +140,7 @@ One installed, logging settings may be changed without restarting the ColdFusion
 	</cffunction>
 	
 	<cffunction name="getErrorLogPath" access="private" output="false" returntype="string">
-		<cfreturn "errors/" & dateformat(now(), "YYYY-MM-DD") & "-" & timeformat(now(), "HH-mm-ss") & "-#randrange(10,99)#." & instance.logExt />
+		<cfreturn "errors/" & dateformat(now(), "yyyy-mm-dd") & "-" & timeformat(now(), "HH-mm-ss") & "-#randrange(10,99)#." & instance.logExt />
 	</cffunction>
 	
 	<cffunction name="error" access="public" output="false" returntype="boolean">
