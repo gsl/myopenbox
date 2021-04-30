@@ -9,7 +9,7 @@ YourOpenbox["IsSuperCall"]=False;
 _YourOpenbox.ActionStack=ArrayNew(1);
 _YourOpenbox.Circuits=StructNew();
 _YourOpenbox.ContentStack=ArrayNew(1);
-_YourOpenbox.VerbStack=CreateObject("java", "java.util.Stack").init();
+_YourOpenbox.VerbStack=ArrayNew(1);
 </cfscript>
 
 <cffunction name="_PushToActionStack" 
@@ -338,7 +338,7 @@ _YourOpenbox.VerbStack=CreateObject("java", "java.util.Stack").init();
 		local.item["ThisVerb"]=YourOpenbox.ThisVerb;
 	}
 	
-	_YourOpenbox.VerbStack.push(local.item);
+	ArrayAppend(_YourOpenbox.VerbStack, local.item);
 	</cfscript>
 	
 </cffunction>
@@ -349,9 +349,10 @@ _YourOpenbox.VerbStack=CreateObject("java", "java.util.Stack").init();
 	returntype="void">
 	
 	<cfscript>
-	if(NOT _YourOpenbox.VerbStack.empty()) {
+		if(ArrayLen(_YourOpenbox.VerbStack) GT 0) {
 		// i pop the item off the stack
-		local.item=_YourOpenbox.VerbStack.pop();
+		local.item=ArrayLast(_YourOpenbox.VerbStack);
+		ArrayDeleteAt(_YourOpenbox.VerbStack, Arraylen(_YourOpenbox.VerbStack));
 		
 		// i reinstate ThisVerb's values from the VerbStack
 		if(StructKeyExists(local.item, "ThisVerb")){
