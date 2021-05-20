@@ -4,7 +4,7 @@ hint="I store the content via an externally configured memcached server using cf
 	<cfset instance.isReady = false />
 	<cfset instance.settings = "memcached.xml.cfm" />
 	<cfset this.description = "External storage using a memcached server with cfmemcached" />
-	<cfset instance.factoryClass = "memcached.memcachedfactory" />
+	<cfset instance.factoryClass = "memcached.MemcachedFactory" />
 	<cfset instance.serverList = "127.0.0.1:11211" />
 	<cfset instance.defaultTimeout = 61 />
 	<cfset instance.defaultUnit = "SECONDS" />
@@ -104,6 +104,26 @@ hint="I store the content via an externally configured memcached server using cf
 		</cfsavecontent>
 		
 		<cfreturn result />
+	</cffunction>
+
+	<cffunction name="getFactoryClass" access="Public" output="false">
+		<cfreturn instance.factoryClass />
+	</cffunction>
+
+	<cffunction name="getServerList" access="Public" output="false">
+		<cfreturn instance.serverList />
+	</cffunction>
+
+	<cffunction name="getDefaultTimeout" access="Public" output="false">
+		<cfreturn instance.defaultTimeout />
+	</cffunction>
+
+	<cffunction name="getDefaultUnit" access="Public" output="false">
+		<cfreturn instance.defaultUnit />
+	</cffunction>
+
+	<cffunction name="getDefaultExpiry" access="Public" output="false">
+		<cfreturn instance.defaultExpiry />
 	</cffunction>
 </cfcomponent>
 

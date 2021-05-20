@@ -4,7 +4,7 @@ hint="I store the content via an externally configured redis server using cfredi
 	<cfset instance.isReady = false />
 	<cfset instance.settings = "redis.xml.cfm" />
 	<cfset this.description = "External storage using a redis server with cfredis" />
-	<cfset instance.factoryClass = "cfredis.redisfactory" />
+	<cfset instance.factoryClass = "cfredis.RedisFactory" />
 	<cfset instance.server = "127.0.0.1" />
 	<cfset instance.port = "6379" />
 	<cfset instance.timeout = 2000 />
@@ -33,10 +33,10 @@ hint="I store the content via an externally configured redis server using cfredi
 				</cfif>
 				
 				<!--- everything is a-okay --->
+				<cfset StructDelete(instance, "error", false) />
 				<cfset instance.isReady = true />
 				<cfreturn />
-				
-				<cfcatch></cfcatch>
+				<cfcatch><cfset instance.error = cfcatch /></cfcatch>
 			</cftry>
 		</cfif>
 		
@@ -103,12 +103,44 @@ hint="I store the content via an externally configured redis server using cfredi
 							<h3>Redis Info</h3>
 							<pre>#HTMLEditFormat(instance.redis.info())#</pre>
 						</foot>
+					<cfelseif StructKeyExists(instance, "error")>
+						<foot>
+							<h3>Error Info</h3>
+							<dl>
+								<dt>Type</dt>
+								<dl>#instance.error.Type#</dl>
+								<dt>Message</dt>
+								<dl>#instance.error.Message#</dl>
+								<dt>Detail</dt>
+								<dl>#instance.error.Detail#</dl>
+							</dl>
+						</foot>
 					</cfif>
 				</form>
 			</cfoutput>
 		</cfsavecontent>
 		
 		<cfreturn result />
+	</cffunction>
+
+	<cffunction name="getFactoryClass" access="Public" output="false">
+		<cfreturn instance.factoryClass />
+	</cffunction>
+
+	<cffunction name="getServer" access="Public" output="false">
+		<cfreturn instance.server />
+	</cffunction>
+
+	<cffunction name="getPort" access="Public" output="false">
+		<cfreturn instance.port />
+	</cffunction>
+
+	<cffunction name="getTimeout" access="Public" output="false">
+		<cfreturn instance.timeout />
+	</cffunction>
+
+	<cffunction name="getPassword" access="Public" output="false">
+		<cfreturn instance.password />
 	</cffunction>
 </cfcomponent>
 
