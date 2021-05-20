@@ -33,7 +33,16 @@ hint="I store the content in the cluster scope introduced by Railo">
 	</cffunction>
 	
 	<cffunction name="isReady" access="public" output="false" returntype="boolean">
-		<cfreturn isDefined("cluster") />
+		<cfif NOT isDefined("cluster")>
+			<cfreturn false />
+		</cfif>
+		<cftry>
+				<cfset cluster.test />
+				<cfcatch>
+						<cfreturn false />
+				</cfcatch>
+		</cftry>
+		<cfreturn true />
 	</cffunction>
 	
 	<cffunction name="store" access="public" output="false" returntype="any">
