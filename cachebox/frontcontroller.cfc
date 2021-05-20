@@ -53,7 +53,7 @@ hint="I am the management application for manually viewing or modifying cache co
 						<cfif currentrow is 1 or currentrow is recordcount>
 							<cfchartdata item="#lsTimeFormat(history.time,'short')#" value="#history.freememory#" />
 						<cfelse>
-							<cfchartdata value="#history.freememory#" />
+							<cfchartdata item="" value="#history.freememory#" />
 						</cfif>
 					</cfloop>
 				</cfchartseries>
@@ -64,7 +64,7 @@ hint="I am the management application for manually viewing or modifying cache co
 						<cfif currentrow is 1 or currentrow is recordcount>
 							<cfchartdata item="#lsTimeFormat(history.time,'short')#" value="#history.occupancy#" />
 						<cfelse>
-							<cfchartdata value="#history.occupancy#" />
+							<cfchartdata item="" value="#history.occupancy#" />
 						</cfif>
 					</cfloop>
 				</cfchartseries>
@@ -130,7 +130,7 @@ hint="I am the management application for manually viewing or modifying cache co
 								</td>
 								<td class="numeric">#int(occupancy)#</td>
 								<td class="numeric">
-									<cfif numHits or numMiss>
+									<cfif numHits GT 0 or numMiss GT 0>
 										#int(100 * (numHits / (numHits + numMiss)))#%
 									</cfif>
 								</td>
