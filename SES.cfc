@@ -94,6 +94,7 @@ Modified for MyOpenbox framework 1/11/2010
 			
 			// Detect Optional Types
 			patternType = "alphanumeric";
+			if( findnoCase("-guid",thisPattern) ){ patternType = "guid"; }
 			if( findnoCase("-numeric",thisPattern) ){ patternType = "numeric"; }
 			if( findnoCase("-alpha",thisPattern) ){ patternType = "alpha"; }
 			
@@ -109,7 +110,7 @@ Modified for MyOpenbox framework 1/11/2010
 						}
 						else{
 							thisRegex = thisRegex & "+";
-							if (thisRoute.partCount LT x) {
+							if (x LT thisRoute.partCount) {
 								thisRegex = thisRegex & "?";
 							}
 							thisRegex = thisRegex & ")";
@@ -119,6 +120,14 @@ Modified for MyOpenbox framework 1/11/2010
 					else{ 
 						thisRegex = thisPattern; 
 					}
+					break;
+				}
+				// GUID OPTIONAL
+				case "guid" : {
+					// Convert to Regex Pattern
+					thisRegex = "(" & REReplace(thisPattern, ":.*?-guid", "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}") & ")";
+					// Add Route Param
+					arrayAppend(thisRoute.patternParams,thisPatternParam);
 					break;
 				}
 				// NUMERICAL OPTIONAL
@@ -131,7 +140,7 @@ Modified for MyOpenbox framework 1/11/2010
 					}
 					else{
 						thisRegex = thisRegex & "+";
-						if (thisRoute.partCount LT x) {
+						if (x LT thisRoute.partCount) {
 							thisRegex = thisRegex & "?";
 						}
 						thisRegex = thisRegex & ")";
@@ -150,7 +159,7 @@ Modified for MyOpenbox framework 1/11/2010
 					}
 					else{
 						thisRegex = thisRegex & "+";
-						if (thisRoute.partCount LT x) {
+						if (x LT thisRoute.partCount) {
 							thisRegex = thisRegex & "?";
 						}
 						thisRegex = thisRegex & ")";
